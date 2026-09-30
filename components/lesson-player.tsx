@@ -11,7 +11,7 @@ type Feedback = {
 
 function isFeedback(value: unknown): value is Feedback {
   return (
-    Boolean(value) &&
+    value !== null &&
     typeof value === "object" &&
     "correct" in value &&
     "feedback" in value &&
