@@ -1,6 +1,13 @@
 import Link from "next/link";
 
-export function TopNav() {
+type TopNavProps = {
+  stats?: {
+    streak: number;
+    totalXp: number;
+  };
+};
+
+export function TopNav({ stats }: TopNavProps) {
   return (
     <header className="topbar">
       <Link className="brand" href="/">
@@ -10,14 +17,14 @@ export function TopNav() {
 
       <nav className="topnav-links" aria-label="Main navigation">
         <Link href="/learn">Learn</Link>
-        <Link href="/learn#practice">Practice</Link>
-        <Link href="/learn#progress">Progress</Link>
+        <Link href="/practice">Practice</Link>
+        <Link href="/progress">Progress</Link>
       </nav>
 
       <div className="top-stats" aria-label="Learning stats">
-        <span className="stat-chip">🔥 <strong>1</strong></span>
+        <span className="stat-chip">🔥 <strong>{stats?.streak ?? 0}</strong></span>
         <span className="stat-chip">⚡ <strong>5/5</strong></span>
-        <span className="stat-chip">⭐ <strong>20 XP</strong></span>
+        <span className="stat-chip">⭐ <strong>{stats?.totalXp ?? 0} XP</strong></span>
       </div>
     </header>
   );
