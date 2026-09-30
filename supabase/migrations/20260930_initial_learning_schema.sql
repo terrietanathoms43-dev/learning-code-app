@@ -114,6 +114,9 @@ create index if not exists exercises_lesson_sort_idx on public.exercises(lesson_
 create index if not exists lesson_progress_user_idx on public.user_lesson_progress(user_id, status);
 create index if not exists exercise_attempts_user_idx on public.exercise_attempts(user_id, attempted_at desc);
 create index if not exists xp_events_user_idx on public.xp_events(user_id, created_at desc);
+create unique index if not exists xp_events_lesson_completion_unique
+on public.xp_events(user_id, lesson_id, event_type)
+where event_type = 'lesson_completed';
 
 alter table public.profiles enable row level security;
 alter table public.courses enable row level security;
@@ -304,13 +307,13 @@ select id, 'operators', 'Operators', 'Make values work together', 'lesson', '➕
 union all
 select id, 'checkpoint-1', 'Trail Checkpoint', 'Prove what you remember', 'checkpoint', '⭐', 50, 8, 5, true from unit_row
 union all
-select id, 'conditions', 'Conditions', 'Teach code how to decide', 'lesson', '🔀', 30, 7, 6, true from unit_row
+select id, 'conditions', 'Conditions', 'Teach code how to decide', 'lesson', '🔀', 30, 7, 6, false from unit_row
 union all
-select id, 'loops', 'Loops', 'Repeat without repeating yourself', 'lesson', '🔁', 35, 8, 7, true from unit_row
+select id, 'loops', 'Loops', 'Repeat without repeating yourself', 'lesson', '🔁', 35, 8, 7, false from unit_row
 union all
-select id, 'functions', 'Functions', 'Build reusable blocks', 'lesson', '🛠️', 40, 9, 8, true from unit_row
+select id, 'functions', 'Functions', 'Build reusable blocks', 'lesson', '🛠️', 40, 9, 8, false from unit_row
 union all
-select id, 'mini-project', 'Mini Project', 'Build a tiny quiz game', 'project', '🚀', 100, 15, 9, true from unit_row
+select id, 'mini-project', 'Mini Project', 'Build a tiny quiz game', 'project', '🚀', 100, 15, 9, false from unit_row
 on conflict (slug) do nothing;
 
 insert into public.exercises (
@@ -403,6 +406,171 @@ select l.id, 'variable-code', 'code', 'Write code',
 from public.lessons l where l.slug = 'variables'
 on conflict (exercise_key) do nothing;
 
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, code_snippet, options, placeholder, hint, explanation, sort_order, is_published
+)
+select l.id, 'type-string', 'choice', 'Name the type',
+  'What data type is the value stored in name?',
+  'name = "Ada"',
+  '["String","Integer","Boolean","Float"]'::jsonb,
+  null,
+  'Quotation marks mean text.',
+  'Text values are strings.',
+  1, true
+from public.lessons l where l.slug = 'data-types'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, code_snippet, options, hint, explanation, sort_order, is_published
+)
+select l.id, 'type-integer', 'choice', 'Name the type',
+  'What data type is 16 in this code?',
+  'age = 16',
+  '["Integer","String","Float","Boolean"]'::jsonb,
+  'Whole numbers are integers.',
+  '16 has no decimal point, so it is an integer.',
+  2, true
+from public.lessons l where l.slug = 'data-types'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, code_snippet, placeholder, hint, explanation, sort_order, is_published
+)
+select l.id, 'type-boolean', 'text', 'Fill the blank',
+  'Complete the boolean value so is_ready means yes.',
+  'is_ready = _____',
+  'Boolean value',
+  'Python uses True with a capital T.',
+  'Booleans represent True or False.',
+  3, true
+from public.lessons l where l.slug = 'data-types'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, placeholder, hint, explanation, sort_order, is_published
+)
+select l.id, 'type-float-code', 'code', 'Write code',
+  'Create a variable named temperature and store the decimal number 24.5.',
+  'temperature = 24.5',
+  'Use a normal variable assignment.',
+  'Numbers with decimal points are floats.',
+  4, true
+from public.lessons l where l.slug = 'data-types'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, code_snippet, options, hint, explanation, sort_order, is_published
+)
+select l.id, 'operator-add', 'choice', 'Predict the result',
+  'What value is stored in total?',
+  'total = 5 + 3',
+  '["8","53","2","15"]'::jsonb,
+  'The + operator adds the numbers.',
+  '5 + 3 evaluates to 8.',
+  1, true
+from public.lessons l where l.slug = 'operators'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, code_snippet, options, hint, explanation, sort_order, is_published
+)
+select l.id, 'operator-compare', 'choice', 'True or false',
+  'What does this comparison produce?',
+  '7 > 4',
+  '["True","False","7","4"]'::jsonb,
+  'Ask whether 7 is greater than 4.',
+  'Comparison operators produce a boolean result.',
+  2, true
+from public.lessons l where l.slug = 'operators'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, code_snippet, placeholder, hint, explanation, sort_order, is_published
+)
+select l.id, 'operator-multiply', 'text', 'Fill the operator',
+  'Which Python operator multiplies two numbers?',
+  '6 ___ 4',
+  'Operator',
+  'Python uses an asterisk.',
+  'The * symbol is Python''s multiplication operator.',
+  3, true
+from public.lessons l where l.slug = 'operators'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, placeholder, hint, explanation, sort_order, is_published
+)
+select l.id, 'operator-code', 'code', 'Write code',
+  'Create a variable named total that stores 6 multiplied by 4.',
+  'total = 6 * 4',
+  'Combine assignment with the multiplication operator.',
+  'The expression 6 * 4 evaluates before being stored in total.',
+  4, true
+from public.lessons l where l.slug = 'operators'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, options, hint, explanation, sort_order, is_published
+)
+select l.id, 'checkpoint-print', 'choice', 'Checkpoint',
+  'Which line correctly displays the word Ready?',
+  '["print(\"Ready\")","display(\"Ready\")","Ready = print","print = \"Ready\""]'::jsonb,
+  'Use Python''s normal output function.',
+  'print() displays a value.',
+  1, true
+from public.lessons l where l.slug = 'checkpoint-1'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, options, hint, explanation, sort_order, is_published
+)
+select l.id, 'checkpoint-variable', 'choice', 'Checkpoint',
+  'Which line stores 12 in a variable named score?',
+  '["score = 12","12 = score","score == 12","score = \"12 points\""]'::jsonb,
+  'Use variable_name = value.',
+  'Assignment places the value on the right into the variable on the left.',
+  2, true
+from public.lessons l where l.slug = 'checkpoint-1'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, options, hint, explanation, sort_order, is_published
+)
+select l.id, 'checkpoint-type', 'choice', 'Checkpoint',
+  'What type of value is 3.5?',
+  '["Float","Integer","String","Boolean"]'::jsonb,
+  'Look at the decimal point.',
+  'A decimal number is a float.',
+  3, true
+from public.lessons l where l.slug = 'checkpoint-1'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, code_snippet, options, hint, explanation, sort_order, is_published
+)
+select l.id, 'checkpoint-operator', 'choice', 'Checkpoint',
+  'What does this expression evaluate to?',
+  '10 - 3',
+  '["7","13","103","30"]'::jsonb,
+  'Evaluate the subtraction.',
+  '10 - 3 equals 7.',
+  4, true
+from public.lessons l where l.slug = 'checkpoint-1'
+on conflict (exercise_key) do nothing;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, placeholder, hint, explanation, sort_order, is_published
+)
+select l.id, 'checkpoint-code', 'code', 'Final challenge',
+  'Create score with the value 12, then print score on the next line.',
+  E'score = 12\nprint(score)',
+  'Write the assignment first, then print the variable.',
+  'This combines variables with output.',
+  5, true
+from public.lessons l where l.slug = 'checkpoint-1'
+on conflict (exercise_key) do nothing;
+
 insert into private.exercise_answers (
   exercise_id, accepted_answers, correct_feedback, incorrect_feedback
 )
@@ -415,6 +583,19 @@ select e.id,
     when 'variable-name' then '["lives"]'::jsonb
     when 'variable-output' then '["7"]'::jsonb
     when 'variable-code' then '["language=\"Python\"","language=''Python''"]'::jsonb
+    when 'type-string' then '["String"]'::jsonb
+    when 'type-integer' then '["Integer"]'::jsonb
+    when 'type-boolean' then '["True"]'::jsonb
+    when 'type-float-code' then '["temperature=24.5"]'::jsonb
+    when 'operator-add' then '["8"]'::jsonb
+    when 'operator-compare' then '["True"]'::jsonb
+    when 'operator-multiply' then '["*"]'::jsonb
+    when 'operator-code' then '["total=6*4"]'::jsonb
+    when 'checkpoint-print' then '["print(\"Ready\")"]'::jsonb
+    when 'checkpoint-variable' then '["score = 12"]'::jsonb
+    when 'checkpoint-type' then '["Float"]'::jsonb
+    when 'checkpoint-operator' then '["7"]'::jsonb
+    when 'checkpoint-code' then '["score=12\nprint(score)"]'::jsonb
   end,
   case
     when e.exercise_key like 'hello-%' then 'Correct — you are getting the hang of Python output.'
@@ -432,6 +613,19 @@ where e.exercise_key in (
   'variable-create',
   'variable-name',
   'variable-output',
-  'variable-code'
+  'variable-code',
+  'type-string',
+  'type-integer',
+  'type-boolean',
+  'type-float-code',
+  'operator-add',
+  'operator-compare',
+  'operator-multiply',
+  'operator-code',
+  'checkpoint-print',
+  'checkpoint-variable',
+  'checkpoint-type',
+  'checkpoint-operator',
+  'checkpoint-code'
 )
 on conflict (exercise_id) do nothing;
