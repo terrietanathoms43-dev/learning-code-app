@@ -98,9 +98,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         <p>You finished every challenge in this lesson.</p>
 
         <div className="reward-grid">
-          <div><span>XP earned</span><strong>+{lesson.xp}</strong></div>
+          <div><span>Lesson XP</span><strong>+{lesson.xp}</strong></div>
           <div><span>Accuracy</span><strong>{accuracy}%</strong></div>
-          <div><span>Next step</span><strong>Unlocked</strong></div>
+          <div><span>Trail progress</span><strong>Ready to save</strong></div>
         </div>
 
         <Link className="primary-button" href="/learn">Back to the trail</Link>
