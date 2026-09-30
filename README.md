@@ -14,6 +14,10 @@ A gamified coding-learning app built around a visual learning path. The current 
 - Email/password sign-up and sign-in screen
 - Auth callback route
 - Initial Supabase migration with RLS, explicit Data API grants and Python seed content
+- Signed-in exercise-attempt persistence through a server-only Supabase secret key
+- Verified completion, one-time XP rewards, streak calculations and automatic path unlocking
+- Progress dashboard and practice deck
+- Five playable Python nodes through the first checkpoint
 
 ## Run locally
 
