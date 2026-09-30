@@ -33,7 +33,7 @@ export default function LoginPage() {
 
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -41,7 +41,13 @@ export default function LoginPage() {
           },
         });
         if (error) throw error;
-        setMessage("Account created. Check your email if confirmation is enabled.");
+
+        if (data.session) {
+          window.location.assign("/learn");
+          return;
+        }
+
+        setMessage("Account created. Check your email to confirm your account.");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
