@@ -430,7 +430,7 @@ select e.id,
     when 'variable-create' then '["score = 10"]'::jsonb
     when 'variable-name' then '["lives"]'::jsonb
     when 'variable-output' then '["7"]'::jsonb
-    when 'variable-code' then '["language=\"Python\"","language=''''Python''''"]'::jsonb
+    when 'variable-code' then '["language=\"Python\"","language=''Python''"]'::jsonb
   end,
   case
     when e.exercise_key like 'hello-%' then 'Correct — you are getting the hang of Python output.'
