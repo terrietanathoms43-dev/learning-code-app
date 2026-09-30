@@ -12,8 +12,14 @@ export function LearningPath({ nodes }: { nodes: PathNode[] }) {
     const y = topPadding + index * step;
     return `${x},${y}`;
   });
-  const currentIndex = Math.max(nodes.findIndex((node) => node.status === "current"), 0);
-  const completedPoints = points.slice(0, currentIndex + 1).join(" ");
+  const currentIndex = nodes.findIndex((node) => node.status === "current");
+  const lastCompletedIndex = nodes.reduce(
+    (lastIndex, node, index) => (node.status === "completed" ? index : lastIndex),
+    -1,
+  );
+  const progressIndex = currentIndex >= 0 ? currentIndex : lastCompletedIndex;
+  const completedPoints =
+    progressIndex >= 0 ? points.slice(0, progressIndex + 1).join(" ") : "";
 
   return (
     <div className="path-canvas" style={{ height }}>
