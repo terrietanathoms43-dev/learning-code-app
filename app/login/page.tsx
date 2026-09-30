@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signup");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -43,7 +45,8 @@ export default function LoginPage() {
         if (error) throw error;
 
         if (data.session) {
-          window.location.assign("/learn");
+          router.push("/learn");
+          router.refresh();
           return;
         }
 
@@ -51,7 +54,8 @@ export default function LoginPage() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        window.location.assign("/learn");
+        router.push("/learn");
+        router.refresh();
       }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Authentication failed.");
