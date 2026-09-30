@@ -1,0 +1,110 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { FormEvent, useState } from "react";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+
+export default function LoginPage() {
+  const [mode, setMode] = useState<"signin" | "signup">("signup");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMessage("");
+
+    if (!isSupabaseConfigured) {
+      setMessage("Supabase is ready in the codebase, but the project keys still need to be added.");
+      return;
+    }
+
+    const form = new FormData(event.currentTarget);
+    const email = String(form.get("email") ?? "").trim();
+    const password = String(form.get("password") ?? "");
+
+    if (!email || password.length < 6) {
+      setMessage("Enter your email and a password with at least 6 characters.");
+      return;
+    }
+
+    setBusy(true);
+    const supabase = createClient();
+
+    try {
+      if (mode === "signup") {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/auth/callback`,
+          },
+        });
+        if (error) throw error;
+        setMessage("Account created. Check your email if confirmation is enabled.");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        window.location.assign("/learn");
+      }
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Authentication failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <main className="auth-page">
+      <Link className="brand auth-brand" href="/">
+        <span className="brand-mark">&lt;/&gt;</span>
+        <span>CodeTrail</span>
+      </Link>
+
+      <section className="auth-card">
+        <div className="auth-mascot">
+          <Image src="/mascot.svg" alt="" width={88} height={88} aria-hidden="true" />
+        </div>
+        <p className="eyebrow">{mode === "signup" ? "Start your trail" : "Welcome back"}</p>
+        <h1>{mode === "signup" ? "Create your learner account" : "Continue learning"}</h1>
+        <p className="auth-subcopy">
+          Your progress, XP and streak will follow you across devices.
+        </p>
+
+        <form onSubmit={submit}>
+          <label>
+            Email
+            <input name="email" type="email" autoComplete="email" required />
+          </label>
+          <label>
+            Password
+            <input
+              name="password"
+              type="password"
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              minLength={6}
+              required
+            />
+          </label>
+
+          {message && <p className="form-message" aria-live="polite">{message}</p>}
+
+          <button className="primary-button primary-button--full" type="submit" disabled={busy}>
+            {busy ? "Working…" : mode === "signup" ? "Create account" : "Sign in"}
+          </button>
+        </form>
+
+        <button
+          className="text-button"
+          type="button"
+          onClick={() => {
+            setMode((value) => (value === "signup" ? "signin" : "signup"));
+            setMessage("");
+          }}
+        >
+          {mode === "signup" ? "Already have an account? Sign in" : "New here? Create an account"}
+        </button>
+      </section>
+    </main>
+  );
+}
