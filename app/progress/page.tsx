@@ -27,7 +27,7 @@ export default async function ProgressPage() {
           <article><span>⭐</span><strong>{dashboard.totalXp}</strong><small>Total XP</small></article>
           <article><span>🔥</span><strong>{dashboard.streak}</strong><small>Day streak</small></article>
           <article><span>✓</span><strong>{dashboard.completedLessons}</strong><small>Lessons cleared</small></article>
-          <article><span>🎯</span><strong>{dashboard.todayXp}/{dashboard.dailyGoalXp}</strong><small>Today's XP</small></article>
+          <article><span>🎯</span><strong>{dashboard.todayXp}/{dashboard.dailyGoalXp}</strong><small>Today&apos;s XP</small></article>
         </section>
 
         <section className="progress-grid">
