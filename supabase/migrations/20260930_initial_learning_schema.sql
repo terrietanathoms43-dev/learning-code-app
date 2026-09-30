@@ -188,26 +188,10 @@ on public.user_lesson_progress for select
 to authenticated
 using ((select auth.uid()) = user_id);
 
-create policy "users can create own progress"
-on public.user_lesson_progress for insert
-to authenticated
-with check ((select auth.uid()) = user_id);
-
-create policy "users can update own progress"
-on public.user_lesson_progress for update
-to authenticated
-using ((select auth.uid()) = user_id)
-with check ((select auth.uid()) = user_id);
-
 create policy "users can read own attempts"
 on public.exercise_attempts for select
 to authenticated
 using ((select auth.uid()) = user_id);
-
-create policy "users can record own attempts"
-on public.exercise_attempts for insert
-to authenticated
-with check ((select auth.uid()) = user_id);
 
 create policy "users can read own xp"
 on public.xp_events for select
@@ -216,11 +200,11 @@ using ((select auth.uid()) = user_id);
 
 grant usage on schema public to anon, authenticated;
 grant select on public.courses, public.units, public.lessons, public.exercises to anon, authenticated;
-grant select, update on public.profiles to authenticated;
-grant select, insert, update on public.user_lesson_progress to authenticated;
-grant select, insert on public.exercise_attempts to authenticated;
+grant select on public.profiles to authenticated;
+grant update (display_name, username, avatar_url, daily_goal_xp) on public.profiles to authenticated;
+grant select on public.user_lesson_progress to authenticated;
+grant select on public.exercise_attempts to authenticated;
 grant select on public.xp_events to authenticated;
-grant usage, select on all sequences in schema public to authenticated;
 
 create or replace function private.handle_new_user()
 returns trigger
