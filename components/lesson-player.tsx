@@ -9,6 +9,17 @@ type Feedback = {
   feedback: string;
 };
 
+function isFeedback(value: unknown): value is Feedback {
+  return (
+    Boolean(value) &&
+    typeof value === "object" &&
+    "correct" in value &&
+    "feedback" in value &&
+    typeof value.correct === "boolean" &&
+    typeof value.feedback === "string"
+  );
+}
+
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
@@ -16,11 +27,15 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [checking, setChecking] = useState(false);
   const [finished, setFinished] = useState(false);
   const [energy, setEnergy] = useState(5);
+  const [mistakes, setMistakes] = useState(0);
 
   const exercise = lesson.exercises[index];
   const progress = useMemo(
     () => Math.round(((finished ? lesson.exercises.length : index) / lesson.exercises.length) * 100),
     [finished, index, lesson.exercises.length],
+  );
+  const accuracy = Math.round(
+    (lesson.exercises.length / Math.max(lesson.exercises.length + mistakes, 1)) * 100,
   );
 
   async function check() {
@@ -33,17 +48,28 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ exerciseId: exercise.id, answer }),
       });
-      const data = (await response.json()) as Feedback | { error: string };
 
-      if (!response.ok || !("correct" in data)) {
-        setFeedback({ correct: false, feedback: "Something went wrong. Try that answer again." });
+      const data: unknown = await response.json();
+
+      if (!response.ok || !isFeedback(data)) {
+        setFeedback({
+          correct: false,
+          feedback: "The answer checker could not respond correctly. Please try again.",
+        });
         return;
       }
 
       setFeedback(data);
+
       if (!data.correct) {
-        setEnergy((value) => Math.max(1, value - 1));
+        setMistakes((value) => value + 1);
+        setEnergy((value) => Math.max(0, value - 1));
       }
+    } catch {
+      setFeedback({
+        correct: false,
+        feedback: "We could not reach the answer checker. Check your connection and try again.",
+      });
     } finally {
       setChecking(false);
     }
@@ -73,7 +99,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
         <div className="reward-grid">
           <div><span>XP earned</span><strong>+{lesson.xp}</strong></div>
-          <div><span>Accuracy goal</span><strong>100%</strong></div>
+          <div><span>Accuracy</span><strong>{accuracy}%</strong></div>
           <div><span>Next step</span><strong>Unlocked</strong></div>
         </div>
 
@@ -114,11 +140,10 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 type="button"
                 role="radio"
                 aria-checked={answer === option}
+                disabled={checking || Boolean(feedback?.correct)}
                 onClick={() => {
-                  if (!feedback?.correct) {
-                    setAnswer(option);
-                    setFeedback(null);
-                  }
+                  setAnswer(option);
+                  setFeedback(null);
                 }}
               >
                 <span className="answer-key">{String.fromCharCode(65 + optionIndex)}</span>
@@ -137,7 +162,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               setAnswer(event.target.value);
               setFeedback(null);
             }}
-            disabled={feedback?.correct}
+            disabled={checking || Boolean(feedback?.correct)}
             autoCapitalize="none"
             autoCorrect="off"
           />
@@ -157,7 +182,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 setAnswer(event.target.value);
                 setFeedback(null);
               }}
-              disabled={feedback?.correct}
+              disabled={checking || Boolean(feedback?.correct)}
               spellCheck={false}
             />
           </div>
