@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { checkAnswer } from "@/lib/answer-key";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isUuidV4 } from "@/lib/validation";
 
 async function recordAttempt(exerciseKey: string, answer: string, isCorrect: boolean, sessionId: string) {
   if (!isAdminSupabaseConfigured) return;
@@ -63,9 +64,9 @@ export async function POST(request: Request) {
   if (
     payload.answer.length > 500 ||
     payload.exerciseId.length > 100 ||
-    !/^[0-9a-f-]{36}$/i.test(payload.sessionId)
+    !isUuidV4(payload.sessionId)
   ) {
-    return NextResponse.json({ error: "Answer is too long." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid exercise, answer or lesson session." }, { status: 400 });
   }
 
   const result = checkAnswer(payload.exerciseId, payload.answer);
