@@ -9,6 +9,10 @@ export default async function LearnPage() {
     100,
     Math.round((dashboard.todayXp / Math.max(dashboard.dailyGoalXp, 1)) * 100),
   );
+  const courseComplete =
+    dashboard.signedIn &&
+    dashboard.totalLessons > 0 &&
+    dashboard.completedLessons >= dashboard.totalLessons;
 
   return (
     <div className="site-shell learn-page">
@@ -47,6 +51,22 @@ export default async function LearnPage() {
             </div>
             {!dashboard.signedIn && <Link className="trail-signin" href="/login">Sign in</Link>}
           </div>
+
+          {courseComplete && (
+            <section className="course-complete-banner">
+              <div className="course-complete-icon" aria-hidden="true">🎓</div>
+              <div>
+                <p className="eyebrow">Python Foundations complete</p>
+                <h2>You cleared Beginner Meadow.</h2>
+                <p>
+                  You finished every available lesson, checkpoint and project in your first Python world.
+                </p>
+              </div>
+              <Link className="secondary-button" href="/progress">
+                See achievements
+              </Link>
+            </section>
+          )}
 
           <LearningPath nodes={dashboard.nodes} />
         </section>
@@ -97,7 +117,7 @@ export default async function LearnPage() {
             <div>
               <p className="eyebrow">AI Code Coach</p>
               <h2>Help without spoiling the answer.</h2>
-              <p>The OpenAI tutor remains the next major integration after persistence.</p>
+              <p>Open any lesson and ask for a hint, concept explanation or similar example.</p>
             </div>
           </section>
         </aside>
