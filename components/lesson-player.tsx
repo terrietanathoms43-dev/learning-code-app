@@ -52,6 +52,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [energy, setEnergy] = useState(5);
   const [mistakes, setMistakes] = useState(0);
   const [completion, setCompletion] = useState<CompletionState | null>(null);
+  const [sessionId] = useState(() => crypto.randomUUID());
 
   const exercise = lesson.exercises[index];
   const progress = useMemo(
@@ -70,7 +71,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       const response = await fetch("/api/check-answer", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ exerciseId: exercise.id, answer }),
+        body: JSON.stringify({ exerciseId: exercise.id, answer, sessionId }),
       });
       const data: unknown = await response.json();
 
@@ -110,7 +111,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       const response = await fetch("/api/progress/complete", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ lessonSlug: lesson.slug }),
+        body: JSON.stringify({ lessonSlug: lesson.slug, sessionId }),
       });
       const data: unknown = await response.json();
 
