@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { implementedLessonSlugs } from "@/lib/course-data";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isUuidV4 } from "@/lib/validation";
 
 export async function POST(request: Request) {
   if (!isAdminSupabaseConfigured) {
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     typeof payload.lessonSlug !== "string" ||
     typeof payload.sessionId !== "string" ||
     !implementedLessonSlugs.includes(payload.lessonSlug) ||
-    !/^[0-9a-f-]{36}$/i.test(payload.sessionId)
+    !isUuidV4(payload.sessionId)
   ) {
     return NextResponse.json({ error: "Unknown lesson." }, { status: 400 });
   }
