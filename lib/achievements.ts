@@ -74,6 +74,15 @@ export function getAchievements(
       target: 1,
     },
     {
+      id: "python-pioneer",
+      title: "Python Pioneer",
+      description: "Finish the Python Foundations mini project.",
+      icon: "🎓",
+      unlocked: completed.has("mini-project"),
+      progress: completed.has("mini-project") ? 1 : 0,
+      target: 1,
+    },
+    {
       id: "streak-spark",
       title: "Streak Spark",
       description: "Keep a three-day coding streak.",
