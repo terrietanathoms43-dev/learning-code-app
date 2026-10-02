@@ -46,6 +46,7 @@ jobs:
           curl --fail --silent http://127.0.0.1:3000/lesson/hello-world > /dev/null
           curl --fail --silent http://127.0.0.1:3000/forgot-password > /dev/null
           curl --fail --silent http://127.0.0.1:3000/reset-password > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/privacy > /dev/null
           curl --fail --silent http://127.0.0.1:3000/robots.txt > /dev/null
           curl --fail --silent http://127.0.0.1:3000/sitemap.xml > /dev/null
           curl --fail --silent http://127.0.0.1:3000/manifest.webmanifest > /dev/null
