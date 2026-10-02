@@ -22,8 +22,11 @@ export async function POST(request: Request) {
     !payload ||
     typeof payload !== "object" ||
     !("lessonSlug" in payload) ||
+    !("sessionId" in payload) ||
     typeof payload.lessonSlug !== "string" ||
-    !implementedLessonSlugs.includes(payload.lessonSlug)
+    typeof payload.sessionId !== "string" ||
+    !implementedLessonSlugs.includes(payload.lessonSlug) ||
+    !/^[0-9a-f-]{36}$/i.test(payload.sessionId)
   ) {
     return NextResponse.json({ error: "Unknown lesson." }, { status: 400 });
   }
@@ -66,6 +69,7 @@ export async function POST(request: Request) {
     .from("exercise_attempts")
     .select("exercise_id, is_correct, attempted_at")
     .eq("user_id", userId)
+    .eq("session_id", payload.sessionId)
     .in("exercise_id", exerciseIds)
     .order("attempted_at", { ascending: true });
 
@@ -123,22 +127,20 @@ export async function POST(request: Request) {
 
   let xpAwarded = 0;
 
-  if (!alreadyCompleted) {
-    const { error: xpError } = await admin.from("xp_events").insert({
-      user_id: userId,
-      amount: lesson.xp_reward,
-      event_type: "lesson_completed",
-      lesson_id: lesson.id,
-    });
+  const { error: xpError } = await admin.from("xp_events").insert({
+    user_id: userId,
+    amount: lesson.xp_reward,
+    event_type: "lesson_completed",
+    lesson_id: lesson.id,
+  });
 
-    if (!xpError) {
-      xpAwarded = Number(lesson.xp_reward || 0);
-    } else if (xpError.code !== "23505") {
-      return NextResponse.json(
-        { error: "Progress was saved, but XP could not be awarded." },
-        { status: 500 },
-      );
-    }
+  if (!xpError) {
+    xpAwarded = Number(lesson.xp_reward || 0);
+  } else if (xpError.code !== "23505") {
+    return NextResponse.json(
+      { error: "Progress was saved, but XP could not be awarded. Retry to recover the reward." },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({
