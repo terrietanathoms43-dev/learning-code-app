@@ -120,6 +120,10 @@ export default function LoginPage() {
         >
           {mode === "signup" ? "Already have an account? Sign in" : "New here? Create an account"}
         </button>
+
+        <Link className="auth-privacy-link" href="/privacy">
+          Privacy &amp; Data
+        </Link>
       </section>
     </main>
   );
