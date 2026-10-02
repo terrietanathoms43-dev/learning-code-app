@@ -201,14 +201,25 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   if (finished) {
     const finalAccuracy = completion?.accuracy ?? localAccuracy;
+    const isFinalProject = lesson.slug === "mini-project";
 
     return (
-      <main className="lesson-shell lesson-finish">
+      <main className={`lesson-shell lesson-finish ${isFinalProject ? "course-finish" : ""}`}>
         <div className="celebration-burst" aria-hidden="true">✦</div>
-        <div className="lesson-finish-icon" aria-hidden="true">🏆</div>
-        <p className="eyebrow">Trail cleared</p>
-        <h1>{lesson.title} complete!</h1>
-        <p>You finished every challenge in this lesson.</p>
+        <div className="lesson-finish-icon" aria-hidden="true">
+          {isFinalProject ? "🎓" : "🏆"}
+        </div>
+        <p className="eyebrow">
+          {isFinalProject ? "Python Foundations complete" : "Trail cleared"}
+        </p>
+        <h1>
+          {isFinalProject ? "You cleared Beginner Meadow!" : `${lesson.title} complete!`}
+        </h1>
+        <p>
+          {isFinalProject
+            ? "You combined variables, data types, operators, conditions, loops and functions in your first coding project."
+            : "You finished every challenge in this lesson."}
+        </p>
 
         <div className="reward-grid">
           <div>
@@ -229,7 +240,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         </div>
 
         {completion?.notice && <p className="completion-notice">{completion.notice}</p>}
-        <Link className="primary-button" href="/learn">Back to the trail</Link>
+        <Link className="primary-button" href={isFinalProject ? "/progress" : "/learn"}>
+          {isFinalProject ? "See my achievements" : "Back to the trail"}
+        </Link>
       </main>
     );
   }
