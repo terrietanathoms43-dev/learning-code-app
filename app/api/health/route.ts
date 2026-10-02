@@ -7,12 +7,17 @@ export async function GET() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const openAIConfigured = Boolean(process.env.OPENAI_API_KEY);
+  const persistenceConfigured = Boolean(
+    (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+      process.env.SUPABASE_SECRET_KEY,
+  );
 
   if (!url || !publishableKey) {
     return NextResponse.json(
       {
         status: "not_ready",
         database: "not_configured",
+        persistence: persistenceConfigured ? "configured" : "not_configured",
         aiCoach: openAIConfigured ? "configured" : "not_configured",
       },
       { status: 503 },
@@ -44,16 +49,18 @@ export async function GET() {
       );
     }
 
-    const status = openAIConfigured ? "ok" : "degraded";
+    const fullyConfigured = openAIConfigured && persistenceConfigured;
+    const status = fullyConfigured ? "ok" : "degraded";
 
     return NextResponse.json(
       {
         status,
         database: "ok",
         publishedLessons: count,
+        persistence: persistenceConfigured ? "configured" : "not_configured",
         aiCoach: openAIConfigured ? "configured" : "not_configured",
       },
-      { status: openAIConfigured ? 200 : 503 },
+      { status: fullyConfigured ? 200 : 503 },
     );
   } catch {
     return NextResponse.json(
