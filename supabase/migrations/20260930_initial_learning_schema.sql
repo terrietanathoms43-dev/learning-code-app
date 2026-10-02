@@ -130,6 +130,9 @@ create index if not exists exercise_attempts_user_idx on public.exercise_attempt
 create index if not exists exercise_attempts_session_idx on public.exercise_attempts(user_id, session_id, attempted_at desc);
 create index if not exists xp_events_user_idx on public.xp_events(user_id, created_at desc);
 create index if not exists ai_tutor_events_user_idx on public.ai_tutor_events(user_id, created_at desc);
+create index if not exists exercise_attempts_exercise_id_idx on public.exercise_attempts(exercise_id);
+create index if not exists user_lesson_progress_lesson_id_idx on public.user_lesson_progress(lesson_id);
+create index if not exists xp_events_lesson_id_idx on public.xp_events(lesson_id);
 create unique index if not exists xp_events_lesson_completion_unique
 on public.xp_events(user_id, lesson_id, event_type)
 where event_type = 'lesson_completed';
