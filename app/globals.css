@@ -1304,6 +1304,13 @@ button { color: inherit; }
   font-size: 1.2rem;
 }
 
+.coach-disclosure {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: .68rem;
+  line-height: 1.45;
+}
+
 .coach-actions {
   margin-top: 13px;
   display: flex;
