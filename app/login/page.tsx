@@ -25,8 +25,8 @@ export default function LoginPage() {
     const email = String(form.get("email") ?? "").trim();
     const password = String(form.get("password") ?? "");
 
-    if (!email || password.length < 6) {
-      setMessage("Enter your email and a password with at least 6 characters.");
+    if (!email || password.length < 8) {
+      setMessage("Enter your email and a password with at least 8 characters.");
       return;
     }
 
@@ -92,7 +92,7 @@ export default function LoginPage() {
               name="password"
               type="password"
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              minLength={6}
+              minLength={8}
               required
             />
           </label>
