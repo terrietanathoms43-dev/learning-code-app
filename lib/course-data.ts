@@ -206,6 +206,54 @@ export const lessons: Record<string, Lesson> = {
       },
     ],
   },
+  "mini-project": {
+    slug: "mini-project",
+    title: "Mini Project",
+    subtitle: "Build the logic for a tiny Python quiz checker.",
+    icon: "🚀",
+    xp: 100,
+    duration: "12 min",
+    exercises: [
+      {
+        id: "project-score-start",
+        type: "choice",
+        eyebrow: "Project setup",
+        prompt: "Which line correctly starts the player's score at zero?",
+        options: ["score = 0", "0 = score", "score == 0", 'score = "zero"'],
+      },
+      {
+        id: "project-check-function",
+        type: "code",
+        eyebrow: "Build the checker",
+        prompt: "Write a function named check_answer that returns True when answer equals Python, otherwise False.",
+        placeholder:
+          'def check_answer(answer):\n    if answer == "Python":\n        return True\n    return False',
+      },
+      {
+        id: "project-rounds",
+        type: "choice",
+        eyebrow: "Add rounds",
+        prompt: "Which values will this loop display?",
+        code: "for round_number in range(1, 4):\n    print(round_number)",
+        options: ["1, 2, 3", "0, 1, 2", "1, 2, 3, 4", "4"],
+      },
+      {
+        id: "project-score-update",
+        type: "code",
+        eyebrow: "Update the score",
+        prompt: "If check_answer returns True, add 1 to score.",
+        placeholder:
+          'if check_answer("Python"):\n    score = score + 1',
+      },
+      {
+        id: "project-final-output",
+        type: "code",
+        eyebrow: "Finish the project",
+        prompt: "Print the final score using the score variable.",
+        placeholder: "print(score)",
+      },
+    ],
+  },
 };
 
 export const implementedLessonSlugs = Object.keys(lessons);
