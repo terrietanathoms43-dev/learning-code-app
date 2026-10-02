@@ -3,7 +3,7 @@ import { checkAnswer } from "@/lib/answer-key";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-async function recordAttempt(exerciseKey: string, answer: string, isCorrect: boolean) {
+async function recordAttempt(exerciseKey: string, answer: string, isCorrect: boolean, sessionId: string) {
   if (!isAdminSupabaseConfigured) return;
 
   try {
@@ -31,6 +31,7 @@ async function recordAttempt(exerciseKey: string, answer: string, isCorrect: boo
       exercise_id: exercise.id,
       submitted_answer: { value: answer },
       is_correct: isCorrect,
+      session_id: sessionId,
     });
   } catch {
     // Answer checking remains available for guests and during persistence outages.
@@ -51,13 +52,19 @@ export async function POST(request: Request) {
     typeof payload !== "object" ||
     !("exerciseId" in payload) ||
     !("answer" in payload) ||
+    !("sessionId" in payload) ||
     typeof payload.exerciseId !== "string" ||
-    typeof payload.answer !== "string"
+    typeof payload.answer !== "string" ||
+    typeof payload.sessionId !== "string"
   ) {
     return NextResponse.json({ error: "Exercise and answer are required." }, { status: 400 });
   }
 
-  if (payload.answer.length > 500 || payload.exerciseId.length > 100) {
+  if (
+    payload.answer.length > 500 ||
+    payload.exerciseId.length > 100 ||
+    !/^[0-9a-f-]{36}$/i.test(payload.sessionId)
+  ) {
     return NextResponse.json({ error: "Answer is too long." }, { status: 400 });
   }
 
@@ -67,6 +74,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Exercise not found." }, { status: 404 });
   }
 
-  await recordAttempt(payload.exerciseId, payload.answer, result.correct);
+  await recordAttempt(payload.exerciseId, payload.answer, result.correct, payload.sessionId);
   return NextResponse.json(result);
 }
