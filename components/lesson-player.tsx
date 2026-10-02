@@ -352,6 +352,10 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
             </div>
           </div>
 
+          <p className="coach-disclosure">
+            AI-generated guidance. Keep personal information out of your exercise answers.
+          </p>
+
           <div className="coach-actions">
             <button
               type="button"
