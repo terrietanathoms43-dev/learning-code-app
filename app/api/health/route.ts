@@ -62,7 +62,8 @@ export async function GET() {
       const admin = createAdminClient();
       const { error: persistenceError } = await admin
         .from("user_lesson_progress")
-        .select("user_id", { count: "exact", head: true });
+        .select("user_id")
+        .limit(1);
 
       persistenceReady = !persistenceError;
     }
