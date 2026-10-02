@@ -62,44 +62,6 @@ function guestDashboard(): LearningDashboard {
   };
 }
 
-function dayKey(input: string | Date, timeZone: string) {
-  const date = new Date(input);
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-  const parts = formatter.formatToParts(date);
-  const year = parts.find((part) => part.type === "year")?.value;
-  const month = parts.find((part) => part.type === "month")?.value;
-  const day = parts.find((part) => part.type === "day")?.value;
-
-  return year && month && day ? `${year}-${month}-${day}` : date.toISOString().slice(0, 10);
-}
-
-function shiftDay(key: string, amount: number) {
-  const [year, month, day] = key.split("-").map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  date.setUTCDate(date.getUTCDate() + amount);
-  return date.toISOString().slice(0, 10);
-}
-
-function calculateStreak(createdAtValues: string[], timeZone: string) {
-  const activeDays = new Set(createdAtValues.map((value) => dayKey(value, timeZone)));
-  const today = dayKey(new Date(), timeZone);
-  const yesterday = shiftDay(today, -1);
-  let cursor = activeDays.has(today) ? today : activeDays.has(yesterday) ? yesterday : null;
-  let streak = 0;
-
-  while (cursor && activeDays.has(cursor)) {
-    streak += 1;
-    cursor = shiftDay(cursor, -1);
-  }
-
-  return streak;
-}
-
 export async function getLearningDashboard(): Promise<LearningDashboard> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
@@ -118,7 +80,7 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
 
     if (!userId) return guestDashboard();
 
-    const [lessonResult, progressResult, xpResult, profileResult] = await Promise.all([
+    const [lessonResult, progressResult, xpResult, profileResult, statsResult] = await Promise.all([
       supabase
         .from("lessons")
         .select("id, slug, sort_order, title")
@@ -130,21 +92,26 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
         .eq("user_id", userId),
       supabase
         .from("xp_events")
-        .select("amount, created_at, lesson_id, event_type")
+        .select("amount, created_at, lesson_id")
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
-        .limit(365),
+        .limit(10),
       supabase
         .from("profiles")
         .select("display_name, daily_goal_xp, time_zone")
         .eq("id", userId)
         .maybeSingle(),
+      supabase.rpc("get_learning_stats"),
     ]);
 
     const lessonRows = lessonResult.error ? [] : lessonResult.data ?? [];
     const progressRows = progressResult.error ? [] : progressResult.data ?? [];
     const xpRows = xpResult.error ? [] : xpResult.data ?? [];
     const profile = profileResult.error ? null : profileResult.data;
+    const stats =
+      !statsResult.error && Array.isArray(statsResult.data) && statsResult.data.length
+        ? statsResult.data[0]
+        : null;
 
     const publishedImplemented = lessonRows
       .filter((lesson) => implementedSet.has(lesson.slug))
@@ -170,13 +137,13 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
     const nodes = buildNodes(completedSlugs, availableSlugs);
     const totalLessons = availableSlugs.size;
     const completedLessons = [...completedSlugs].filter((slug) => availableSlugs.has(slug)).length;
-    const totalXp = xpRows.reduce((sum, event) => sum + Number(event.amount || 0), 0);
+    const totalXp = stats
+      ? Number(stats.total_xp || 0)
+      : xpRows.reduce((sum, event) => sum + Number(event.amount || 0), 0);
+    const todayXp = stats ? Number(stats.today_xp || 0) : 0;
+    const streak = stats ? Number(stats.streak || 0) : 0;
     const dailyGoalXp = Number(profile?.daily_goal_xp || 50);
     const timeZone = profile?.time_zone || "UTC";
-    const today = dayKey(new Date(), timeZone);
-    const todayXp = xpRows
-      .filter((event) => dayKey(event.created_at, timeZone) === today)
-      .reduce((sum, event) => sum + Number(event.amount || 0), 0);
 
     return {
       signedIn: true,
@@ -184,7 +151,7 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
       nodes,
       totalXp,
       todayXp,
-      streak: calculateStreak(xpRows.map((event) => event.created_at), timeZone),
+      streak,
       dailyGoalXp,
       completedLessons,
       totalLessons,
