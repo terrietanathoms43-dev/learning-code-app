@@ -89,6 +89,39 @@ const rules: Record<string, AnswerRule> = {
     correctFeedback: "Excellent. The function accepts a number and returns its square.",
     incorrectFeedback: "Define square(number), then return number * number on the next line.",
   },
+  "project-score-start": {
+    accepted: ["score = 0"],
+    correctFeedback: "Correct. The project now has a score counter starting at zero.",
+    incorrectFeedback: "Use a normal variable assignment with score on the left and 0 on the right.",
+  },
+  "project-check-function": {
+    accepted: [
+      'defcheck_answer(answer):\nifanswer=="Python":\nreturnTrue\nreturnFalse',
+      "defcheck_answer(answer):\nifanswer=='Python':\nreturnTrue\nreturnFalse",
+    ],
+    requiredIndentedLines: [1, 2, 3],
+    correctFeedback: "Great. Your function checks the answer and returns a boolean result.",
+    incorrectFeedback: "Define check_answer(answer), test whether answer equals Python, then return True or False with correct indentation.",
+  },
+  "project-rounds": {
+    accepted: ["1, 2, 3"],
+    correctFeedback: "Correct. range(1, 4) includes 1, 2 and 3 but stops before 4.",
+    incorrectFeedback: "Remember that the end value in range is not included.",
+  },
+  "project-score-update": {
+    accepted: [
+      'ifcheck_answer("Python"):\nscore=score+1',
+      "ifcheck_answer('Python'):\nscore=score+1",
+    ],
+    requiredIndentedLines: [1],
+    correctFeedback: "Nice. A correct answer now increases the score by one.",
+    incorrectFeedback: "Check the function result with if, then indent score = score + 1.",
+  },
+  "project-final-output": {
+    accepted: ["print(score)"],
+    correctFeedback: "Project finished. The final score is displayed with print().",
+    incorrectFeedback: "Print the score variable directly.",
+  },
 };
 
 function normalize(value: string) {
