@@ -10,6 +10,7 @@ create table if not exists public.profiles (
   username text unique,
   avatar_url text,
   daily_goal_xp integer not null default 50 check (daily_goal_xp between 10 and 500),
+  time_zone text not null default 'UTC',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -96,6 +97,7 @@ create table if not exists public.exercise_attempts (
   exercise_id uuid not null references public.exercises(id) on delete cascade,
   submitted_answer jsonb not null,
   is_correct boolean,
+  session_id uuid,
   attempted_at timestamptz not null default now()
 );
 
@@ -108,11 +110,15 @@ create table if not exists public.xp_events (
   created_at timestamptz not null default now()
 );
 
+alter table public.profiles add column if not exists time_zone text not null default 'UTC';
+alter table public.exercise_attempts add column if not exists session_id uuid;
+
 create index if not exists units_course_sort_idx on public.units(course_id, sort_order);
 create index if not exists lessons_unit_sort_idx on public.lessons(unit_id, sort_order);
 create index if not exists exercises_lesson_sort_idx on public.exercises(lesson_id, sort_order);
 create index if not exists lesson_progress_user_idx on public.user_lesson_progress(user_id, status);
 create index if not exists exercise_attempts_user_idx on public.exercise_attempts(user_id, attempted_at desc);
+create index if not exists exercise_attempts_session_idx on public.exercise_attempts(user_id, session_id, attempted_at desc);
 create index if not exists xp_events_user_idx on public.xp_events(user_id, created_at desc);
 create unique index if not exists xp_events_lesson_completion_unique
 on public.xp_events(user_id, lesson_id, event_type)
@@ -204,7 +210,7 @@ using ((select auth.uid()) = user_id);
 grant usage on schema public to anon, authenticated;
 grant select on public.courses, public.units, public.lessons, public.exercises to anon, authenticated;
 grant select on public.profiles to authenticated;
-grant update (display_name, username, avatar_url, daily_goal_xp) on public.profiles to authenticated;
+grant update (display_name, username, avatar_url, daily_goal_xp, time_zone) on public.profiles to authenticated;
 grant select on public.user_lesson_progress to authenticated;
 grant select on public.exercise_attempts to authenticated;
 grant select on public.xp_events to authenticated;
