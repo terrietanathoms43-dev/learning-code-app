@@ -12,7 +12,7 @@ export default async function ProgressPage() {
 
   return (
     <div className="site-shell">
-      <TopNav stats={{ streak: dashboard.streak, totalXp: dashboard.totalXp }} />
+      <TopNav stats={{ streak: dashboard.streak, totalXp: dashboard.totalXp, signedIn: dashboard.signedIn }} />
       <main className="progress-page">
         <section className="progress-hero">
           <div>
