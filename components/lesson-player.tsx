@@ -16,6 +16,8 @@ type CompletionState = {
   notice: string;
 };
 
+type CoachMode = "hint" | "explain" | "example";
+
 function isFeedback(value: unknown): value is Feedback {
   return (
     value !== null &&
@@ -53,6 +55,10 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [mistakes, setMistakes] = useState(0);
   const [completion, setCompletion] = useState<CompletionState | null>(null);
   const [sessionId] = useState(() => crypto.randomUUID());
+  const [coachLoading, setCoachLoading] = useState<CoachMode | null>(null);
+  const [coachReply, setCoachReply] = useState("");
+  const [coachError, setCoachError] = useState("");
+  const [coachRemaining, setCoachRemaining] = useState<number | null>(null);
 
   const exercise = lesson.exercises[index];
   const progress = useMemo(
@@ -95,6 +101,44 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       });
     } finally {
       setChecking(false);
+    }
+  }
+
+  async function askCoach(mode: CoachMode) {
+    if (!exercise || coachLoading) return;
+
+    setCoachLoading(mode);
+    setCoachError("");
+
+    try {
+      const response = await fetch("/api/coach", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          lessonSlug: lesson.slug,
+          exerciseId: exercise.id,
+          mode,
+          studentAnswer: answer,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        reply?: string;
+        remaining?: number;
+        error?: string;
+      };
+
+      if (!response.ok || !data.reply) {
+        setCoachError(data.error || "The AI Code Coach is unavailable right now.");
+        return;
+      }
+
+      setCoachReply(data.reply);
+      setCoachRemaining(typeof data.remaining === "number" ? data.remaining : null);
+    } catch {
+      setCoachError("The AI Code Coach is unavailable right now.");
+    } finally {
+      setCoachLoading(null);
     }
   }
 
@@ -150,6 +194,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     setIndex((value) => value + 1);
     setAnswer("");
     setFeedback(null);
+    setCoachReply("");
+    setCoachError("");
+    setCoachRemaining(null);
   }
 
   if (finished) {
@@ -264,6 +311,53 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
             />
           </div>
         )}
+        <div className="coach-inline">
+          <div className="coach-inline-heading">
+            <span className="coach-inline-icon" aria-hidden="true">🤖</span>
+            <div>
+              <strong>AI Code Coach</strong>
+              <small>Get help without revealing the exact answer.</small>
+            </div>
+          </div>
+
+          <div className="coach-actions">
+            <button
+              type="button"
+              className="coach-action"
+              onClick={() => askCoach("hint")}
+              disabled={Boolean(coachLoading)}
+            >
+              {coachLoading === "hint" ? "Thinking…" : "Give me a hint"}
+            </button>
+            <button
+              type="button"
+              className="coach-action"
+              onClick={() => askCoach("explain")}
+              disabled={Boolean(coachLoading)}
+            >
+              {coachLoading === "explain" ? "Thinking…" : "Explain the concept"}
+            </button>
+            <button
+              type="button"
+              className="coach-action"
+              onClick={() => askCoach("example")}
+              disabled={Boolean(coachLoading)}
+            >
+              {coachLoading === "example" ? "Thinking…" : "Similar example"}
+            </button>
+          </div>
+
+          {(coachReply || coachError) && (
+            <div className={`coach-response ${coachError ? "is-error" : ""}`} aria-live="polite">
+              <strong>{coachError ? "Coach unavailable" : "Coach says"}</strong>
+              <p>{coachError || coachReply}</p>
+              {!coachError && coachRemaining !== null && (
+                <small>{coachRemaining} AI Coach requests left in your rolling daily limit.</small>
+              )}
+            </div>
+          )}
+        </div>
+
       </section>
 
       <div className={`lesson-action-bar ${feedback ? (feedback.correct ? "is-correct" : "is-wrong") : ""}`}>
