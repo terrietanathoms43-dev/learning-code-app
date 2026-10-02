@@ -17,7 +17,11 @@ A gamified coding-learning app built around a visual learning path. The current 
 - Signed-in exercise-attempt persistence through a server-only Supabase secret key
 - Verified completion, one-time XP rewards, streak calculations and automatic path unlocking
 - Progress dashboard and practice deck
-- Five playable Python nodes through the first checkpoint
+- Full Python Foundations path through Conditions, Loops, Functions and the Mini Project
+- AI Code Coach with hint / explain / similar-example modes
+- Achievement badges including Python Pioneer
+- Editable learner profile and daily XP goals
+- Timezone-aware streaks and activity dates
 
 ## Run locally
 
@@ -32,10 +36,16 @@ A gamified coding-learning app built around a visual learning path. The current 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_URL=
+SUPABASE_SECRET_KEY=
 OPENAI_API_KEY=
+OPENAI_MODEL=gpt-6-luna
+AI_COACH_DAILY_LIMIT=20
 ```
 
-The OpenAI variable is reserved for the AI Code Coach phase. Do not expose it through a `NEXT_PUBLIC_` variable.
+The Supabase secret key and OpenAI API key are server-only. Never expose either through a `NEXT_PUBLIC_` variable.
+
+The AI Code Coach uses the Responses API, stores no model response history through the API request, and applies a configurable rolling request limit.
 
 ## Build order
 
@@ -47,22 +57,27 @@ The OpenAI variable is reserved for the AI Code Coach phase. Do not expose it th
 - Core database schema
 
 ### Phase 2 — Persistence
-- Load courses/units/lessons from Supabase
-- Store lesson progress and attempts
-- Unlock the next path node from real completion state
-- XP ledger, daily goals and streak calculations
+- Store signed-in attempts by lesson session
+- Verify completion server-side
+- Award one-time XP and calculate timezone-aware streaks
+- Unlock the next path node from saved completion state
 
 ### Phase 3 — AI Code Coach
-- Server-only OpenAI route
+- Server-only Responses API route
 - Hint / explain / similar-example modes
-- Context from the current lesson and student attempts
+- Per-user rolling usage limit
 - Guardrails so the coach teaches before revealing solutions
 
-### Phase 4 — Rich coding practice
-- Sandboxed code execution
-- Automated tests for Python challenges
-- Project nodes and checkpoints
+### Phase 4 — Python Foundations completion
+- Conditions, Loops and Functions lessons
+- Final Mini Project
 - Achievement engine
+- Editable profile and daily XP goals
+
+### Phase 5 — Rich coding practice
+- Sandboxed Python execution
+- Automated tests for free-form code
+- Project workspace and saved code
 
 ### Phase 5 — Growth features
 - Admin course editor
