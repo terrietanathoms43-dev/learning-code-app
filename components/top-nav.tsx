@@ -35,7 +35,6 @@ export function TopNav({ stats }: TopNavProps) {
           {stats?.signedIn ? "👤" : "Sign in"}
         </Link>
         <span className="stat-chip">🔥 <strong>{stats?.streak ?? 0}</strong></span>
-        <span className="stat-chip">⚡ <strong>5/5</strong></span>
         <span className="stat-chip">⭐ <strong>{stats?.totalXp ?? 0} XP</strong></span>
       </div>
       </header>
