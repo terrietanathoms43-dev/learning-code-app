@@ -1,26 +1,32 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
+
+function healthResponse(body: Record<string, unknown>, status: number) {
+  return NextResponse.json(body, {
+    status,
+    headers: {
+      "cache-control": "private, no-store, max-age=0",
+    },
+  });
+}
 
 export async function GET() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const openAIConfigured = Boolean(process.env.OPENAI_API_KEY);
-  const persistenceConfigured = Boolean(
-    (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-      process.env.SUPABASE_SECRET_KEY,
-  );
 
   if (!url || !publishableKey) {
-    return NextResponse.json(
+    return healthResponse(
       {
         status: "not_ready",
         database: "not_configured",
-        persistence: persistenceConfigured ? "configured" : "not_configured",
+        persistence: isAdminSupabaseConfigured ? "configured" : "not_configured",
         aiCoach: openAIConfigured ? "configured" : "not_configured",
       },
-      { status: 503 },
+      503,
     );
   }
 
@@ -39,37 +45,53 @@ export async function GET() {
       .eq("is_published", true);
 
     if (error || (count ?? 0) < 1) {
-      return NextResponse.json(
+      return healthResponse(
         {
           status: "not_ready",
           database: "unavailable",
+          persistence: isAdminSupabaseConfigured ? "configured" : "not_configured",
           aiCoach: openAIConfigured ? "configured" : "not_configured",
         },
-        { status: 503 },
+        503,
       );
     }
 
-    const fullyConfigured = openAIConfigured && persistenceConfigured;
-    const status = fullyConfigured ? "ok" : "degraded";
+    let persistenceReady = false;
 
-    return NextResponse.json(
+    if (isAdminSupabaseConfigured) {
+      const admin = createAdminClient();
+      const { error: persistenceError } = await admin
+        .from("user_lesson_progress")
+        .select("user_id", { count: "exact", head: true });
+
+      persistenceReady = !persistenceError;
+    }
+
+    const fullyConfigured = openAIConfigured && persistenceReady;
+
+    return healthResponse(
       {
-        status,
+        status: fullyConfigured ? "ok" : "degraded",
         database: "ok",
         publishedLessons: count,
-        persistence: persistenceConfigured ? "configured" : "not_configured",
+        persistence: persistenceReady
+          ? "configured"
+          : isAdminSupabaseConfigured
+            ? "unavailable"
+            : "not_configured",
         aiCoach: openAIConfigured ? "configured" : "not_configured",
       },
-      { status: fullyConfigured ? 200 : 503 },
+      fullyConfigured ? 200 : 503,
     );
   } catch {
-    return NextResponse.json(
+    return healthResponse(
       {
         status: "not_ready",
         database: "unavailable",
+        persistence: isAdminSupabaseConfigured ? "unavailable" : "not_configured",
         aiCoach: openAIConfigured ? "configured" : "not_configured",
       },
-      { status: 503 },
+      503,
     );
   }
 }
