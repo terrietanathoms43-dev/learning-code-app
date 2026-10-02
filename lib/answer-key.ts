@@ -2,6 +2,7 @@ type AnswerRule = {
   accepted: string[];
   correctFeedback: string;
   incorrectFeedback: string;
+  requiredIndentedLines?: number[];
 };
 
 const rules: Record<string, AnswerRule> = {
@@ -42,6 +43,7 @@ const rules: Record<string, AnswerRule> = {
   },
   "condition-code": {
     accepted: ['ifscore>=10:\nprint("Ready")', "ifscore>=10:\nprint('Ready')"],
+    requiredIndentedLines: [1],
     correctFeedback: "Nice. Your condition includes the comparison, colon and indented action.",
     incorrectFeedback: "Use if score >= 10: on the first line, then print Ready on the next line.",
   },
@@ -62,6 +64,7 @@ const rules: Record<string, AnswerRule> = {
   },
   "loop-code": {
     accepted: ["fornumberinrange(1,4):\nprint(number)"],
+    requiredIndentedLines: [1],
     correctFeedback: "Great. range(1, 4) produces 1, 2 and 3.",
     incorrectFeedback: "Use range(1, 4), then print the loop variable on the next line.",
   },
@@ -82,6 +85,7 @@ const rules: Record<string, AnswerRule> = {
   },
   "function-code": {
     accepted: ["defsquare(number):\nreturnnumber*number"],
+    requiredIndentedLines: [1],
     correctFeedback: "Excellent. The function accepts a number and returns its square.",
     incorrectFeedback: "Define square(number), then return number * number on the next line.",
   },
@@ -91,12 +95,21 @@ function normalize(value: string) {
   return value.trim().replace(/\r\n/g, "\n").replace(/[ \t]+/g, "").replace(/;$/, "");
 }
 
+function hasRequiredIndentation(value: string, requiredLines: number[] = []) {
+  if (!requiredLines.length) return true;
+
+  const lines = value.replace(/\r\n/g, "\n").trim().split("\n");
+  return requiredLines.every((lineIndex) => /^[ \t]+/.test(lines[lineIndex] ?? ""));
+}
+
 export function checkAnswer(exerciseId: string, rawAnswer: string) {
   const rule = rules[exerciseId];
   if (!rule) return null;
 
   const normalized = normalize(rawAnswer);
-  const correct = rule.accepted.some((answer) => normalize(answer) === normalized);
+  const matchesAccepted = rule.accepted.some((answer) => normalize(answer) === normalized);
+  const correct =
+    matchesAccepted && hasRequiredIndentation(rawAnswer, rule.requiredIndentedLines);
 
   return {
     correct,
