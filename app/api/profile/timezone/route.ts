@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
+import { isSameOriginRequest } from "@/lib/request-security";
 
 function isValidTimeZone(value: string) {
   try {
@@ -12,6 +13,10 @@ function isValidTimeZone(value: string) {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Cross-site request blocked." }, { status: 403 });
+  }
+
   let payload: unknown;
 
   try {
