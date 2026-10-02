@@ -3,8 +3,12 @@ import { TopNav } from "@/components/top-nav";
 import { getLearningDashboard } from "@/lib/learning-dashboard";
 import { getAchievements } from "@/lib/achievements";
 
-function formatActivityDate(value: string) {
-  return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(new Date(value));
+function formatActivityDate(value: string, timeZone: string) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+    timeZone,
+  }).format(new Date(value));
 }
 
 export default async function ProgressPage() {
@@ -15,7 +19,14 @@ export default async function ProgressPage() {
 
   return (
     <div className="site-shell">
-      <TopNav stats={{ streak: dashboard.streak, totalXp: dashboard.totalXp, signedIn: dashboard.signedIn }} />
+      <TopNav
+        stats={{
+          streak: dashboard.streak,
+          totalXp: dashboard.totalXp,
+          signedIn: dashboard.signedIn,
+          timeZone: dashboard.timeZone,
+        }}
+      />
       <main className="progress-page">
         <section className="progress-hero">
           <div>
@@ -103,7 +114,7 @@ export default async function ProgressPage() {
               {dashboard.recentEvents.map((event, index) => (
                 <div className="activity-row" key={`${event.createdAt}-${index}`}>
                   <span className="activity-icon">✨</span>
-                  <div><strong>{event.lessonTitle}</strong><small>{formatActivityDate(event.createdAt)}</small></div>
+                  <div><strong>{event.lessonTitle}</strong><small>{formatActivityDate(event.createdAt, dashboard.timeZone)}</small></div>
                   <b>+{event.amount} XP</b>
                 </div>
               ))}
