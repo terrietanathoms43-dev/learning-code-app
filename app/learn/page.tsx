@@ -12,7 +12,7 @@ export default async function LearnPage() {
 
   return (
     <div className="site-shell learn-page">
-      <TopNav stats={{ streak: dashboard.streak, totalXp: dashboard.totalXp }} />
+      <TopNav stats={{ streak: dashboard.streak, totalXp: dashboard.totalXp, signedIn: dashboard.signedIn }} />
 
       <main className="learn-layout">
         <section className="trail-column">
