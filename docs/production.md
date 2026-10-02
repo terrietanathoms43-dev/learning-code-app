@@ -35,6 +35,18 @@ After Vercel gives the production URL, configure Supabase Auth:
 - **Redirect URL:** `https://<production-domain>/auth/callback`
 - Add the corresponding preview callback pattern only if preview authentication is required.
 
+## Auth launch requirements
+
+Before inviting real users:
+
+- Set the Supabase **Site URL** to `https://learning-code-app.vercel.app`.
+- Keep `https://learning-code-app.vercel.app/auth/callback` in the allowed redirect URLs.
+- In **Authentication > Providers > Email**, set the minimum password length to at least **8** so the backend matches the CodeTrail UI.
+- Configure a **custom SMTP provider** for reliable signup confirmation and password-recovery email delivery. Supabase's built-in mail service is rate-limited and is better suited to development/testing.
+- Test both a new-account confirmation email and the full **Forgot password → recovery email → new password → sign in** flow.
+- For a public signup form, enable Supabase Auth CAPTCHA and review the Auth rate limits before launch.
+- Supabase's leaked-password protection is recommended when available. The current CodeTrail Supabase organization is on the Free plan; Supabase currently limits leaked-password protection to Pro and above.
+
 ## 4. Readiness check
 
 After deployment, request:
