@@ -337,7 +337,16 @@ union all
 select id, 'functions', 'Functions', 'Build reusable blocks', 'lesson', '🛠️', 40, 9, 8, true from unit_row
 union all
 select id, 'mini-project', 'Mini Project', 'Build a tiny quiz game', 'project', '🚀', 100, 15, 9, false from unit_row
-on conflict (slug) do nothing;
+on conflict (slug) do update
+set unit_id = excluded.unit_id,
+    title = excluded.title,
+    subtitle = excluded.subtitle,
+    lesson_type = excluded.lesson_type,
+    icon = excluded.icon,
+    xp_reward = excluded.xp_reward,
+    duration_minutes = excluded.duration_minutes,
+    sort_order = excluded.sort_order,
+    is_published = excluded.is_published;
 
 insert into public.exercises (
   lesson_id, exercise_key, exercise_type, eyebrow, prompt, code_snippet, options, placeholder, hint, explanation, sort_order, is_published
