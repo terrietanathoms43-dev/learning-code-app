@@ -45,13 +45,57 @@ export async function POST(request: Request) {
   const admin = createAdminClient();
   const { data: lesson, error: lessonError } = await admin
     .from("lessons")
-    .select("id, slug, xp_reward")
+    .select("id, slug, xp_reward, unit_id, sort_order")
     .eq("slug", payload.lessonSlug)
     .eq("is_published", true)
     .maybeSingle();
 
   if (lessonError || !lesson) {
     return NextResponse.json({ error: "Lesson is not available." }, { status: 404 });
+  }
+
+  const { data: prerequisiteRows, error: prerequisiteError } = await admin
+    .from("lessons")
+    .select("id")
+    .eq("unit_id", lesson.unit_id)
+    .eq("is_published", true)
+    .lt("sort_order", lesson.sort_order);
+
+  if (prerequisiteError) {
+    return NextResponse.json(
+      { error: "Could not verify lesson prerequisites." },
+      { status: 500 },
+    );
+  }
+
+  const prerequisiteIds = (prerequisiteRows ?? []).map((row) => row.id);
+
+  if (prerequisiteIds.length) {
+    const { data: completedPrerequisites, error: completedPrerequisitesError } =
+      await admin
+        .from("user_lesson_progress")
+        .select("lesson_id")
+        .eq("user_id", userId)
+        .eq("status", "completed")
+        .in("lesson_id", prerequisiteIds);
+
+    if (completedPrerequisitesError) {
+      return NextResponse.json(
+        { error: "Could not verify lesson prerequisites." },
+        { status: 500 },
+      );
+    }
+
+    const completedPrerequisiteIds = new Set(
+      (completedPrerequisites ?? []).map((row) => row.lesson_id),
+    );
+
+    if (completedPrerequisiteIds.size < prerequisiteIds.length) {
+      return NextResponse.json(
+        { error: "Complete the earlier trail lessons before finishing this one." },
+        { status: 409 },
+      );
+    }
   }
 
   const { data: exerciseRows, error: exerciseError } = await admin
