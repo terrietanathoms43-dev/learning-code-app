@@ -88,6 +88,11 @@ export default function Home() {
             </div>
           </article>
         </section>
+
+        <footer className="site-footer">
+          <span>CodeTrail</span>
+          <Link href="/privacy">Privacy &amp; Data</Link>
+        </footer>
       </main>
     </div>
   );
