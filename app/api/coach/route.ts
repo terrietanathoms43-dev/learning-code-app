@@ -88,39 +88,31 @@ export async function POST(request: Request) {
   }
 
   const admin = createAdminClient();
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const dailyLimit = getDailyLimit();
 
-  const { count, error: countError } = await admin
-    .from("ai_tutor_events")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", userId)
-    .gte("created_at", since);
+  const { data: usageRows, error: usageError } = await admin.rpc(
+    "reserve_ai_tutor_usage",
+    {
+      p_user_id: userId,
+      p_lesson_slug: lesson.slug,
+      p_exercise_key: exercise.id,
+      p_mode: mode,
+      p_limit: dailyLimit,
+    },
+  );
 
-  if (countError) {
-    return NextResponse.json({ error: "Coach usage could not be checked." }, { status: 503 });
+  if (usageError) {
+    return NextResponse.json({ error: "Coach usage could not be reserved." }, { status: 503 });
   }
 
-  if ((count ?? 0) >= dailyLimit) {
+  const usageEvent =
+    Array.isArray(usageRows) && usageRows.length ? usageRows[0] : null;
+
+  if (!usageEvent) {
     return NextResponse.json(
       { error: "Daily AI Coach limit reached. Try again later." },
       { status: 429 },
     );
-  }
-
-  const { data: usageEvent, error: usageError } = await admin
-    .from("ai_tutor_events")
-    .insert({
-      user_id: userId,
-      lesson_slug: lesson.slug,
-      exercise_key: exercise.id,
-      mode,
-    })
-    .select("id")
-    .single();
-
-  if (usageError || !usageEvent) {
-    return NextResponse.json({ error: "Coach usage could not be reserved." }, { status: 503 });
   }
 
   const releaseUsage = async () => {
@@ -193,6 +185,6 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     reply,
-    remaining: Math.max(0, dailyLimit - (count ?? 0) - 1),
+    remaining: Math.max(0, Number(usageEvent.remaining ?? 0)),
   });
 }
