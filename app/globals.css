@@ -1474,3 +1474,260 @@ button { color: inherit; }
   .achievement-grid { grid-template-columns: 1fr; }
   .achievement-card { min-height: auto; }
 }
+
+
+.profile-chip {
+  min-height: 36px;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: white;
+  color: var(--ink);
+  font-size: .72rem;
+  font-weight: 850;
+  box-shadow: var(--shadow-soft);
+}
+
+.course-complete-banner {
+  margin: 20px 20px 0;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #d7f6e8;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(250,204,21,.14), transparent 13rem),
+    linear-gradient(135deg, #f2fff9, #ffffff);
+  box-shadow: var(--shadow-soft);
+}
+
+.course-complete-icon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: #fef3c7;
+  font-size: 1.8rem;
+}
+
+.course-complete-banner .eyebrow { color: var(--mint-dark); }
+.course-complete-banner h2 { margin: 3px 0 4px; font-size: 1.1rem; }
+.course-complete-banner p:not(.eyebrow) {
+  margin: 0;
+  color: var(--muted);
+  font-size: .77rem;
+  line-height: 1.5;
+}
+
+.course-finish {
+  background:
+    radial-gradient(circle at 20% 20%, rgba(91,82,232,.10), transparent 20rem),
+    radial-gradient(circle at 80% 75%, rgba(250,204,21,.13), transparent 22rem),
+    #fbfcff;
+}
+
+.profile-page {
+  width: min(1040px, calc(100% - 32px));
+  margin: 40px auto 80px;
+}
+
+.profile-hero {
+  padding: 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 94% 10%, rgba(34,211,238,.12), transparent 17rem),
+    radial-gradient(circle at 4% 95%, rgba(91,82,232,.10), transparent 19rem),
+    white;
+  box-shadow: var(--shadow-soft);
+}
+
+.profile-avatar {
+  width: 82px;
+  height: 82px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 27px;
+  background: linear-gradient(145deg, var(--indigo), #7c72ff);
+  color: white;
+  font-size: 2rem;
+  font-weight: 950;
+  box-shadow: 0 9px 0 #dcd9ff;
+}
+
+.profile-hero .eyebrow { color: var(--indigo); }
+.profile-hero h1 {
+  margin: 4px 0 5px;
+  font-size: clamp(2rem, 5vw, 3.7rem);
+  letter-spacing: -.05em;
+}
+.profile-hero p:not(.eyebrow) {
+  max-width: 620px;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.profile-stat-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 11px;
+}
+
+.profile-stat-grid article {
+  min-height: 124px;
+  padding: 17px;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.profile-stat-grid span { font-size: 1.2rem; }
+.profile-stat-grid strong { font-size: 1.45rem; letter-spacing: -.035em; }
+.profile-stat-grid small { color: var(--muted); font-size: .69rem; }
+
+.profile-layout {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: 1.35fr .65fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.profile-settings-card,
+.profile-info-card {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: white;
+  box-shadow: var(--shadow-soft);
+}
+
+.profile-settings-card .eyebrow,
+.profile-info-card .eyebrow { color: var(--indigo); }
+
+.profile-settings-card h2,
+.profile-info-card h2 { margin: 4px 0 7px; }
+
+.profile-help,
+.profile-info-card > p:not(.eyebrow) {
+  margin: 0;
+  color: var(--muted);
+  font-size: .8rem;
+  line-height: 1.5;
+}
+
+.profile-form {
+  margin-top: 22px;
+  display: grid;
+  gap: 20px;
+}
+
+.profile-form label,
+.profile-form fieldset {
+  display: grid;
+  gap: 8px;
+  color: #4f5874;
+  font-size: .78rem;
+  font-weight: 850;
+}
+
+.profile-form fieldset {
+  padding: 0;
+  border: 0;
+}
+
+.profile-form legend { margin-bottom: 8px; }
+
+.profile-form input {
+  min-height: 52px;
+  padding: 0 14px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  outline: none;
+  font-size: 1rem;
+}
+
+.profile-form input:focus {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 4px var(--indigo-soft);
+}
+
+.goal-options {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.goal-options button {
+  min-height: 72px;
+  padding: 10px 8px;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #f9fafc;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.goal-options button.is-selected {
+  border-color: var(--indigo);
+  background: var(--indigo-soft);
+  box-shadow: inset 0 0 0 1px var(--indigo);
+}
+
+.goal-options strong { font-size: .78rem; }
+.goal-options span { color: var(--muted); font-size: .63rem; }
+
+.profile-actions {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.profile-timezone {
+  margin-top: 18px;
+  padding: 14px;
+  display: grid;
+  gap: 3px;
+  border-radius: 15px;
+  background: #f7f8fc;
+}
+
+.profile-timezone span { color: var(--muted); font-size: .67rem; }
+.profile-timezone strong { word-break: break-word; font-size: .83rem; }
+
+@media (max-width: 800px) {
+  .course-complete-banner { grid-template-columns: auto 1fr; }
+  .course-complete-banner .secondary-button { grid-column: 1 / -1; }
+  .profile-stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .profile-layout { grid-template-columns: 1fr; }
+  .goal-options { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 540px) {
+  .profile-chip { padding-inline: 9px; }
+  .course-complete-banner { margin-inline: 14px; }
+  .profile-page { width: min(100% - 22px, 1040px); margin-top: 22px; }
+  .profile-hero { align-items: flex-start; padding: 22px 18px; }
+  .profile-avatar { width: 62px; height: 62px; border-radius: 20px; font-size: 1.5rem; }
+  .profile-stat-grid { grid-template-columns: 1fr 1fr; }
+  .goal-options { grid-template-columns: repeat(2, 1fr); }
+}
