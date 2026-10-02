@@ -27,6 +27,7 @@ export function TopNav({ stats }: TopNavProps) {
         <Link href="/learn">Learn</Link>
         <Link href="/practice">Practice</Link>
         <Link href="/progress">Progress</Link>
+        {stats?.signedIn ? <Link href="/profile">Profile</Link> : <Link href="/login">Sign in</Link>}
       </nav>
 
       <div className="top-stats" aria-label="Learning stats">
