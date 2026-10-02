@@ -99,23 +99,30 @@ export async function POST(request: Request) {
 
   const { data: existingProgress } = await admin
     .from("user_lesson_progress")
-    .select("status, best_score")
+    .select("status, best_score, attempts, started_at, completed_at")
     .eq("user_id", userId)
     .eq("lesson_id", lesson.id)
     .maybeSingle();
 
   const alreadyCompleted = existingProgress?.status === "completed";
   const bestScore = Math.max(Number(existingProgress?.best_score || 0), accuracy);
+  const storedAttempts = Math.max(
+    Number(existingProgress?.attempts || 0),
+    attemptRows.length,
+  );
+  const startedAt =
+    existingProgress?.started_at ?? attemptRows[0]?.attempted_at ?? completedAt;
+  const firstCompletedAt = existingProgress?.completed_at ?? completedAt;
 
   const { error: progressError } = await admin.from("user_lesson_progress").upsert(
     {
       user_id: userId,
       lesson_id: lesson.id,
       status: "completed",
-      attempts: attemptRows.length,
+      attempts: storedAttempts,
       best_score: bestScore,
-      started_at: attemptRows[0]?.attempted_at ?? completedAt,
-      completed_at: completedAt,
+      started_at: startedAt,
+      completed_at: firstCompletedAt,
       updated_at: completedAt,
     },
     { onConflict: "user_id,lesson_id" },
