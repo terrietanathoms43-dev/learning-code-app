@@ -21,6 +21,7 @@ export type LearningDashboard = {
   progressPercent: number;
   completedLessonSlugs: string[];
   recentEvents: DashboardEvent[];
+  timeZone: string;
 };
 
 const implementedSet = new Set(implementedLessonSlugs);
@@ -57,6 +58,7 @@ function guestDashboard(): LearningDashboard {
     progressPercent: 0,
     completedLessonSlugs: [],
     recentEvents: [],
+    timeZone: "UTC",
   };
 }
 
@@ -189,6 +191,7 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
       progressPercent:
         totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0,
       completedLessonSlugs: [...completedSlugs],
+      timeZone,
       recentEvents: xpRows.slice(0, 10).map((event) => ({
         amount: Number(event.amount || 0),
         createdAt: event.created_at,
