@@ -336,7 +336,7 @@ select id, 'loops', 'Loops', 'Repeat without repeating yourself', 'lesson', '�
 union all
 select id, 'functions', 'Functions', 'Build reusable blocks', 'lesson', '🛠️', 40, 9, 8, true from unit_row
 union all
-select id, 'mini-project', 'Mini Project', 'Build a tiny quiz game', 'project', '🚀', 100, 15, 9, false from unit_row
+select id, 'mini-project', 'Mini Project', 'Build a tiny quiz game', 'project', '🚀', 100, 12, 9, true from unit_row
 on conflict (slug) do update
 set unit_id = excluded.unit_id,
     title = excluded.title,
@@ -754,6 +754,114 @@ select l.id, 'function-code', 'code', 'Write code',
 from public.lessons l where l.slug = 'functions'
 on conflict (exercise_key) do nothing;
 
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, options, hint, explanation, sort_order, is_published
+)
+select l.id, 'project-score-start', 'choice', 'Project setup',
+  'Which line correctly starts the player''s score at zero?',
+  '["score = 0","0 = score","score == 0","score = \"zero\""]'::jsonb,
+  'Use a normal variable assignment.',
+  'The score variable should start at the integer value 0.',
+  1, true
+from public.lessons l where l.slug = 'mini-project'
+on conflict (exercise_key) do update
+set lesson_id = excluded.lesson_id,
+    exercise_type = excluded.exercise_type,
+    eyebrow = excluded.eyebrow,
+    prompt = excluded.prompt,
+    options = excluded.options,
+    hint = excluded.hint,
+    explanation = excluded.explanation,
+    sort_order = excluded.sort_order,
+    is_published = excluded.is_published;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, placeholder, hint, explanation, sort_order, is_published
+)
+select l.id, 'project-check-function', 'code', 'Build the checker',
+  'Write a function named check_answer that returns True when answer equals Python, otherwise False.',
+  E'def check_answer(answer):\n    if answer == "Python":\n        return True\n    return False',
+  'Combine a function, condition and boolean returns.',
+  'The function checks the answer string and returns a boolean result.',
+  2, true
+from public.lessons l where l.slug = 'mini-project'
+on conflict (exercise_key) do update
+set lesson_id = excluded.lesson_id,
+    exercise_type = excluded.exercise_type,
+    eyebrow = excluded.eyebrow,
+    prompt = excluded.prompt,
+    placeholder = excluded.placeholder,
+    hint = excluded.hint,
+    explanation = excluded.explanation,
+    sort_order = excluded.sort_order,
+    is_published = excluded.is_published;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, code_snippet, options, hint, explanation, sort_order, is_published
+)
+select l.id, 'project-rounds', 'choice', 'Add rounds',
+  'Which values will this loop display?',
+  E'for round_number in range(1, 4):\n    print(round_number)',
+  '["1, 2, 3","0, 1, 2","1, 2, 3, 4","4"]'::jsonb,
+  'range stops before its final value.',
+  'range(1, 4) produces 1, 2 and 3.',
+  3, true
+from public.lessons l where l.slug = 'mini-project'
+on conflict (exercise_key) do update
+set lesson_id = excluded.lesson_id,
+    exercise_type = excluded.exercise_type,
+    eyebrow = excluded.eyebrow,
+    prompt = excluded.prompt,
+    code_snippet = excluded.code_snippet,
+    options = excluded.options,
+    hint = excluded.hint,
+    explanation = excluded.explanation,
+    sort_order = excluded.sort_order,
+    is_published = excluded.is_published;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, placeholder, hint, explanation, sort_order, is_published
+)
+select l.id, 'project-score-update', 'code', 'Update the score',
+  'If check_answer returns True, add 1 to score.',
+  E'if check_answer("Python"):\n    score = score + 1',
+  'Use an if block and update score inside it.',
+  'When the checker returns True, the indented score update runs.',
+  4, true
+from public.lessons l where l.slug = 'mini-project'
+on conflict (exercise_key) do update
+set lesson_id = excluded.lesson_id,
+    exercise_type = excluded.exercise_type,
+    eyebrow = excluded.eyebrow,
+    prompt = excluded.prompt,
+    placeholder = excluded.placeholder,
+    hint = excluded.hint,
+    explanation = excluded.explanation,
+    sort_order = excluded.sort_order,
+    is_published = excluded.is_published;
+
+insert into public.exercises (
+  lesson_id, exercise_key, exercise_type, eyebrow, prompt, placeholder, hint, explanation, sort_order, is_published
+)
+select l.id, 'project-final-output', 'code', 'Finish the project',
+  'Print the final score using the score variable.',
+  'print(score)',
+  'Use the same output function from your first lesson.',
+  'print(score) displays the current value stored in score.',
+  5, true
+from public.lessons l where l.slug = 'mini-project'
+on conflict (exercise_key) do update
+set lesson_id = excluded.lesson_id,
+    exercise_type = excluded.exercise_type,
+    eyebrow = excluded.eyebrow,
+    prompt = excluded.prompt,
+    placeholder = excluded.placeholder,
+    hint = excluded.hint,
+    explanation = excluded.explanation,
+    sort_order = excluded.sort_order,
+    is_published = excluded.is_published;
+
 insert into private.exercise_answers (
   exercise_id, accepted_answers, correct_feedback, incorrect_feedback
 )
@@ -791,6 +899,11 @@ select e.id,
     when 'function-parameter-output' then '["Maya"]'::jsonb
     when 'function-return' then '["return"]'::jsonb
     when 'function-code' then '["def square(number):\n    return number * number"]'::jsonb
+    when 'project-score-start' then '["score = 0"]'::jsonb
+    when 'project-check-function' then '["def check_answer(answer):\n    if answer == \"Python\":\n        return True\n    return False"]'::jsonb
+    when 'project-rounds' then '["1, 2, 3"]'::jsonb
+    when 'project-score-update' then '["if check_answer(\"Python\"):\n    score = score + 1"]'::jsonb
+    when 'project-final-output' then '["print(score)"]'::jsonb
   end,
   case
     when e.exercise_key like 'hello-%' then 'Correct — you are getting the hang of Python output.'
@@ -833,6 +946,14 @@ where e.exercise_key in (
   'function-def',
   'function-parameter-output',
   'function-return',
-  'function-code'
+  'function-code',
+  'project-score-start',
+  'project-check-function',
+  'project-rounds',
+  'project-score-update',
+  'project-final-output'
 )
-on conflict (exercise_id) do nothing;
+on conflict (exercise_id) do update
+set accepted_answers = excluded.accepted_answers,
+    correct_feedback = excluded.correct_feedback,
+    incorrect_feedback = excluded.incorrect_feedback;
