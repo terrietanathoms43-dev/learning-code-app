@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
+import { isSameOriginRequest } from "@/lib/request-security";
 
 const allowedGoals = new Set([20, 30, 50, 75, 100]);
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Cross-site request blocked." }, { status: 403 });
+  }
+
   let payload: unknown;
 
   try {
