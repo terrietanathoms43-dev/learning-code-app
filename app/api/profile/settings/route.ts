@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 
 const allowedGoals = new Set([20, 30, 50, 75, 100]);
 
@@ -62,8 +63,29 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Could not save profile settings." }, { status: 500 });
   }
 
-  if (!data) {
-    return NextResponse.json({ error: "Your learner profile is not ready yet." }, { status: 409 });
+  if (data) {
+    return NextResponse.json({ saved: true });
+  }
+
+  if (!isAdminSupabaseConfigured) {
+    return NextResponse.json(
+      { error: "Your learner profile is not ready yet." },
+      { status: 409 },
+    );
+  }
+
+  const admin = createAdminClient();
+  const { error: createError } = await admin.from("profiles").upsert(
+    {
+      id: userId,
+      display_name: displayName,
+      daily_goal_xp: dailyGoalXp,
+    },
+    { onConflict: "id" },
+  );
+
+  if (createError) {
+    return NextResponse.json({ error: "Could not create learner profile." }, { status: 500 });
   }
 
   return NextResponse.json({ saved: true });
