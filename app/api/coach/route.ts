@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getLesson } from "@/lib/course-data";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { isSameOriginRequest } from "@/lib/request-security";
 
 type CoachMode = "hint" | "explain" | "example";
 
@@ -62,6 +63,10 @@ async function isFlaggedByModeration(input: string) {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Cross-site request blocked." }, { status: 403 });
+  }
+
   if (!process.env.OPENAI_API_KEY || !isAdminSupabaseConfigured) {
     return NextResponse.json(
       { error: "AI Code Coach is not configured yet." },
