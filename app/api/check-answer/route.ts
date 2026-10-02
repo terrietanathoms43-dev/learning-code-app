@@ -3,6 +3,7 @@ import { checkAnswer } from "@/lib/answer-key";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isUuidV4 } from "@/lib/validation";
+import { isSameOriginRequest } from "@/lib/request-security";
 
 async function recordAttempt(exerciseKey: string, isCorrect: boolean, sessionId: string) {
   if (!isAdminSupabaseConfigured) return;
@@ -40,6 +41,10 @@ async function recordAttempt(exerciseKey: string, isCorrect: boolean, sessionId:
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Cross-site request blocked." }, { status: 403 });
+  }
+
   let payload: unknown;
 
   try {
