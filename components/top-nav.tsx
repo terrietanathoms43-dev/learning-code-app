@@ -1,15 +1,19 @@
 import Link from "next/link";
+import { TimezoneSync } from "@/components/timezone-sync";
 
 type TopNavProps = {
   stats?: {
     streak: number;
     totalXp: number;
+    signedIn?: boolean;
   };
 };
 
 export function TopNav({ stats }: TopNavProps) {
   return (
-    <header className="topbar">
+    <>
+      <TimezoneSync enabled={Boolean(stats?.signedIn)} />
+      <header className="topbar">
       <Link className="brand" href="/">
         <span className="brand-mark" aria-hidden="true">&lt;/&gt;</span>
         <span>CodeTrail</span>
@@ -26,6 +30,7 @@ export function TopNav({ stats }: TopNavProps) {
         <span className="stat-chip">⚡ <strong>5/5</strong></span>
         <span className="stat-chip">⭐ <strong>{stats?.totalXp ?? 0} XP</strong></span>
       </div>
-    </header>
+      </header>
+    </>
   );
 }
