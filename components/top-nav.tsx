@@ -6,13 +6,17 @@ type TopNavProps = {
     streak: number;
     totalXp: number;
     signedIn?: boolean;
+    timeZone?: string;
   };
 };
 
 export function TopNav({ stats }: TopNavProps) {
   return (
     <>
-      <TimezoneSync enabled={Boolean(stats?.signedIn)} />
+      <TimezoneSync
+        enabled={Boolean(stats?.signedIn)}
+        currentTimeZone={stats?.timeZone ?? "UTC"}
+      />
       <header className="topbar">
       <Link className="brand" href="/">
         <span className="brand-mark" aria-hidden="true">&lt;/&gt;</span>
