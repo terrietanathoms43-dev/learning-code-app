@@ -3,8 +3,13 @@ import { implementedLessonSlugs } from "@/lib/course-data";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isUuidV4 } from "@/lib/validation";
+import { isSameOriginRequest } from "@/lib/request-security";
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Cross-site request blocked." }, { status: 403 });
+  }
+
   if (!isAdminSupabaseConfigured) {
     return NextResponse.json(
       { error: "Cloud progress saving is not configured yet." },
