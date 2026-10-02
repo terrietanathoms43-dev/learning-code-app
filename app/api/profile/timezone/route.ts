@@ -42,30 +42,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .update({ time_zone: payload.timeZone })
-    .eq("id", userId)
-    .select("id")
-    .maybeSingle();
-
-  if (error) {
-    return NextResponse.json({ error: "Could not save timezone." }, { status: 500 });
-  }
-
-  if (data) {
-    return NextResponse.json({ saved: true });
-  }
-
   if (!isAdminSupabaseConfigured) {
     return NextResponse.json(
-      { error: "Your learner profile is not ready yet." },
-      { status: 409 },
+      { error: "Timezone saving is temporarily unavailable." },
+      { status: 503 },
     );
   }
 
   const admin = createAdminClient();
-  const { error: createError } = await admin.from("profiles").upsert(
+  const { error: saveError } = await admin.from("profiles").upsert(
     {
       id: userId,
       time_zone: payload.timeZone,
@@ -73,8 +58,8 @@ export async function POST(request: Request) {
     { onConflict: "id" },
   );
 
-  if (createError) {
-    return NextResponse.json({ error: "Could not create learner profile." }, { status: 500 });
+  if (saveError) {
+    return NextResponse.json({ error: "Could not save timezone." }, { status: 500 });
   }
 
   return NextResponse.json({ saved: true });
