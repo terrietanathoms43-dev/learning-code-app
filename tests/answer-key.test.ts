@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { checkAnswer } from "../lib/answer-key.ts";
 import { isUuidV4 } from "../lib/validation.ts";
+import { isSameOriginRequest } from "../lib/request-security.ts";
 
 test("accepts normal spacing variants without merging Python tokens", () => {
   assert.equal(checkAnswer("variable-create", "score=10")?.correct, true);
@@ -43,4 +44,23 @@ test("only accepts RFC-style version 4 lesson session UUIDs", () => {
   assert.equal(isUuidV4("550e8400-e29b-41d4-a716-446655440000"), true);
   assert.equal(isUuidV4("550e8400-e29b-11d4-a716-446655440000"), false);
   assert.equal(isUuidV4("not-a-session-id"), false);
+});
+
+
+test("same-origin mutation guard rejects cross-site browser requests", () => {
+  const sameOrigin = new Request("https://codetrail.example/api/profile/settings", {
+    method: "POST",
+    headers: { origin: "https://codetrail.example" },
+  });
+  const crossSite = new Request("https://codetrail.example/api/profile/settings", {
+    method: "POST",
+    headers: { origin: "https://evil.example" },
+  });
+  const serverToServer = new Request("https://codetrail.example/api/profile/settings", {
+    method: "POST",
+  });
+
+  assert.equal(isSameOriginRequest(sameOrigin), true);
+  assert.equal(isSameOriginRequest(crossSite), false);
+  assert.equal(isSameOriginRequest(serverToServer), true);
 });
