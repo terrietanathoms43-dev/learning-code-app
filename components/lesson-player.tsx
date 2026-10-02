@@ -54,7 +54,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [energy, setEnergy] = useState(5);
   const [mistakes, setMistakes] = useState(0);
   const [completion, setCompletion] = useState<CompletionState | null>(null);
-  const [sessionId] = useState(() => crypto.randomUUID());
+  const [sessionId, setSessionId] = useState(() => crypto.randomUUID());
   const [coachLoading, setCoachLoading] = useState<CoachMode | null>(null);
   const [coachReply, setCoachReply] = useState("");
   const [coachError, setCoachError] = useState("");
@@ -69,8 +69,27 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     (lesson.exercises.length / Math.max(lesson.exercises.length + mistakes, 1)) * 100,
   );
 
+  const outOfEnergy = energy <= 0 && !feedback?.correct;
+
+  function restartLesson() {
+    setIndex(0);
+    setAnswer("");
+    setFeedback(null);
+    setChecking(false);
+    setSaving(false);
+    setFinished(false);
+    setEnergy(5);
+    setMistakes(0);
+    setCompletion(null);
+    setSessionId(crypto.randomUUID());
+    setCoachLoading(null);
+    setCoachReply("");
+    setCoachError("");
+    setCoachRemaining(null);
+  }
+
   async function check() {
-    if (!exercise || !answer.trim() || checking) return;
+    if (!exercise || !answer.trim() || checking || outOfEnergy) return;
     setChecking(true);
 
     try {
@@ -377,8 +396,18 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         <div className="feedback-copy" aria-live="polite">
           {feedback ? (
             <>
-              <strong>{feedback.correct ? "Nice work!" : "Try once more"}</strong>
-              <span>{feedback.feedback}</span>
+              <strong>
+                {feedback.correct
+                  ? "Nice work!"
+                  : outOfEnergy
+                    ? "Practice energy empty"
+                    : "Try once more"}
+              </strong>
+              <span>
+                {outOfEnergy
+                  ? "Restart this lesson to refill your 5 practice energy."
+                  : feedback.feedback}
+              </span>
             </>
           ) : (
             <>
@@ -391,6 +420,10 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         {feedback?.correct ? (
           <button className="primary-button" type="button" onClick={next} disabled={saving}>
             {saving ? "Saving…" : index === lesson.exercises.length - 1 ? "Finish lesson" : "Continue"}
+          </button>
+        ) : outOfEnergy ? (
+          <button className="primary-button" type="button" onClick={restartLesson}>
+            Restart lesson
           </button>
         ) : (
           <button
