@@ -169,12 +169,12 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
     const totalLessons = availableSlugs.size;
     const completedLessons = [...completedSlugs].filter((slug) => availableSlugs.has(slug)).length;
     const totalXp = xpRows.reduce((sum, event) => sum + Number(event.amount || 0), 0);
+    const dailyGoalXp = Number(profile?.daily_goal_xp || 50);
+    const timeZone = profile?.time_zone || "UTC";
     const today = dayKey(new Date(), timeZone);
     const todayXp = xpRows
       .filter((event) => dayKey(event.created_at, timeZone) === today)
       .reduce((sum, event) => sum + Number(event.amount || 0), 0);
-    const dailyGoalXp = Number(profile?.daily_goal_xp || 50);
-    const timeZone = profile?.time_zone || "UTC";
 
     return {
       signedIn: true,
