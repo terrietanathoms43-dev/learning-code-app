@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { TopNav } from "@/components/top-nav";
 import { getLearningDashboard } from "@/lib/learning-dashboard";
+import { getAchievements } from "@/lib/achievements";
 
 function formatActivityDate(value: string) {
   return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(new Date(value));
@@ -9,6 +10,8 @@ function formatActivityDate(value: string) {
 export default async function ProgressPage() {
   const dashboard = await getLearningDashboard();
   const dailyPercent = Math.min(100, Math.round((dashboard.todayXp / Math.max(dashboard.dailyGoalXp, 1)) * 100));
+  const achievements = getAchievements(dashboard);
+  const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length;
 
   return (
     <div className="site-shell">
@@ -49,6 +52,46 @@ export default async function ProgressPage() {
             <div className="big-progress-track daily"><span style={{ width: `${dailyPercent}%` }} /></div>
             <p>Your current daily target is {dashboard.dailyGoalXp} XP.</p>
           </article>
+        </section>
+
+
+        <section className="achievement-panel">
+          <div className="progress-panel-heading">
+            <div>
+              <p className="eyebrow">Achievements</p>
+              <h2>{unlockedAchievements} of {achievements.length} badges unlocked</h2>
+            </div>
+            <span className="achievement-count">🏅</span>
+          </div>
+
+          <div className="achievement-grid">
+            {achievements.map((achievement) => {
+              const percent = Math.round(
+                (achievement.progress / Math.max(achievement.target, 1)) * 100,
+              );
+
+              return (
+                <article
+                  className={`achievement-card ${achievement.unlocked ? "is-unlocked" : ""}`}
+                  key={achievement.id}
+                >
+                  <span className="achievement-icon">{achievement.icon}</span>
+                  <div>
+                    <strong>{achievement.title}</strong>
+                    <p>{achievement.description}</p>
+                  </div>
+                  <div className="achievement-progress" aria-label={`${achievement.title} ${percent}%`}>
+                    <span style={{ width: `${Math.min(percent, 100)}%` }} />
+                  </div>
+                  <small>
+                    {achievement.unlocked
+                      ? "Unlocked"
+                      : `${achievement.progress} / ${achievement.target}`}
+                  </small>
+                </article>
+              );
+            })}
+          </div>
         </section>
 
         <section className="activity-panel">
