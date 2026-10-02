@@ -12,9 +12,6 @@ export const metadata: Metadata = {
   },
   description:
     "Learn Python through short lessons, real coding challenges, progress tracking, and an AI Code Coach.",
-  alternates: {
-    canonical: "/",
-  },
   icons: {
     icon: "/mascot.svg",
   },
