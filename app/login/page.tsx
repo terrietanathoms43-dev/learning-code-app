@@ -102,6 +102,12 @@ export default function LoginPage() {
           <button className="primary-button primary-button--full" type="submit" disabled={busy}>
             {busy ? "Working…" : mode === "signup" ? "Create account" : "Sign in"}
           </button>
+
+          {mode === "signin" && (
+            <Link className="text-link" href="/forgot-password">
+              Forgot password?
+            </Link>
+          )}
         </form>
 
         <button
