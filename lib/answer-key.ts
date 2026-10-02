@@ -25,6 +25,66 @@ const rules: Record<string, AnswerRule> = {
   "checkpoint-type": { accepted: ["Float"], correctFeedback: "Correct. A decimal numeric value is a float.", incorrectFeedback: "The decimal point is the clue." },
   "checkpoint-operator": { accepted: ["7"], correctFeedback: "Correct. 10 minus 3 is 7.", incorrectFeedback: "Evaluate the subtraction normally." },
   "checkpoint-code": { accepted: ["score=12\nprint(score)"], correctFeedback: "Checkpoint cleared. You assigned a value and then used it.", incorrectFeedback: "Use two lines: first assign 12 to score, then print(score)." },
+  "condition-syntax": {
+    accepted: ["if score > 10:"],
+    correctFeedback: "Correct. Python conditions end the if line with a colon.",
+    incorrectFeedback: "Look for Python's if keyword and the colon at the end.",
+  },
+  "condition-output": {
+    accepted: ["Warm"],
+    correctFeedback: "Correct. 30 is greater than 25, so the indented print line runs.",
+    incorrectFeedback: "Check whether 30 makes the condition temperature > 25 true.",
+  },
+  "condition-else": {
+    accepted: ["else"],
+    correctFeedback: "Right. else handles the case where the if condition is false.",
+    incorrectFeedback: "Use the keyword that means otherwise.",
+  },
+  "condition-code": {
+    accepted: ['ifscore>=10:\nprint("Ready")', "ifscore>=10:\nprint('Ready')"],
+    correctFeedback: "Nice. Your condition includes the comparison, colon and indented action.",
+    incorrectFeedback: "Use if score >= 10: on the first line, then print Ready on the next line.",
+  },
+  "loop-range-output": {
+    accepted: ["0, 1, 2"],
+    correctFeedback: "Correct. range(3) starts at 0 and stops before 3.",
+    incorrectFeedback: "Remember that range(3) produces 0, 1 and 2.",
+  },
+  "loop-for-keyword": {
+    accepted: ["for"],
+    correctFeedback: "Correct. for repeats once for each item in the collection.",
+    incorrectFeedback: "Use Python's loop keyword for visiting each item.",
+  },
+  "loop-while-syntax": {
+    accepted: ["while lives > 0:"],
+    correctFeedback: "Correct. A while loop also ends its condition line with a colon.",
+    incorrectFeedback: "Look for the while keyword and a colon after the condition.",
+  },
+  "loop-code": {
+    accepted: ["fornumberinrange(1,4):\nprint(number)"],
+    correctFeedback: "Great. range(1, 4) produces 1, 2 and 3.",
+    incorrectFeedback: "Use range(1, 4), then print the loop variable on the next line.",
+  },
+  "function-def": {
+    accepted: ["def greet():"],
+    correctFeedback: "Correct. Python uses def, parentheses and a colon to define a function.",
+    incorrectFeedback: "Python function definitions begin with def and end the first line with a colon.",
+  },
+  "function-parameter-output": {
+    accepted: ["Maya"],
+    correctFeedback: "Correct. Maya is passed into the name parameter and then printed.",
+    incorrectFeedback: "Follow the value passed into greet and see what name becomes.",
+  },
+  "function-return": {
+    accepted: ["return"],
+    correctFeedback: "Correct. return sends a value back to the code that called the function.",
+    incorrectFeedback: "Use the keyword that gives a result back to the caller.",
+  },
+  "function-code": {
+    accepted: ["defsquare(number):\nreturnnumber*number"],
+    correctFeedback: "Excellent. The function accepts a number and returns its square.",
+    incorrectFeedback: "Define square(number), then return number * number on the next line.",
+  },
 };
 
 function normalize(value: string) {
