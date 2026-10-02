@@ -53,7 +53,6 @@ export async function POST(request: Request) {
     .update({
       display_name: displayName,
       daily_goal_xp: dailyGoalXp,
-      updated_at: new Date().toISOString(),
     })
     .eq("id", userId)
     .select("id")
