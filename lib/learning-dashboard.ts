@@ -60,19 +60,32 @@ function guestDashboard(): LearningDashboard {
   };
 }
 
-function dayKey(input: string | Date) {
-  return new Date(input).toISOString().slice(0, 10);
+function dayKey(input: string | Date, timeZone: string) {
+  const date = new Date(input);
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const parts = formatter.formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  return year && month && day ? `${year}-${month}-${day}` : date.toISOString().slice(0, 10);
 }
 
 function shiftDay(key: string, amount: number) {
-  const date = new Date(`${key}T00:00:00.000Z`);
+  const [year, month, day] = key.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
   date.setUTCDate(date.getUTCDate() + amount);
-  return dayKey(date);
+  return date.toISOString().slice(0, 10);
 }
 
-function calculateStreak(createdAtValues: string[]) {
-  const activeDays = new Set(createdAtValues.map(dayKey));
-  const today = dayKey(new Date());
+function calculateStreak(createdAtValues: string[], timeZone: string) {
+  const activeDays = new Set(createdAtValues.map((value) => dayKey(value, timeZone)));
+  const today = dayKey(new Date(), timeZone);
   const yesterday = shiftDay(today, -1);
   let cursor = activeDays.has(today) ? today : activeDays.has(yesterday) ? yesterday : null;
   let streak = 0;
@@ -121,7 +134,7 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
         .limit(365),
       supabase
         .from("profiles")
-        .select("display_name, daily_goal_xp")
+        .select("display_name, daily_goal_xp, time_zone")
         .eq("id", userId)
         .maybeSingle(),
     ]);
@@ -156,11 +169,12 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
     const totalLessons = availableSlugs.size;
     const completedLessons = [...completedSlugs].filter((slug) => availableSlugs.has(slug)).length;
     const totalXp = xpRows.reduce((sum, event) => sum + Number(event.amount || 0), 0);
-    const today = dayKey(new Date());
+    const today = dayKey(new Date(), timeZone);
     const todayXp = xpRows
-      .filter((event) => dayKey(event.created_at) === today)
+      .filter((event) => dayKey(event.created_at, timeZone) === today)
       .reduce((sum, event) => sum + Number(event.amount || 0), 0);
     const dailyGoalXp = Number(profile?.daily_goal_xp || 50);
+    const timeZone = profile?.time_zone || "UTC";
 
     return {
       signedIn: true,
@@ -168,7 +182,7 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
       nodes,
       totalXp,
       todayXp,
-      streak: calculateStreak(xpRows.map((event) => event.created_at)),
+      streak: calculateStreak(xpRows.map((event) => event.created_at), timeZone),
       dailyGoalXp,
       completedLessons,
       totalLessons,
