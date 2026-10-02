@@ -43,6 +43,36 @@ jobs:
 
           curl --fail --silent http://127.0.0.1:3000/ > /dev/null
           curl --fail --silent http://127.0.0.1:3000/learn > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/lesson/hello-world > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/forgot-password > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/reset-password > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/robots.txt > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/sitemap.xml > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/manifest.webmanifest > /dev/null
+
+          curl --fail --silent \
+            -H 'content-type: application/json' \
+            -d '{"exerciseId":"hello-print-choice","answer":"print(\"Hello, coder!\")","sessionId":"550e8400-e29b-41d4-a716-446655440000"}' \
+            http://127.0.0.1:3000/api/check-answer > /tmp/correct-answer.json
+          grep -q '"correct":true' /tmp/correct-answer.json
+
+          BAD_SESSION_STATUS=$(curl --silent --output /tmp/bad-session.json --write-out "%{http_code}" \
+            -H 'content-type: application/json' \
+            -d '{"exerciseId":"hello-print-choice","answer":"print(\"Hello, coder!\")","sessionId":"not-a-session"}' \
+            http://127.0.0.1:3000/api/check-answer)
+          test "$BAD_SESSION_STATUS" = "400"
+
+          COACH_STATUS=$(curl --silent --output /tmp/coach.json --write-out "%{http_code}" \
+            -H 'content-type: application/json' \
+            -d '{"lessonSlug":"hello-world","exerciseId":"hello-print-choice","mode":"hint"}' \
+            http://127.0.0.1:3000/api/coach)
+          test "$COACH_STATUS" = "503"
+
+          PROGRESS_STATUS=$(curl --silent --output /tmp/progress.json --write-out "%{http_code}" \
+            -H 'content-type: application/json' \
+            -d '{"lessonSlug":"hello-world","sessionId":"550e8400-e29b-41d4-a716-446655440000"}' \
+            http://127.0.0.1:3000/api/progress/complete)
+          test "$PROGRESS_STATUS" = "503"
 
           HEALTH_STATUS=$(curl --silent --output /tmp/health.json --write-out "%{http_code}" http://127.0.0.1:3000/api/health)
           test "$HEALTH_STATUS" = "503"
