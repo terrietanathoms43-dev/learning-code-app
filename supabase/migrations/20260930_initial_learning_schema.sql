@@ -259,6 +259,13 @@ create trigger on_auth_user_created
 after insert on auth.users
 for each row execute function private.handle_new_user();
 
+insert into public.profiles (id, display_name)
+select
+  u.id,
+  coalesce(nullif(u.raw_user_meta_data ->> 'display_name', ''), 'Coder')
+from auth.users u
+on conflict (id) do nothing;
+
 with new_course as (
   insert into public.courses (
     slug, title, description, language, accent, sort_order, is_published
