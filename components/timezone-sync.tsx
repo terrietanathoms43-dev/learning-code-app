@@ -3,17 +3,20 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export function TimezoneSync({ enabled }: { enabled: boolean }) {
+export function TimezoneSync({
+  enabled,
+  currentTimeZone,
+}: {
+  enabled: boolean;
+  currentTimeZone: string;
+}) {
   const router = useRouter();
 
   useEffect(() => {
     if (!enabled) return;
 
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    if (!timeZone) return;
-
-    const storageKey = `codetrail-timezone:${timeZone}`;
-    if (sessionStorage.getItem(storageKey)) return;
+    const browserTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (!browserTimeZone || browserTimeZone === currentTimeZone) return;
 
     let cancelled = false;
 
@@ -22,11 +25,10 @@ export function TimezoneSync({ enabled }: { enabled: boolean }) {
         const response = await fetch("/api/profile/timezone", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ timeZone }),
+          body: JSON.stringify({ timeZone: browserTimeZone }),
         });
 
         if (!cancelled && response.ok) {
-          sessionStorage.setItem(storageKey, "1");
           router.refresh();
         }
       } catch {
@@ -39,7 +41,7 @@ export function TimezoneSync({ enabled }: { enabled: boolean }) {
     return () => {
       cancelled = true;
     };
-  }, [enabled, router]);
+  }, [currentTimeZone, enabled, router]);
 
   return null;
 }
