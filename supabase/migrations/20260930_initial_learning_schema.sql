@@ -779,6 +779,18 @@ select e.id,
     when 'checkpoint-type' then '["Float"]'::jsonb
     when 'checkpoint-operator' then '["7"]'::jsonb
     when 'checkpoint-code' then '["score=12\nprint(score)"]'::jsonb
+    when 'condition-syntax' then '["if score > 10:"]'::jsonb
+    when 'condition-output' then '["Warm"]'::jsonb
+    when 'condition-else' then '["else"]'::jsonb
+    when 'condition-code' then '["if score >= 10:\n    print(\"Ready\")"]'::jsonb
+    when 'loop-range-output' then '["0, 1, 2"]'::jsonb
+    when 'loop-for-keyword' then '["for"]'::jsonb
+    when 'loop-while-syntax' then '["while lives > 0:"]'::jsonb
+    when 'loop-code' then '["for number in range(1, 4):\n    print(number)"]'::jsonb
+    when 'function-def' then '["def greet():"]'::jsonb
+    when 'function-parameter-output' then '["Maya"]'::jsonb
+    when 'function-return' then '["return"]'::jsonb
+    when 'function-code' then '["def square(number):\n    return number * number"]'::jsonb
   end,
   case
     when e.exercise_key like 'hello-%' then 'Correct — you are getting the hang of Python output.'
@@ -809,6 +821,18 @@ where e.exercise_key in (
   'checkpoint-variable',
   'checkpoint-type',
   'checkpoint-operator',
-  'checkpoint-code'
+  'checkpoint-code',
+  'condition-syntax',
+  'condition-output',
+  'condition-else',
+  'condition-code',
+  'loop-range-output',
+  'loop-for-keyword',
+  'loop-while-syntax',
+  'loop-code',
+  'function-def',
+  'function-parameter-output',
+  'function-return',
+  'function-code'
 )
 on conflict (exercise_id) do nothing;
