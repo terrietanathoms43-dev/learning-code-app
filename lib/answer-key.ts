@@ -2,7 +2,7 @@ type AnswerRule = {
   accepted: string[];
   correctFeedback: string;
   incorrectFeedback: string;
-  requiredIndentedLines?: number[];
+  indentPattern?: number[];
 };
 
 const rules: Record<string, AnswerRule> = {
@@ -43,7 +43,7 @@ const rules: Record<string, AnswerRule> = {
   },
   "condition-code": {
     accepted: ['ifscore>=10:\nprint("Ready")', "ifscore>=10:\nprint('Ready')"],
-    requiredIndentedLines: [1],
+    indentPattern: [0, 1],
     correctFeedback: "Nice. Your condition includes the comparison, colon and indented action.",
     incorrectFeedback: "Use if score >= 10: on the first line, then print Ready on the next line.",
   },
@@ -64,7 +64,7 @@ const rules: Record<string, AnswerRule> = {
   },
   "loop-code": {
     accepted: ["fornumberinrange(1,4):\nprint(number)"],
-    requiredIndentedLines: [1],
+    indentPattern: [0, 1],
     correctFeedback: "Great. range(1, 4) produces 1, 2 and 3.",
     incorrectFeedback: "Use range(1, 4), then print the loop variable on the next line.",
   },
@@ -85,7 +85,7 @@ const rules: Record<string, AnswerRule> = {
   },
   "function-code": {
     accepted: ["defsquare(number):\nreturnnumber*number"],
-    requiredIndentedLines: [1],
+    indentPattern: [0, 1],
     correctFeedback: "Excellent. The function accepts a number and returns its square.",
     incorrectFeedback: "Define square(number), then return number * number on the next line.",
   },
@@ -99,7 +99,7 @@ const rules: Record<string, AnswerRule> = {
       'defcheck_answer(answer):\nifanswer=="Python":\nreturnTrue\nreturnFalse',
       "defcheck_answer(answer):\nifanswer=='Python':\nreturnTrue\nreturnFalse",
     ],
-    requiredIndentedLines: [1, 2, 3],
+    indentPattern: [0, 1, 2, 1],
     correctFeedback: "Great. Your function checks the answer and returns a boolean result.",
     incorrectFeedback: "Define check_answer(answer), test whether answer equals Python, then return True or False with correct indentation.",
   },
@@ -113,7 +113,7 @@ const rules: Record<string, AnswerRule> = {
       'ifcheck_answer("Python"):\nscore=score+1',
       "ifcheck_answer('Python'):\nscore=score+1",
     ],
-    requiredIndentedLines: [1],
+    indentPattern: [0, 1],
     correctFeedback: "Nice. A correct answer now increases the score by one.",
     incorrectFeedback: "Check the function result with if, then indent score = score + 1.",
   },
@@ -128,11 +128,45 @@ function normalize(value: string) {
   return value.trim().replace(/\r\n/g, "\n").replace(/[ \t]+/g, "").replace(/;$/, "");
 }
 
-function hasRequiredIndentation(value: string, requiredLines: number[] = []) {
-  if (!requiredLines.length) return true;
+function indentationWidth(line: string) {
+  const indentation = line.match(/^[ \t]*/)?.[0] ?? "";
+  return [...indentation].reduce(
+    (width, character) => width + (character === "\t" ? 4 : 1),
+    0,
+  );
+}
+
+function hasValidIndentPattern(value: string, pattern: number[] = []) {
+  if (!pattern.length) return true;
 
   const lines = value.replace(/\r\n/g, "\n").trim().split("\n");
-  return requiredLines.every((lineIndex) => /^[ \t]+/.test(lines[lineIndex] ?? ""));
+  if (lines.length < pattern.length) return false;
+
+  const widthsByLevel = new Map<number, number>();
+
+  for (let index = 0; index < pattern.length; index += 1) {
+    const level = pattern[index];
+    const width = indentationWidth(lines[index] ?? "");
+
+    if (level === 0) {
+      if (width !== 0) return false;
+      widthsByLevel.set(0, 0);
+      continue;
+    }
+
+    const existingWidth = widthsByLevel.get(level);
+    if (existingWidth !== undefined) {
+      if (width !== existingWidth) return false;
+      continue;
+    }
+
+    const parentWidth = widthsByLevel.get(level - 1);
+    if (parentWidth === undefined || width <= parentWidth) return false;
+
+    widthsByLevel.set(level, width);
+  }
+
+  return true;
 }
 
 export function checkAnswer(exerciseId: string, rawAnswer: string) {
@@ -142,7 +176,7 @@ export function checkAnswer(exerciseId: string, rawAnswer: string) {
   const normalized = normalize(rawAnswer);
   const matchesAccepted = rule.accepted.some((answer) => normalize(answer) === normalized);
   const correct =
-    matchesAccepted && hasRequiredIndentation(rawAnswer, rule.requiredIndentedLines);
+    matchesAccepted && hasValidIndentPattern(rawAnswer, rule.indentPattern);
 
   return {
     correct,
