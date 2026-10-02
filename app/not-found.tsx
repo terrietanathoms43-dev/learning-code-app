@@ -5,9 +5,11 @@ export default function NotFound() {
     <main className="simple-state">
       <div className="simple-state-icon" aria-hidden="true">🧭</div>
       <p className="eyebrow">Wrong turn</p>
-      <h1>That lesson is not on the trail yet.</h1>
-      <p>Head back to the Python path and choose an unlocked node.</p>
-      <Link className="primary-button" href="/learn">Return to trail</Link>
+      <h1>That page isn&apos;t on the trail.</h1>
+      <p>The link may be outdated, or the page may have moved.</p>
+      <Link className="primary-button" href="/learn">
+        Return to the coding trail
+      </Link>
     </main>
   );
 }
