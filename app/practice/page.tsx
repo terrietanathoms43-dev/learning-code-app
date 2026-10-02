@@ -9,7 +9,7 @@ export default async function PracticePage() {
 
   return (
     <div className="site-shell">
-      <TopNav stats={{ streak: dashboard.streak, totalXp: dashboard.totalXp }} />
+      <TopNav stats={{ streak: dashboard.streak, totalXp: dashboard.totalXp, signedIn: dashboard.signedIn }} />
       <main className="practice-page">
         <section className="progress-hero">
           <div>
