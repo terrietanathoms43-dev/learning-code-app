@@ -42,7 +42,7 @@ const rules: Record<string, AnswerRule> = {
     incorrectFeedback: "Use the keyword that means otherwise.",
   },
   "condition-code": {
-    accepted: ['ifscore>=10:\nprint("Ready")', "ifscore>=10:\nprint('Ready')"],
+    accepted: ['if score >= 10:\nprint("Ready")', "if score >= 10:\nprint('Ready')"],
     indentPattern: [0, 1],
     correctFeedback: "Nice. Your condition includes the comparison, colon and indented action.",
     incorrectFeedback: "Use if score >= 10: on the first line, then print Ready on the next line.",
@@ -63,7 +63,7 @@ const rules: Record<string, AnswerRule> = {
     incorrectFeedback: "Look for the while keyword and a colon after the condition.",
   },
   "loop-code": {
-    accepted: ["fornumberinrange(1,4):\nprint(number)"],
+    accepted: ["for number in range(1, 4):\nprint(number)"],
     indentPattern: [0, 1],
     correctFeedback: "Great. range(1, 4) produces 1, 2 and 3.",
     incorrectFeedback: "Use range(1, 4), then print the loop variable on the next line.",
@@ -84,7 +84,7 @@ const rules: Record<string, AnswerRule> = {
     incorrectFeedback: "Use the keyword that gives a result back to the caller.",
   },
   "function-code": {
-    accepted: ["defsquare(number):\nreturnnumber*number"],
+    accepted: ["def square(number):\nreturn number * number"],
     indentPattern: [0, 1],
     correctFeedback: "Excellent. The function accepts a number and returns its square.",
     incorrectFeedback: "Define square(number), then return number * number on the next line.",
@@ -96,8 +96,8 @@ const rules: Record<string, AnswerRule> = {
   },
   "project-check-function": {
     accepted: [
-      'defcheck_answer(answer):\nifanswer=="Python":\nreturnTrue\nreturnFalse',
-      "defcheck_answer(answer):\nifanswer=='Python':\nreturnTrue\nreturnFalse",
+      'def check_answer(answer):\nif answer == "Python":\nreturn True\nreturn False',
+      "def check_answer(answer):\nif answer == 'Python':\nreturn True\nreturn False",
     ],
     indentPattern: [0, 1, 2, 1],
     correctFeedback: "Great. Your function checks the answer and returns a boolean result.",
@@ -110,8 +110,8 @@ const rules: Record<string, AnswerRule> = {
   },
   "project-score-update": {
     accepted: [
-      'ifcheck_answer("Python"):\nscore=score+1',
-      "ifcheck_answer('Python'):\nscore=score+1",
+      'if check_answer("Python"):\nscore = score + 1',
+      "if check_answer('Python'):\nscore = score + 1",
     ],
     indentPattern: [0, 1],
     correctFeedback: "Nice. A correct answer now increases the score by one.",
@@ -124,8 +124,69 @@ const rules: Record<string, AnswerRule> = {
   },
 };
 
+const punctuation = new Set(["(", ")", "[", "]", "{", "}", ":", ",", "=", ">", "<", "+", "-", "*", "/", "%"]);
+
+function normalizeCodeLine(line: string) {
+  const input = line.trim();
+  let result = "";
+  let quote: "'" | '"' | null = null;
+  let escaped = false;
+  let pendingSpace = false;
+
+  for (const character of input) {
+    if (quote) {
+      result += character;
+
+      if (escaped) {
+        escaped = false;
+      } else if (character === "\\") {
+        escaped = true;
+      } else if (character === quote) {
+        quote = null;
+      }
+
+      continue;
+    }
+
+    if (character === "'" || character === '"') {
+      if (pendingSpace && result && !punctuation.has(result.at(-1) ?? "")) {
+        result += " ";
+      }
+      pendingSpace = false;
+      quote = character;
+      result += character;
+      continue;
+    }
+
+    if (/\s/.test(character)) {
+      pendingSpace = true;
+      continue;
+    }
+
+    if (punctuation.has(character)) {
+      result = result.trimEnd();
+      result += character;
+      pendingSpace = false;
+      continue;
+    }
+
+    if (pendingSpace && result && !punctuation.has(result.at(-1) ?? "")) {
+      result += " ";
+    }
+
+    pendingSpace = false;
+    result += character;
+  }
+
+  return result.trim();
+}
+
 function normalize(value: string) {
-  return value.trim().replace(/\r\n/g, "\n").replace(/[ \t]+/g, "").replace(/;$/, "");
+  const normalized = value.trim().replace(/\r\n?/g, "\n").replace(/;$/, "");
+  return normalized
+    .split("\n")
+    .map((line) => normalizeCodeLine(line))
+    .join("\n");
 }
 
 function indentationWidth(line: string) {
