@@ -4,7 +4,7 @@ import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/adm
 import { createClient } from "@/lib/supabase/server";
 import { isUuidV4 } from "@/lib/validation";
 
-async function recordAttempt(exerciseKey: string, answer: string, isCorrect: boolean, sessionId: string) {
+async function recordAttempt(exerciseKey: string, isCorrect: boolean, sessionId: string) {
   if (!isAdminSupabaseConfigured) return;
 
   try {
@@ -30,7 +30,7 @@ async function recordAttempt(exerciseKey: string, answer: string, isCorrect: boo
     await admin.from("exercise_attempts").insert({
       user_id: userId,
       exercise_id: exercise.id,
-      submitted_answer: { value: answer },
+      submitted_answer: {},
       is_correct: isCorrect,
       session_id: sessionId,
     });
@@ -75,6 +75,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Exercise not found." }, { status: 404 });
   }
 
-  await recordAttempt(payload.exerciseId, payload.answer, result.correct, payload.sessionId);
+  await recordAttempt(payload.exerciseId, result.correct, payload.sessionId);
   return NextResponse.json(result);
 }
