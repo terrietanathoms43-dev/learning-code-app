@@ -59,6 +59,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [coachReply, setCoachReply] = useState("");
   const [coachError, setCoachError] = useState("");
   const [coachRemaining, setCoachRemaining] = useState<number | null>(null);
+  const [coachSource, setCoachSource] = useState<"ai" | "built-in" | null>(null);
+  const [coachNotice, setCoachNotice] = useState("");
 
   const exercise = lesson.exercises[index];
   const progress = useMemo(
@@ -86,6 +88,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     setCoachReply("");
     setCoachError("");
     setCoachRemaining(null);
+    setCoachSource(null);
+    setCoachNotice("");
   }
 
   async function check() {
@@ -128,6 +132,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
     setCoachLoading(mode);
     setCoachError("");
+    setCoachNotice("");
 
     try {
       const response = await fetch("/api/coach", {
@@ -143,7 +148,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
       const data = (await response.json()) as {
         reply?: string;
-        remaining?: number;
+        remaining?: number | null;
+        source?: "ai" | "built-in";
+        notice?: string;
         error?: string;
       };
 
@@ -153,6 +160,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       }
 
       setCoachReply(data.reply);
+      setCoachSource(data.source ?? "ai");
+      setCoachNotice(data.notice ?? "");
       setCoachRemaining(typeof data.remaining === "number" ? data.remaining : null);
     } catch {
       setCoachError("The AI Code Coach is unavailable right now.");
@@ -216,6 +225,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     setCoachReply("");
     setCoachError("");
     setCoachRemaining(null);
+    setCoachSource(null);
+    setCoachNotice("");
   }
 
   if (finished) {
@@ -385,9 +396,18 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
           {(coachReply || coachError) && (
             <div className={`coach-response ${coachError ? "is-error" : ""}`} aria-live="polite">
-              <strong>{coachError ? "Coach unavailable" : "Coach says"}</strong>
+              <strong>
+                {coachError
+                  ? "Coach unavailable"
+                  : coachSource === "built-in"
+                    ? "CodeTrail Coach"
+                    : "AI Coach says"}
+              </strong>
               <p>{coachError || coachReply}</p>
-              {!coachError && coachRemaining !== null && (
+              {!coachError && coachNotice && (
+                <small className="coach-source-note">{coachNotice}</small>
+              )}
+              {!coachError && coachSource === "ai" && coachRemaining !== null && (
                 <small>{coachRemaining} AI Coach requests left in your rolling daily limit.</small>
               )}
             </div>
