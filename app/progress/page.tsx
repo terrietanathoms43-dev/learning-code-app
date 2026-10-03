@@ -25,6 +25,7 @@ export default async function ProgressPage() {
           totalXp: dashboard.totalXp,
           signedIn: dashboard.signedIn,
           timeZone: dashboard.timeZone,
+          username: dashboard.username,
         }}
       />
       <main className="progress-page">
