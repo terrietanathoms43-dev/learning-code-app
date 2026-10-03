@@ -28,7 +28,7 @@ export default function PrivacyPage() {
             <p>
               Email sign-up, sign-in, confirmation, sessions, and password recovery are
               handled through Supabase Auth. CodeTrail stores a learner profile linked to
-              the account with your display name, daily XP goal, and timezone.
+              the account with your display name, optional unique username, daily XP goal, and timezone.
             </p>
           </section>
 
