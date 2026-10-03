@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getUsernameError } from "@/lib/profile-validation";
 
 const goalOptions = [20, 30, 50, 75, 100];
 
@@ -19,8 +20,69 @@ export function ProfileSettingsForm({
   const [username, setUsername] = useState(initialUsername ?? "");
   const [dailyGoalXp, setDailyGoalXp] = useState(initialDailyGoalXp);
   const [message, setMessage] = useState("");
+  const [usernameStatus, setUsernameStatus] = useState<
+    "idle" | "current" | "checking" | "available" | "taken" | "invalid" | "error"
+  >("idle");
   const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+
+  const normalizedInitialUsername = (initialUsername ?? "").toLowerCase();
+  const usernameError = useMemo(() => getUsernameError(username), [username]);
+  const usernameChanged = username !== normalizedInitialUsername;
+  const usernameSaveReady =
+    !username ||
+    !usernameChanged ||
+    (usernameStatus === "available" && !usernameError);
+
+  useEffect(() => {
+    if (!username) {
+      setUsernameStatus("idle");
+      return;
+    }
+
+    if (usernameError) {
+      setUsernameStatus("invalid");
+      return;
+    }
+
+    if (!usernameChanged) {
+      setUsernameStatus("current");
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = window.setTimeout(async () => {
+      setUsernameStatus("checking");
+
+      try {
+        const response = await fetch("/api/profile/username-availability", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ username }),
+          signal: controller.signal,
+        });
+        const data = (await response.json()) as {
+          available?: boolean;
+          error?: string;
+        };
+
+        if (!response.ok) {
+          setUsernameStatus(response.status === 400 ? "invalid" : "error");
+          return;
+        }
+
+        setUsernameStatus(data.available ? "available" : "taken");
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setUsernameStatus("error");
+      }
+    }, 350);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeout);
+    };
+  }, [username, usernameChanged, usernameError]);
 
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -123,6 +185,19 @@ export function ProfileSettingsForm({
           <small id="username-help" className="profile-field-help">
             3–20 characters. Lowercase letters, numbers, and underscores. Leave blank until you&apos;re ready to claim one.
           </small>
+          {username && (
+            <small
+              className={"username-status username-status--" + usernameStatus}
+              aria-live="polite"
+            >
+              {usernameStatus === "checking" && "Checking availability…"}
+              {usernameStatus === "available" && "@" + username + " is available."}
+              {usernameStatus === "taken" && "@" + username + " is already taken."}
+              {usernameStatus === "current" && "This is your current username."}
+              {usernameStatus === "invalid" && (usernameError || "Choose another username.")}
+              {usernameStatus === "error" && "Availability check is temporarily unavailable."}
+            </small>
+          )}
         </label>
 
         <fieldset>
@@ -154,7 +229,11 @@ export function ProfileSettingsForm({
         {message && <p className="form-message" aria-live="polite">{message}</p>}
 
         <div className="profile-actions">
-          <button className="primary-button" type="submit" disabled={saving}>
+          <button
+            className="primary-button"
+            type="submit"
+            disabled={saving || !usernameSaveReady || usernameStatus === "checking"}
+          >
             {saving ? "Saving…" : "Save settings"}
           </button>
           <button
