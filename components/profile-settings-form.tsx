@@ -20,40 +20,36 @@ export function ProfileSettingsForm({
   const [username, setUsername] = useState(initialUsername ?? "");
   const [dailyGoalXp, setDailyGoalXp] = useState(initialDailyGoalXp);
   const [message, setMessage] = useState("");
-  const [usernameStatus, setUsernameStatus] = useState<
-    "idle" | "current" | "checking" | "available" | "taken" | "invalid" | "error"
-  >("idle");
+  const [usernameAvailability, setUsernameAvailability] = useState<{
+    username: string;
+    status: "available" | "taken" | "error";
+  } | null>(null);
   const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
 
   const normalizedInitialUsername = (initialUsername ?? "").toLowerCase();
   const usernameError = useMemo(() => getUsernameError(username), [username]);
   const usernameChanged = username !== normalizedInitialUsername;
+  const usernameStatus =
+    !username
+      ? "idle"
+      : usernameError
+        ? "invalid"
+        : !usernameChanged
+          ? "current"
+          : usernameAvailability?.username === username
+            ? usernameAvailability.status
+            : "checking";
   const usernameSaveReady =
     !username ||
     !usernameChanged ||
-    (usernameStatus === "available" && !usernameError);
+    usernameStatus === "available";
 
   useEffect(() => {
-    if (!username) {
-      setUsernameStatus("idle");
-      return;
-    }
-
-    if (usernameError) {
-      setUsernameStatus("invalid");
-      return;
-    }
-
-    if (!usernameChanged) {
-      setUsernameStatus("current");
-      return;
-    }
+    if (!username || usernameError || !usernameChanged) return;
 
     const controller = new AbortController();
     const timeout = window.setTimeout(async () => {
-      setUsernameStatus("checking");
-
       try {
         const response = await fetch("/api/profile/username-availability", {
           method: "POST",
@@ -67,14 +63,17 @@ export function ProfileSettingsForm({
         };
 
         if (!response.ok) {
-          setUsernameStatus(response.status === 400 ? "invalid" : "error");
+          setUsernameAvailability({ username, status: "error" });
           return;
         }
 
-        setUsernameStatus(data.available ? "available" : "taken");
+        setUsernameAvailability({
+          username,
+          status: data.available ? "available" : "taken",
+        });
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
-        setUsernameStatus("error");
+        setUsernameAvailability({ username, status: "error" });
       }
     }, 350);
 
