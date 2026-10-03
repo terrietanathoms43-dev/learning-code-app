@@ -22,6 +22,7 @@ export default async function LearnPage() {
           totalXp: dashboard.totalXp,
           signedIn: dashboard.signedIn,
           timeZone: dashboard.timeZone,
+          username: dashboard.username,
         }}
       />
 
