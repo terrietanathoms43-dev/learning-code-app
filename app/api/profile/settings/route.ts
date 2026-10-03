@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { isSameOriginRequest } from "@/lib/request-security";
+import { getUsernameError, normalizeUsername } from "@/lib/profile-validation";
 
 const allowedGoals = new Set([20, 30, 50, 75, 100]);
 
@@ -22,14 +23,17 @@ export async function POST(request: Request) {
     !payload ||
     typeof payload !== "object" ||
     !("displayName" in payload) ||
+    !("username" in payload) ||
     !("dailyGoalXp" in payload) ||
     typeof payload.displayName !== "string" ||
+    typeof payload.username !== "string" ||
     typeof payload.dailyGoalXp !== "number"
   ) {
     return NextResponse.json({ error: "Profile settings are incomplete." }, { status: 400 });
   }
 
   const displayName = payload.displayName.trim();
+  const username = normalizeUsername(payload.username);
   const dailyGoalXp = payload.dailyGoalXp;
 
   if (displayName.length < 2 || displayName.length > 40) {
@@ -37,6 +41,11 @@ export async function POST(request: Request) {
       { error: "Display name must be between 2 and 40 characters." },
       { status: 400 },
     );
+  }
+
+  const usernameError = getUsernameError(username);
+  if (usernameError) {
+    return NextResponse.json({ error: usernameError }, { status: 400 });
   }
 
   if (!allowedGoals.has(dailyGoalXp)) {
@@ -66,14 +75,22 @@ export async function POST(request: Request) {
     {
       id: userId,
       display_name: displayName,
+      username: username || null,
       daily_goal_xp: dailyGoalXp,
     },
     { onConflict: "id" },
   );
 
   if (saveError) {
+    if (saveError.code === "23505") {
+      return NextResponse.json(
+        { error: "That username is already taken. Try another one." },
+        { status: 409 },
+      );
+    }
+
     return NextResponse.json({ error: "Could not save profile settings." }, { status: 500 });
   }
 
-  return NextResponse.json({ saved: true });
+  return NextResponse.json({ saved: true, username: username || null });
 }
