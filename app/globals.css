@@ -1935,3 +1935,60 @@ button { color: inherit; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+
+.app-loading {
+  min-height: 70vh;
+  display: grid;
+  place-items: center;
+  gap: 18px;
+  align-content: center;
+  padding: 28px 18px;
+}
+
+.loading-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: .95rem;
+}
+
+.loading-card {
+  width: min(360px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 28px 24px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: rgba(255,255,255,.92);
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+
+.loading-card > span {
+  color: var(--muted);
+  font-size: .76rem;
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 5px;
+  border: 3px solid #e8e9fb;
+  border-top-color: var(--indigo);
+  border-radius: 50%;
+  animation: codetrail-spin .75s linear infinite;
+}
+
+@keyframes codetrail-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation: none;
+    border-top-color: #e8e9fb;
+    background: var(--indigo-soft);
+  }
+}
