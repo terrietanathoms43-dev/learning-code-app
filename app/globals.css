@@ -1908,6 +1908,27 @@ button { color: inherit; }
   line-height: 1.45;
 }
 
+.username-status {
+  font-size: .68rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.username-status--available,
+.username-status--current {
+  color: var(--mint-dark);
+}
+
+.username-status--taken,
+.username-status--invalid {
+  color: #b42318;
+}
+
+.username-status--checking,
+.username-status--error {
+  color: var(--muted);
+}
+
 .profile-chip {
   max-width: 170px;
   overflow: hidden;
