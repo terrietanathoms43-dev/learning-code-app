@@ -18,6 +18,7 @@ export default async function ProfilePage() {
           totalXp: dashboard.totalXp,
           signedIn: dashboard.signedIn,
           timeZone: dashboard.timeZone,
+          username: dashboard.username,
         }}
       />
 
