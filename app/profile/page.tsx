@@ -29,6 +29,9 @@ export default async function ProfilePage() {
           <div>
             <p className="eyebrow">Learner profile</p>
             <h1>{dashboard.displayName}</h1>
+            <p className="profile-username">
+              {dashboard.username ? `@${dashboard.username}` : "Choose a unique username in your settings"}
+            </p>
             <p>
               Keep your goal realistic enough to return tomorrow, then raise it when the habit feels easy.
             </p>
@@ -61,6 +64,7 @@ export default async function ProfilePage() {
         <section className="profile-layout">
           <ProfileSettingsForm
             initialDisplayName={dashboard.displayName}
+            initialUsername={dashboard.username}
             initialDailyGoalXp={dashboard.dailyGoalXp}
           />
 
