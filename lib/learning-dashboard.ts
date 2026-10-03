@@ -11,6 +11,7 @@ export type DashboardEvent = {
 export type LearningDashboard = {
   signedIn: boolean;
   displayName: string;
+  username: string | null;
   nodes: PathNode[];
   totalXp: number;
   todayXp: number;
@@ -48,6 +49,7 @@ function guestDashboard(): LearningDashboard {
   return {
     signedIn: false,
     displayName: "Coder",
+    username: null,
     nodes: buildNodes(new Set<string>(), available),
     totalXp: 0,
     todayXp: 0,
@@ -98,7 +100,7 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
         .limit(10),
       supabase
         .from("profiles")
-        .select("display_name, daily_goal_xp, time_zone")
+        .select("display_name, username, daily_goal_xp, time_zone")
         .eq("id", userId)
         .maybeSingle(),
       supabase.rpc("get_learning_stats"),
@@ -148,6 +150,7 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
     return {
       signedIn: true,
       displayName: profile?.display_name || "Coder",
+      username: profile?.username || null,
       nodes,
       totalXp,
       todayXp,
