@@ -1856,3 +1856,61 @@ button { color: inherit; }
     display: grid;
   }
 }
+
+
+.profile-username {
+  margin: -1px 0 7px !important;
+  color: var(--indigo-dark) !important;
+  font-size: .86rem;
+  font-weight: 850;
+}
+
+.username-input-wrap {
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: white;
+  overflow: hidden;
+}
+
+.username-input-wrap:focus-within {
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 4px var(--indigo-soft);
+}
+
+.username-input-wrap > span {
+  padding-left: 14px;
+  color: var(--muted);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.profile-form .username-input-wrap input {
+  min-height: 48px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding-left: 4px;
+}
+
+.profile-form .username-input-wrap input:focus {
+  border: 0;
+  box-shadow: none;
+}
+
+.profile-field-help {
+  color: var(--muted);
+  font-size: .67rem;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.profile-chip {
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
