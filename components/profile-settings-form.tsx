@@ -7,13 +7,16 @@ const goalOptions = [20, 30, 50, 75, 100];
 
 export function ProfileSettingsForm({
   initialDisplayName,
+  initialUsername,
   initialDailyGoalXp,
 }: {
   initialDisplayName: string;
+  initialUsername: string | null;
   initialDailyGoalXp: number;
 }) {
   const router = useRouter();
   const [displayName, setDisplayName] = useState(initialDisplayName);
+  const [username, setUsername] = useState(initialUsername ?? "");
   const [dailyGoalXp, setDailyGoalXp] = useState(initialDailyGoalXp);
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
@@ -28,15 +31,22 @@ export function ProfileSettingsForm({
       const response = await fetch("/api/profile/settings", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ displayName, dailyGoalXp }),
+        body: JSON.stringify({ displayName, username, dailyGoalXp }),
       });
-      const data = (await response.json()) as { saved?: boolean; error?: string };
+      const data = (await response.json()) as {
+        saved?: boolean;
+        username?: string | null;
+        error?: string;
+      };
 
       if (!response.ok || !data.saved) {
         setMessage(data.error || "Your settings could not be saved.");
         return;
       }
 
+      if (data.username !== undefined) {
+        setUsername(data.username ?? "");
+      }
       setMessage("Profile updated.");
       router.refresh();
     } catch {
@@ -72,7 +82,7 @@ export function ProfileSettingsForm({
         <p className="eyebrow">Learner settings</p>
         <h2>Make CodeTrail yours</h2>
         <p className="profile-help">
-          Your display name appears in the learning trail. Your XP target controls the daily goal ring.
+          Your display name is the friendly name people see. Your username is your unique CodeTrail handle.
         </p>
       </div>
 
@@ -87,6 +97,32 @@ export function ProfileSettingsForm({
             autoComplete="nickname"
             required
           />
+        </label>
+        <label>
+          Username
+          <div className="username-input-wrap">
+            <span aria-hidden="true">@</span>
+            <input
+              value={username}
+              onChange={(event) => {
+                const next = event.target.value
+                  .replace(/^@+/, "")
+                  .toLowerCase()
+                  .replace(/[^a-z0-9_]/g, "")
+                  .slice(0, 20);
+                setUsername(next);
+              }}
+              minLength={3}
+              maxLength={20}
+              pattern="[a-z0-9][a-z0-9_]{2,19}"
+              autoComplete="username"
+              placeholder="your_username"
+              aria-describedby="username-help"
+            />
+          </div>
+          <small id="username-help" className="profile-field-help">
+            3–20 characters. Lowercase letters, numbers, and underscores. Leave blank until you&apos;re ready to claim one.
+          </small>
         </label>
 
         <fieldset>
