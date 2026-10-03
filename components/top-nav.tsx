@@ -7,6 +7,7 @@ type TopNavProps = {
     totalXp: number;
     signedIn?: boolean;
     timeZone?: string;
+    username?: string | null;
   };
 };
 
@@ -32,7 +33,7 @@ export function TopNav({ stats }: TopNavProps) {
 
       <div className="top-stats" aria-label="Learning stats">
         <Link className="profile-chip" href={stats?.signedIn ? "/profile" : "/login"}>
-          {stats?.signedIn ? "👤" : "Sign in"}
+          {stats?.signedIn ? (stats.username ? `@${stats.username}` : "👤") : "Sign in"}
         </Link>
         <span className="stat-chip">🔥 <strong>{stats?.streak ?? 0}</strong></span>
         <span className="stat-chip">⭐ <strong>{stats?.totalXp ?? 0} XP</strong></span>
