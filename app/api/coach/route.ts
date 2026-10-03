@@ -216,7 +216,7 @@ export async function POST(request: Request) {
     await admin
       .from("ai_tutor_events")
       .delete()
-      .eq("id", usageEvent.id)
+      .eq("id", usageEvent.event_id)
       .eq("user_id", userId);
   };
 
@@ -280,8 +280,14 @@ export async function POST(request: Request) {
       lesson.slug,
       mode,
       Math.max(0, Number(usageEvent.remaining ?? 0) + 1),
-      openAIError.error?.code === "insufficient_quota"
-        ? "The live AI service needs API billing or credits, so CodeTrail used built-in lesson guidance."
+      [
+        "credit_balance_exhausted",
+        "organization_usage_limit_exceeded",
+        "organization_spend_limit_exceeded",
+        "project_spend_limit_exceeded",
+      ].includes(openAIError.error?.code ?? "") ||
+      openAIError.error?.type === "insufficient_quota"
+        ? "The live AI service needs API billing or available credits, so CodeTrail used built-in lesson guidance."
         : "The live AI service is temporarily unavailable, so CodeTrail used built-in lesson guidance.",
     );
   }
