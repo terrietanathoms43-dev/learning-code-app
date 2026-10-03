@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { checkAnswer } from "../lib/answer-key.ts";
 import { isUuidV4 } from "../lib/validation.ts";
 import { isSameOriginRequest } from "../lib/request-security.ts";
+import { getUsernameError, normalizeUsername } from "../lib/profile-validation.ts";
 
 test("accepts normal spacing variants without merging Python tokens", () => {
   assert.equal(checkAnswer("variable-create", "score=10")?.correct, true);
@@ -63,4 +64,17 @@ test("same-origin mutation guard rejects cross-site browser requests", () => {
   assert.equal(isSameOriginRequest(sameOrigin), true);
   assert.equal(isSameOriginRequest(crossSite), false);
   assert.equal(isSameOriginRequest(serverToServer), true);
+});
+
+
+test("normalizes usernames consistently", () => {
+  assert.equal(normalizeUsername("  @Terri_Etana  "), "terri_etana");
+});
+
+test("validates username format and reserved handles", () => {
+  assert.equal(getUsernameError("terri_etana"), null);
+  assert.equal(getUsernameError("ab"), "Username must be 3–20 characters and use only lowercase letters, numbers, or underscores.");
+  assert.equal(getUsernameError("terri-etana"), "Username must be 3–20 characters and use only lowercase letters, numbers, or underscores.");
+  assert.equal(getUsernameError("Admin"), "That username is reserved. Choose another one.");
+  assert.equal(getUsernameError(""), null);
 });
