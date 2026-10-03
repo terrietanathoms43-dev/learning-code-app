@@ -25,6 +25,40 @@ export type LearningDashboard = {
   timeZone: string;
 };
 
+type DashboardSnapshot = {
+  profile?: {
+    display_name?: string | null;
+    username?: string | null;
+    daily_goal_xp?: number | null;
+    time_zone?: string | null;
+  } | null;
+  stats?: {
+    total_xp?: number | string | null;
+    today_xp?: number | string | null;
+    streak?: number | string | null;
+  } | null;
+  published_lessons?: Array<{
+    id?: string;
+    slug?: string;
+    title?: string;
+    sort_order?: number;
+  }> | null;
+  progress?: Array<{
+    lesson_id?: string;
+    status?: string;
+    completed_at?: string | null;
+    slug?: string;
+    title?: string;
+  }> | null;
+  recent_events?: Array<{
+    amount?: number | string;
+    created_at?: string;
+    lesson_id?: string | null;
+    slug?: string | null;
+    title?: string | null;
+  }> | null;
+};
+
 const implementedSet = new Set(implementedLessonSlugs);
 
 function buildNodes(completedSlugs: Set<string>, availableSlugs: Set<string>) {
@@ -82,68 +116,47 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
 
     if (!userId) return guestDashboard();
 
-    const [lessonResult, progressResult, xpResult, profileResult, statsResult] = await Promise.all([
-      supabase
-        .from("lessons")
-        .select("id, slug, sort_order, title")
-        .eq("is_published", true)
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("user_lesson_progress")
-        .select("lesson_id, status, completed_at")
-        .eq("user_id", userId),
-      supabase
-        .from("xp_events")
-        .select("amount, created_at, lesson_id")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(10),
-      supabase
-        .from("profiles")
-        .select("display_name, username, daily_goal_xp, time_zone")
-        .eq("id", userId)
-        .maybeSingle(),
-      supabase.rpc("get_learning_stats"),
-    ]);
+    const { data, error } = await supabase.rpc("get_learning_dashboard_snapshot");
 
-    const lessonRows = lessonResult.error ? [] : lessonResult.data ?? [];
-    const progressRows = progressResult.error ? [] : progressResult.data ?? [];
-    const xpRows = xpResult.error ? [] : xpResult.data ?? [];
-    const profile = profileResult.error ? null : profileResult.data;
-    const stats =
-      !statsResult.error && Array.isArray(statsResult.data) && statsResult.data.length
-        ? statsResult.data[0]
-        : null;
+    if (error || !data || typeof data !== "object") {
+      console.error("[dashboard_snapshot]", {
+        code: error?.code ?? null,
+        message: error?.message?.slice(0, 180) ?? "empty snapshot",
+      });
+      return guestDashboard();
+    }
 
-    const publishedImplemented = lessonRows
-      .filter((lesson) => implementedSet.has(lesson.slug))
-      .map((lesson) => lesson.slug);
+    const snapshot = data as DashboardSnapshot;
+    const profile = snapshot.profile ?? null;
+    const stats = snapshot.stats ?? null;
+    const publishedLessons = Array.isArray(snapshot.published_lessons)
+      ? snapshot.published_lessons
+      : [];
+    const progressRows = Array.isArray(snapshot.progress) ? snapshot.progress : [];
+    const recentRows = Array.isArray(snapshot.recent_events) ? snapshot.recent_events : [];
+
+    const publishedImplemented = publishedLessons
+      .map((lesson) => lesson.slug)
+      .filter((slug): slug is string => Boolean(slug && implementedSet.has(slug)));
+
     const availableSlugs = new Set<string>(
       publishedImplemented.length ? publishedImplemented : implementedLessonSlugs,
     );
 
-    const lessonIdToSlug = new Map<string, string>();
-    const lessonIdToTitle = new Map<string, string>();
-    for (const lesson of lessonRows) {
-      lessonIdToSlug.set(lesson.id, lesson.slug);
-      lessonIdToTitle.set(lesson.id, lesson.title);
-    }
-
     const completedSlugs = new Set<string>();
     for (const row of progressRows) {
-      if (row.status !== "completed") continue;
-      const slug = lessonIdToSlug.get(row.lesson_id);
-      if (slug && implementedSet.has(slug)) completedSlugs.add(slug);
+      if (row.status !== "completed" || !row.slug) continue;
+      if (implementedSet.has(row.slug)) completedSlugs.add(row.slug);
     }
 
     const nodes = buildNodes(completedSlugs, availableSlugs);
     const totalLessons = availableSlugs.size;
-    const completedLessons = [...completedSlugs].filter((slug) => availableSlugs.has(slug)).length;
-    const totalXp = stats
-      ? Number(stats.total_xp || 0)
-      : xpRows.reduce((sum, event) => sum + Number(event.amount || 0), 0);
-    const todayXp = stats ? Number(stats.today_xp || 0) : 0;
-    const streak = stats ? Number(stats.streak || 0) : 0;
+    const completedLessons = [...completedSlugs].filter((slug) =>
+      availableSlugs.has(slug),
+    ).length;
+    const totalXp = Number(stats?.total_xp || 0);
+    const todayXp = Number(stats?.today_xp || 0);
+    const streak = Number(stats?.streak || 0);
     const dailyGoalXp = Number(profile?.daily_goal_xp || 50);
     const timeZone = profile?.time_zone || "UTC";
 
@@ -162,16 +175,17 @@ export async function getLearningDashboard(): Promise<LearningDashboard> {
         totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0,
       completedLessonSlugs: [...completedSlugs],
       timeZone,
-      recentEvents: xpRows.slice(0, 10).map((event) => ({
+      recentEvents: recentRows.map((event) => ({
         amount: Number(event.amount || 0),
-        createdAt: event.created_at,
-        lessonSlug: event.lesson_id ? lessonIdToSlug.get(event.lesson_id) ?? null : null,
-        lessonTitle: event.lesson_id
-          ? lessonIdToTitle.get(event.lesson_id) ?? "Coding activity"
-          : "Coding activity",
+        createdAt: event.created_at || new Date(0).toISOString(),
+        lessonSlug: event.slug || null,
+        lessonTitle: event.title || "Coding activity",
       })),
     };
-  } catch {
+  } catch (error) {
+    console.error("[dashboard_snapshot]", {
+      message: error instanceof Error ? error.message.slice(0, 180) : "unknown error",
+    });
     return guestDashboard();
   }
 }
