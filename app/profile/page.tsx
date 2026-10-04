@@ -1,10 +1,16 @@
 import { redirect } from "next/navigation";
 import { TopNav } from "@/components/top-nav";
 import { ProfileSettingsForm } from "@/components/profile-settings-form";
-import { getLearningDashboard } from "@/lib/learning-dashboard";
+import { getLearningDashboard, getWebLearningDashboard } from "@/lib/learning-dashboard";
 
 export default async function ProfilePage() {
-  const dashboard = await getLearningDashboard();
+  const [dashboard, webDashboard] = await Promise.all([
+    getLearningDashboard(),
+    getWebLearningDashboard(),
+  ]);
+  const completedLessons =
+    dashboard.completedLessons + webDashboard.completedLessons;
+  const totalLessons = dashboard.totalLessons + webDashboard.totalLessons;
 
   if (!dashboard.signedIn) {
     redirect("/login");
@@ -52,7 +58,7 @@ export default async function ProfilePage() {
           </article>
           <article>
             <span>✓</span>
-            <strong>{dashboard.completedLessons}/{dashboard.totalLessons}</strong>
+            <strong>{completedLessons}/{totalLessons}</strong>
             <small>Lessons cleared</small>
           </article>
           <article>
