@@ -27,6 +27,7 @@ export function TopNav({ stats }: TopNavProps) {
       <nav className="topnav-links" aria-label="Main navigation">
         <Link href="/learn">Learn</Link>
         <Link href="/practice">Practice</Link>
+        {stats?.signedIn && <Link href="/projects">Projects</Link>}
         <Link href="/progress">Progress</Link>
         {stats?.signedIn ? <Link href="/profile">Profile</Link> : <Link href="/login">Sign in</Link>}
       </nav>
