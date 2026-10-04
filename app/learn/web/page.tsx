@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { WorldSwitcher } from "@/components/world-switcher";
 import { LearningPath } from "@/components/learning-path";
 import { TopNav } from "@/components/top-nav";
 import { getWebLearningDashboard } from "@/lib/learning-dashboard";
@@ -27,16 +28,7 @@ export default async function WebLearnPage() {
         }}
       />
 
-      <nav className="world-switcher" aria-label="Learning worlds">
-        <Link className="world-switcher-link" href="/learn">
-          <span aria-hidden="true">🐍</span>
-          <span><strong>Python Foundations</strong><small>Beginner Meadow</small></span>
-        </Link>
-        <Link className="world-switcher-link is-active" href="/learn/web">
-          <span aria-hidden="true">🌐</span>
-          <span><strong>Web Foundations</strong><small>Pixel Garden</small></span>
-        </Link>
-      </nav>
+      <WorldSwitcher active="web" />
 
       <main className="learn-layout">
         <section className="trail-column">
