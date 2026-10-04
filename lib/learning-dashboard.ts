@@ -208,8 +208,9 @@ function buildWorldDashboard(
   const snapshot = context.snapshot;
   const profile = snapshot.profile ?? null;
   const stats = snapshot.stats ?? null;
-  const publishedLessons = Array.isArray(snapshot.published_lessons)
-    ? snapshot.published_lessons
+  const hasPublishedLessonSnapshot = Array.isArray(snapshot.published_lessons);
+  const publishedLessons = hasPublishedLessonSnapshot
+    ? snapshot.published_lessons ?? []
     : [];
   const progressRows = Array.isArray(snapshot.progress) ? snapshot.progress : [];
   const recentRows = Array.isArray(snapshot.recent_events) ? snapshot.recent_events : [];
@@ -219,7 +220,7 @@ function buildWorldDashboard(
     .filter((slug): slug is string => Boolean(slug && worldSet.has(slug)));
 
   const availableSlugs = new Set<string>(
-    publishedWorldSlugs.length ? publishedWorldSlugs : world.lessonSlugs,
+    hasPublishedLessonSnapshot ? publishedWorldSlugs : world.lessonSlugs,
   );
 
   const completedSlugs = new Set<string>();
