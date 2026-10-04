@@ -52,15 +52,35 @@ const fallbacks: Record<string, CoachFallback> = {
     explain: "The mini project combines the earlier concepts into one flow: variables hold state, functions organize logic, conditions decide, and loops repeat work.",
     example: 'A similar pattern is: def is_ready(value):\n    return value == "yes"',
   },
+  "web-html-basics": {
+    hint: "Think about the HTML tag that matches the kind of content you are creating, then remember that most tags have an opening and closing form.",
+    explain: "HTML gives a page structure. Elements use tags such as headings, paragraphs and buttons to describe what each piece of content means.",
+    example: "A similar example is: <p>Welcome to my page</p>",
+  },
+  "web-css-basics": {
+    hint: "CSS follows the pattern selector { property: value; }. Check each of those three parts.",
+    explain: "CSS selects HTML elements and gives them visual rules. Inside braces, each declaration uses a property, a colon, a value and usually a semicolon.",
+    example: "A similar example is: p { color: green; }",
+  },
+  "web-js-basics": {
+    hint: "Look for the JavaScript pattern that creates a value first, then use console.log when you want to inspect it.",
+    explain: "JavaScript adds behavior to web pages. Variables store values, and functions such as console.log() let you perform actions with those values.",
+    example: 'A similar example is: const greeting = "Hi";\nconsole.log(greeting);',
+  },
+  "web-mini-project": {
+    hint: "Separate the job by language: HTML creates the content, CSS styles it, and JavaScript adds behavior or logic.",
+    explain: "A web page combines three layers: HTML for structure, CSS for appearance and JavaScript for behavior. Build and test one layer at a time.",
+    example: "A similar tiny project could use <button>Go</button>, style button in CSS, then log a message with JavaScript.",
+  },
 };
 
 export function getCoachFallback(lessonSlug: string, mode: CoachMode) {
   const lessonFallback =
     fallbacks[lessonSlug] ??
     ({
-      hint: "Focus on the Python pattern this exercise is testing and compare it with the examples in the lesson.",
-      explain: "Break the coding task into its smallest parts, then check the syntax and the value each part produces.",
-      example: 'Try a similar tiny example such as: print("Practice")',
+      hint: "Focus on the coding pattern this exercise is testing and compare it with the examples in the lesson.",
+      explain: "Break the coding task into its smallest parts, then check the syntax and what each part is meant to do.",
+      example: "Try a smaller example that uses the same coding idea without copying the exercise.",
     } satisfies CoachFallback);
 
   return lessonFallback[mode];
