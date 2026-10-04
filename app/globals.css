@@ -2707,3 +2707,71 @@ button { color: inherit; }
     width: min(100%, 320px);
   }
 }
+
+
+/* Multi-file Web App projects */
+.project-file-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  background: #f8f9fc;
+}
+
+.project-file-tabs button {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+.project-file-tabs button strong {
+  color: inherit;
+  font-size: .72rem;
+}
+
+.project-file-tabs button small {
+  overflow: hidden;
+  color: inherit;
+  font-size: .6rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-file-tabs button:hover,
+.project-file-tabs button:focus-visible {
+  outline: none;
+  border-color: var(--line);
+  background: white;
+}
+
+.project-file-tabs button.is-active {
+  border-color: #bbb6ff;
+  background: var(--indigo-soft);
+  color: var(--indigo-dark);
+}
+
+.project-file-tabs button:disabled {
+  cursor: not-allowed;
+  opacity: .6;
+}
+
+@media (max-width: 560px) {
+  .project-file-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .project-file-tabs button {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+}
