@@ -47,11 +47,22 @@ export const webPath: PathNode[] = [
   { slug: "web-mini-project", title: "Mini Web Project", subtitle: "Put HTML, CSS and JS together", icon: "🌐", kind: "project", status: "locked", xp: 80 },
 ];
 
+export const javascriptPath: PathNode[] = [
+  { slug: "js-variables", title: "Values & Variables", subtitle: "Store values and print them", icon: "⚡", kind: "lesson", status: "current", xp: 25 },
+  { slug: "js-types", title: "Types & Operators", subtitle: "Work with values safely", icon: "🔢", kind: "lesson", status: "locked", xp: 30 },
+  { slug: "js-conditions", title: "Decisions", subtitle: "Make code choose a path", icon: "🔀", kind: "lesson", status: "locked", xp: 35 },
+  { slug: "js-arrays-loops", title: "Arrays & Loops", subtitle: "Store lists and repeat work", icon: "🔁", kind: "lesson", status: "locked", xp: 40 },
+  { slug: "js-functions", title: "Functions", subtitle: "Create reusable JavaScript", icon: "🧰", kind: "lesson", status: "locked", xp: 45 },
+  { slug: "js-mini-project", title: "Score Tracker", subtitle: "Build a tiny score calculator", icon: "🚀", kind: "project", status: "locked", xp: 90 },
+];
+
 export const pythonLessonSlugs = pythonPath.map((node) => node.slug);
 export const webLessonSlugs = webPath.map((node) => node.slug);
+export const javascriptLessonSlugs = javascriptPath.map((node) => node.slug);
 export const guestAccessibleLessonSlugs = [
   pythonLessonSlugs[0],
   webLessonSlugs[0],
+  javascriptLessonSlugs[0],
 ];
 
 export const lessons: Record<string, Lesson> = {
@@ -413,6 +424,199 @@ export const lessons: Record<string, Lesson> = {
         eyebrow: "Add JavaScript",
         prompt: "Create a constant named message containing Ready, then log it.",
         placeholder: "const message = \"Ready\";\nconsole.log(message);",
+      },
+    ],
+  },
+  "js-variables": {
+    slug: "js-variables",
+    title: "Values & Variables",
+    subtitle: "Create JavaScript values, variables and console output.",
+    icon: "⚡",
+    xp: 25,
+    duration: "6 min",
+    exercises: [
+      {
+        id: "js-variable-console",
+        type: "text",
+        eyebrow: "Fill the method",
+        prompt: "Complete the JavaScript method that prints to the console.",
+        code: "console.____(\"Hello\");",
+        placeholder: "Method name",
+      },
+      {
+        id: "js-variable-let",
+        type: "choice",
+        eyebrow: "Choose the variable",
+        prompt: "Which line creates a changeable variable named score with the value 5?",
+        options: ["let score = 5;", "score == 5;", "5 = score;", "variable score = 5;"],
+      },
+      {
+        id: "js-variable-code",
+        type: "code",
+        eyebrow: "Write JavaScript",
+        prompt: "Create a constant named language containing JavaScript, then log language.",
+        placeholder: "const language = \"JavaScript\";\nconsole.log(language);",
+      },
+    ],
+  },
+  "js-types": {
+    slug: "js-types",
+    title: "Types & Operators",
+    subtitle: "Recognize JavaScript values and compare them safely.",
+    icon: "🔢",
+    xp: 30,
+    duration: "7 min",
+    exercises: [
+      {
+        id: "js-type-boolean",
+        type: "choice",
+        eyebrow: "Name the type",
+        prompt: "What kind of value is stored in ready?",
+        code: "const ready = true;",
+        options: ["Boolean", "String", "Number", "Array"],
+      },
+      {
+        id: "js-strict-equality",
+        type: "choice",
+        eyebrow: "Predict the result",
+        prompt: "What does this strict comparison produce?",
+        code: "5 === \"5\"",
+        options: ["false", "true", "5", "\"5\""],
+      },
+      {
+        id: "js-operator-code",
+        type: "code",
+        eyebrow: "Update a value",
+        prompt: "Create let score with 8, then add 2 and store the result back in score.",
+        placeholder: "let score = 8;\nscore = score + 2;",
+      },
+    ],
+  },
+  "js-conditions": {
+    slug: "js-conditions",
+    title: "Decisions",
+    subtitle: "Use if statements to make JavaScript choose what happens.",
+    icon: "🔀",
+    xp: 35,
+    duration: "8 min",
+    exercises: [
+      {
+        id: "js-condition-syntax",
+        type: "choice",
+        eyebrow: "Choose the syntax",
+        prompt: "Which line correctly starts a JavaScript if statement?",
+        options: ["if (score >= 10) {", "if score >= 10:", "when (score >= 10) {", "if score >= 10 then"],
+      },
+      {
+        id: "js-condition-output",
+        type: "choice",
+        eyebrow: "Predict the output",
+        prompt: "What will this code log?",
+        code: "const age = 16;\nif (age >= 13) {\n  console.log(\"Ready\");\n}",
+        options: ["Ready", "16", "true", "Nothing"],
+      },
+      {
+        id: "js-condition-code",
+        type: "code",
+        eyebrow: "Write a decision",
+        prompt: "Log Level up when score is at least 10.",
+        placeholder: "if (score >= 10) {\n  console.log(\"Level up\");\n}",
+      },
+    ],
+  },
+  "js-arrays-loops": {
+    slug: "js-arrays-loops",
+    title: "Arrays & Loops",
+    subtitle: "Keep lists of values and repeat code over them.",
+    icon: "🔁",
+    xp: 40,
+    duration: "9 min",
+    exercises: [
+      {
+        id: "js-array-index",
+        type: "choice",
+        eyebrow: "Read the array",
+        prompt: "What does this code log?",
+        code: "const colors = [\"blue\", \"gold\"];\nconsole.log(colors[0]);",
+        options: ["blue", "gold", "0", "colors"],
+      },
+      {
+        id: "js-loop-output",
+        type: "choice",
+        eyebrow: "Predict the loop",
+        prompt: "Which sequence is logged?",
+        code: "for (let i = 1; i <= 3; i++) {\n  console.log(i);\n}",
+        options: ["1, 2, 3", "0, 1, 2", "1, 2, 3, 4", "3, 3, 3"],
+      },
+      {
+        id: "js-loop-code",
+        type: "code",
+        eyebrow: "Loop through a list",
+        prompt: "Use for...of to log every item in an array named items.",
+        placeholder: "for (const item of items) {\n  console.log(item);\n}",
+      },
+    ],
+  },
+  "js-functions": {
+    slug: "js-functions",
+    title: "Functions",
+    subtitle: "Package JavaScript into reusable pieces.",
+    icon: "🧰",
+    xp: 45,
+    duration: "9 min",
+    exercises: [
+      {
+        id: "js-function-syntax",
+        type: "choice",
+        eyebrow: "Choose the function",
+        prompt: "Which line correctly starts a function named greet with a name parameter?",
+        options: ["function greet(name) {", "def greet(name):", "function = greet(name)", "greet function(name) {"],
+      },
+      {
+        id: "js-function-return",
+        type: "text",
+        eyebrow: "Fill the keyword",
+        prompt: "Which keyword sends a result back from a JavaScript function?",
+        code: "function double(number) {\n  ____ number * 2;\n}",
+        placeholder: "Keyword",
+      },
+      {
+        id: "js-function-code",
+        type: "code",
+        eyebrow: "Write a function",
+        prompt: "Write a function named double that returns number multiplied by 2.",
+        placeholder: "function double(number) {\n  return number * 2;\n}",
+      },
+    ],
+  },
+  "js-mini-project": {
+    slug: "js-mini-project",
+    title: "Score Tracker",
+    subtitle: "Combine arrays, loops and variables into a small project.",
+    icon: "🚀",
+    xp: 90,
+    duration: "11 min",
+    exercises: [
+      {
+        id: "js-project-array",
+        type: "choice",
+        eyebrow: "Project setup",
+        prompt: "Which line creates an array containing the scores 4, 7 and 9?",
+        options: ["const scores = [4, 7, 9];", "const scores = (4, 7, 9);", "scores = 4 + 7 + 9;", "array scores = 4, 7, 9;"],
+      },
+      {
+        id: "js-project-total",
+        type: "code",
+        eyebrow: "Add the scores",
+        prompt: "Start total at 0, then use for...of to add each score from scores into total.",
+        placeholder: "let total = 0;\nfor (const score of scores) {\n  total = total + score;\n}",
+      },
+      {
+        id: "js-project-output",
+        type: "code",
+        eyebrow: "Finish the project",
+        prompt: "Log the final total to the console.",
+        placeholder: "console.log(total);",
       },
     ],
   },
