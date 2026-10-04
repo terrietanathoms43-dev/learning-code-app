@@ -3,10 +3,10 @@ import { Sandbox } from "@vercel/sandbox";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { isSameOriginRequest } from "@/lib/request-security";
+import { MAX_PROJECT_CODE_LENGTH } from "@/lib/project-validation";
 
 export const maxDuration = 20;
 
-const MAX_CODE_LENGTH = 20_000;
 const MAX_OUTPUT_LENGTH = 12_000;
 const HOURLY_RUN_LIMIT = 30;
 
@@ -66,9 +66,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Write some code before running it." }, { status: 400 });
   }
 
-  if (code.length > MAX_CODE_LENGTH) {
+  if (code.length > MAX_PROJECT_CODE_LENGTH) {
     return NextResponse.json(
-      { error: "Runnable code must be 20,000 characters or fewer." },
+      { error: `Runnable code must be ${MAX_PROJECT_CODE_LENGTH.toLocaleString()} characters or fewer.` },
       { status: 400 },
     );
   }
