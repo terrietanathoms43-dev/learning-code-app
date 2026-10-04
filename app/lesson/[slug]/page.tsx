@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { LessonPlayer } from "@/components/lesson-player";
-import { getLesson, implementedLessonSlugs } from "@/lib/course-data";
+import { getLesson, guestAccessibleLessonSlugs } from "@/lib/course-data";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function LessonPage({
@@ -13,11 +13,13 @@ export default async function LessonPage({
 
   if (!lesson) notFound();
 
+  const worldHome = slug.startsWith("web-") ? "/learn/web" : "/learn";
+
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   ) {
-    if (slug !== implementedLessonSlugs[0]) redirect("/learn");
+    if (!guestAccessibleLessonSlugs.includes(slug)) redirect(worldHome);
     return <LessonPlayer lesson={lesson} />;
   }
 
@@ -29,7 +31,7 @@ export default async function LessonPage({
     typeof claimsData.claims.sub === "string";
 
   if (!signedIn) {
-    if (slug !== implementedLessonSlugs[0]) redirect("/learn");
+    if (!guestAccessibleLessonSlugs.includes(slug)) redirect(worldHome);
     return <LessonPlayer lesson={lesson} />;
   }
 
@@ -39,7 +41,7 @@ export default async function LessonPage({
   );
 
   if (accessError || canAccess !== true) {
-    redirect("/learn");
+    redirect(worldHome);
   }
 
   return <LessonPlayer lesson={lesson} />;
