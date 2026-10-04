@@ -44,8 +44,10 @@ jobs:
           curl --fail --silent http://127.0.0.1:3000/ > /dev/null
           curl --fail --silent http://127.0.0.1:3000/learn > /dev/null
           curl --fail --silent http://127.0.0.1:3000/learn/web > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/learn/javascript > /dev/null
           curl --fail --silent http://127.0.0.1:3000/lesson/hello-world > /dev/null
           curl --fail --silent http://127.0.0.1:3000/lesson/web-html-basics > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/lesson/js-variables > /dev/null
           curl --fail --silent http://127.0.0.1:3000/forgot-password > /dev/null
           curl --fail --silent http://127.0.0.1:3000/reset-password > /dev/null
           curl --fail --silent http://127.0.0.1:3000/privacy > /dev/null
@@ -64,6 +66,12 @@ jobs:
             -d '{"exerciseId":"web-html-heading","answer":"<h1>Hello</h1>","sessionId":"550e8400-e29b-41d4-a716-446655440001"}' \
             http://127.0.0.1:3000/api/check-answer > /tmp/web-answer.json
           grep -q '"correct":true' /tmp/web-answer.json
+
+          curl --fail --silent \
+            -H 'content-type: application/json' \
+            -d '{"exerciseId":"js-variable-console","answer":"log","sessionId":"550e8400-e29b-41d4-a716-446655440002"}' \
+            http://127.0.0.1:3000/api/check-answer > /tmp/javascript-answer.json
+          grep -q '"correct":true' /tmp/javascript-answer.json
 
           BAD_SESSION_STATUS=$(curl --silent --output /tmp/bad-session.json --write-out "%{http_code}" \
             -H 'content-type: application/json' \
