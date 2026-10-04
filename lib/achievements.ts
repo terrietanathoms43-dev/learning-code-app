@@ -17,11 +17,19 @@ type AchievementDashboard = Pick<
 
 export function getAchievements(
   dashboard: AchievementDashboard,
-  additionalDashboard?: Pick<LearningDashboard, "completedLessons">,
+  additionalDashboards?:
+    | Pick<LearningDashboard, "completedLessons">
+    | Array<Pick<LearningDashboard, "completedLessons">>,
 ): Achievement[] {
   const completed = new Set(dashboard.completedLessonSlugs);
+  const extras = Array.isArray(additionalDashboards)
+    ? additionalDashboards
+    : additionalDashboards
+      ? [additionalDashboards]
+      : [];
   const allCompletedLessons =
-    dashboard.completedLessons + (additionalDashboard?.completedLessons ?? 0);
+    dashboard.completedLessons +
+    extras.reduce((total, world) => total + world.completedLessons, 0);
 
   return [
     {
