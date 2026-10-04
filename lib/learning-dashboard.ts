@@ -75,6 +75,13 @@ type DashboardContext = {
   snapshot: DashboardSnapshot | null;
 };
 
+type ServerSupabaseClient = Awaited<ReturnType<typeof createClient>>;
+
+type DashboardLoadOptions = {
+  supabase?: ServerSupabaseClient;
+  userId?: string | null;
+};
+
 const pythonWorld: WorldDefinition = {
   path: pythonPath,
   lessonSlugs: pythonLessonSlugs,
@@ -131,7 +138,9 @@ function emptyDashboard(
   };
 }
 
-async function loadDashboardContext(): Promise<DashboardContext> {
+async function loadDashboardContext(
+  options: DashboardLoadOptions = {},
+): Promise<DashboardContext> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
@@ -142,12 +151,21 @@ async function loadDashboardContext(): Promise<DashboardContext> {
   let signedIn = false;
 
   try {
-    const supabase = await createClient();
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
-    const userId =
-      !claimsError && claimsData?.claims && typeof claimsData.claims.sub === "string"
-        ? claimsData.claims.sub
-        : null;
+    const supabase = options.supabase ?? (await createClient());
+    let userId: string | null;
+
+    if ("userId" in options) {
+      userId = options.userId ?? null;
+    } else {
+      const { data: claimsData, error: claimsError } =
+        await supabase.auth.getClaims();
+      userId =
+        !claimsError &&
+        claimsData?.claims &&
+        typeof claimsData.claims.sub === "string"
+          ? claimsData.claims.sub
+          : null;
+    }
 
     if (!userId) return { signedIn: false, snapshot: null };
     signedIn = true;
@@ -240,18 +258,24 @@ function buildWorldDashboard(
   };
 }
 
-export async function getLearningDashboard() {
-  const context = await loadDashboardContext();
+export async function getLearningDashboard(
+  options: DashboardLoadOptions = {},
+) {
+  const context = await loadDashboardContext(options);
   return buildWorldDashboard(pythonWorld, context);
 }
 
-export async function getWebLearningDashboard() {
-  const context = await loadDashboardContext();
+export async function getWebLearningDashboard(
+  options: DashboardLoadOptions = {},
+) {
+  const context = await loadDashboardContext(options);
   return buildWorldDashboard(webWorld, context);
 }
 
-export async function getLearningDashboards() {
-  const context = await loadDashboardContext();
+export async function getLearningDashboards(
+  options: DashboardLoadOptions = {},
+) {
+  const context = await loadDashboardContext(options);
 
   return {
     python: buildWorldDashboard(pythonWorld, context),
