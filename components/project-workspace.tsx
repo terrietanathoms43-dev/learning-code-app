@@ -334,12 +334,19 @@ export function ProjectWorkspace({
     if (!active || active.language !== "web" || activeDeleting) return;
 
     const files = decodeWebProject(active.code);
-    updateActive({
-      code: encodeWebProject({
-        ...files,
-        [file]: value,
-      }),
+    const nextCode = encodeWebProject({
+      ...files,
+      [file]: value,
     });
+
+    if (nextCode.length > MAX_PROJECT_CODE_LENGTH) {
+      setMessage(
+        `Web App projects can contain at most ${MAX_PROJECT_CODE_LENGTH.toLocaleString()} characters across all three files.`,
+      );
+      return;
+    }
+
+    updateActive({ code: nextCode });
   }
 
   async function createProject(language: ProjectLanguage = "python") {
@@ -744,7 +751,9 @@ export function ProjectWorkspace({
                     className="project-run-button"
                     type="button"
                     onClick={runCode}
-                    disabled={runState === "running" || !active.code.trim()}
+                    disabled={
+                      activeDeleting || runState === "running" || !active.code.trim()
+                    }
                   >
                     {runState === "running" ? "Running…" : "▶ Run"}
                   </button>
@@ -755,11 +764,13 @@ export function ProjectWorkspace({
                   onChange={(event) =>
                     changeLanguage(event.target.value as ProjectLanguage)
                   }
+                  disabled={activeDeleting}
                 >
                   <option value="python">Python</option>
                   <option value="html">HTML</option>
                   <option value="css">CSS</option>
                   <option value="javascript">JavaScript</option>
+                  <option value="web">Web App · 3 files</option>
                 </select>
                 <button
                   className="project-utility-button"
@@ -792,7 +803,11 @@ export function ProjectWorkspace({
             </div>
 
             <div className="project-save-row" aria-live="polite">
-              <span>{fileNames[active.language]}</span>
+              <span>
+                {active.language === "web"
+                  ? `Web App · ${activeEditorName}`
+                  : fileNames[active.language]}
+              </span>
               <strong className={`save-state save-state--${saveState}`}>
                 {saveState === "saved" && "Saved"}
                 {saveState === "unsaved" && "Unsaved changes"}
@@ -804,24 +819,55 @@ export function ProjectWorkspace({
             <div className="project-code-editor">
               <div className="editor-bar">
                 <span /><span /><span />
-                <strong>{fileNames[active.language]}</strong>
+                <strong>{activeEditorName}</strong>
               </div>
+
+              {active.language === "web" && (
+                <div className="project-file-tabs" role="tablist" aria-label="Web App files">
+                  {(Object.keys(webFileNames) as WebProjectFile[]).map((file) => (
+                    <button
+                      type="button"
+                      role="tab"
+                      aria-selected={activeWebFile === file}
+                      className={activeWebFile === file ? "is-active" : ""}
+                      key={file}
+                      onClick={() => setActiveWebFile(file)}
+                      disabled={activeDeleting}
+                    >
+                      <strong>{webFileLabels[file]}</strong>
+                      <small>{webFileNames[file]}</small>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <textarea
-                value={active.code}
-                aria-label="Project code"
+                value={activeEditorValue}
+                aria-label={
+                  active.language === "web"
+                    ? `${activeEditorName} code`
+                    : "Project code"
+                }
                 spellCheck={false}
                 autoCapitalize="none"
                 autoCorrect="off"
                 maxLength={MAX_PROJECT_CODE_LENGTH}
-                onChange={(event) => updateActive({ code: event.target.value })}
+                onChange={(event) =>
+                  active.language === "web"
+                    ? updateWebFile(activeWebFile, event.target.value)
+                    : updateActive({ code: event.target.value })
+                }
                 onBlur={() => flushProjectSave(active.id)}
                 onKeyDown={handleSaveShortcut}
+                disabled={activeDeleting}
               />
             </div>
 
             <div className="project-editor-footer">
               <span>
-                {active.code.length.toLocaleString()} / {MAX_PROJECT_CODE_LENGTH.toLocaleString()} characters
+                {active.language === "web"
+                  ? `${activeEditorValue.length.toLocaleString()} in ${activeEditorName} · ${active.code.length.toLocaleString()} / ${MAX_PROJECT_CODE_LENGTH.toLocaleString()} total`
+                  : `${active.code.length.toLocaleString()} / ${MAX_PROJECT_CODE_LENGTH.toLocaleString()} characters`}
               </span>
               <span>
                 Saved privately to your CodeTrail account · Ctrl/Cmd + S saves now.
@@ -864,16 +910,22 @@ export function ProjectWorkspace({
               </section>
             )}
 
-            {(active.language === "html" || active.language === "css") && (
+            {(active.language === "html" ||
+              active.language === "css" ||
+              active.language === "web") && (
               <section className="project-preview-panel">
                 <div className="project-output-heading">
                   <strong>Live preview</strong>
-                  <span>Scripts and network requests are blocked</span>
+                  <span>
+                    {active.language === "web"
+                      ? "JavaScript runs in an isolated preview · network blocked"
+                      : "Scripts and network requests are blocked"}
+                  </span>
                 </div>
                 <iframe
                   className="project-preview-frame"
                   title={`${active.title} preview`}
-                  sandbox=""
+                  sandbox={active.language === "web" ? "allow-scripts" : ""}
                   srcDoc={previewDocument}
                 />
               </section>
