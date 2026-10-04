@@ -1,4 +1,6 @@
 import {
+  javascriptLessonSlugs,
+  javascriptPath,
   pythonLessonSlugs,
   pythonPath,
   webLessonSlugs,
@@ -90,6 +92,11 @@ const pythonWorld: WorldDefinition = {
 const webWorld: WorldDefinition = {
   path: webPath,
   lessonSlugs: webLessonSlugs,
+};
+
+const javascriptWorld: WorldDefinition = {
+  path: javascriptPath,
+  lessonSlugs: javascriptLessonSlugs,
 };
 
 function buildNodes(
@@ -272,6 +279,13 @@ export async function getWebLearningDashboard(
   return buildWorldDashboard(webWorld, context);
 }
 
+export async function getJavaScriptLearningDashboard(
+  options: DashboardLoadOptions = {},
+) {
+  const context = await loadDashboardContext(options);
+  return buildWorldDashboard(javascriptWorld, context);
+}
+
 export async function getLearningDashboards(
   options: DashboardLoadOptions = {},
 ) {
@@ -280,5 +294,6 @@ export async function getLearningDashboards(
   return {
     python: buildWorldDashboard(pythonWorld, context),
     web: buildWorldDashboard(webWorld, context),
+    javascript: buildWorldDashboard(javascriptWorld, context),
   };
 }
