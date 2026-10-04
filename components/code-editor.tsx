@@ -47,6 +47,8 @@ export function CodeEditor({
 }: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
+  const valueRef = useRef(value);
+  valueRef.current = value;
   const highlightRef = useRef<HTMLPreElement>(null);
   const [cursor, setCursor] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -64,7 +66,7 @@ export function CodeEditor({
     if (!textarea) return;
 
     const target = getLineSelection(
-      value,
+      valueRef.current,
       jumpTo.line,
       jumpTo.column ?? 1,
     );
@@ -83,7 +85,7 @@ export function CodeEditor({
       }
       setCursor(target.caret);
     });
-  }, [jumpTo, value]);
+  }, [jumpTo]);
 
   function restoreSelection(start: number, end: number) {
     window.requestAnimationFrame(() => {
