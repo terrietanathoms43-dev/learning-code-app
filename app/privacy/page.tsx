@@ -52,6 +52,16 @@ export default function PrivacyPage() {
           </section>
 
           <section>
+            <h2>Saved projects</h2>
+            <p>
+              When you intentionally create a project in the Projects workspace, CodeTrail
+              stores the project title, selected language and code so you can continue
+              working across devices. Saved projects are private to your signed-in account
+              and can be deleted from the workspace.
+            </p>
+          </section>
+
+          <section>
             <h2>AI Code Coach</h2>
             <p>
               When you choose an AI Coach action, CodeTrail sends the current lesson,
@@ -81,7 +91,7 @@ export default function PrivacyPage() {
           <Link className="secondary-button" href="/login">Account access</Link>
         </div>
 
-        <small className="privacy-updated">Current app behavior · Updated October 2, 2026</small>
+        <small className="privacy-updated">Current app behavior · Updated October 4, 2026</small>
       </section>
     </main>
   );
