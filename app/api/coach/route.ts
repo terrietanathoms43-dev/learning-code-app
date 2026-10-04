@@ -309,6 +309,8 @@ export async function POST(request: Request) {
       return NextResponse.json({
         reply:
           "Let's keep this focused on the coding skill in this lesson. Try the exercise again, and I can give you a short coding hint.",
+        source: "built-in",
+        notice: "The live AI response was filtered, so CodeTrail used a safe built-in reply.",
         remaining: Math.max(0, Number(usageEvent.remaining ?? 0)),
       });
     }
