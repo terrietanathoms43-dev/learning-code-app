@@ -1,4 +1,4 @@
-import { after, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { checkAnswer } from "@/lib/answer-key";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -83,9 +83,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Exercise not found." }, { status: 404 });
   }
 
-  after(async () => {
-    await recordAttempt(exerciseId, result.correct, sessionId);
-  });
+  await recordAttempt(exerciseId, result.correct, sessionId);
 
   return NextResponse.json(result);
 }
