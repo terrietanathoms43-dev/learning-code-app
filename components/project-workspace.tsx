@@ -81,6 +81,7 @@ export function ProjectWorkspace({
   const pendingSaves = useRef(new Map<string, { project: SavedProject; revision: number }>());
   const [creating, setCreating] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [newProjectMenuOpen, setNewProjectMenuOpen] = useState(false);
   const [projectSearch, setProjectSearch] = useState("");
   const [runState, setRunState] = useState<"idle" | "running" | "done" | "error">("idle");
@@ -280,7 +281,7 @@ export function ProjectWorkspace({
   }
 
   async function createProject(language: ProjectLanguage = "python") {
-    if (creating || projects.length >= MAX_SAVED_PROJECTS) return;
+    if (creating || deletingId || projects.length >= MAX_SAVED_PROJECTS) return;
     setCreating(true);
     setMessage("");
 
@@ -319,7 +320,14 @@ export function ProjectWorkspace({
   }
 
   async function duplicateProject() {
-    if (!active || duplicating || projects.length >= MAX_SAVED_PROJECTS) return;
+    if (
+      !active ||
+      duplicating ||
+      deletingId ||
+      projects.length >= MAX_SAVED_PROJECTS
+    ) {
+      return;
+    }
 
     flushProjectSave(active.id);
     setDuplicating(true);
@@ -389,6 +397,8 @@ export function ProjectWorkspace({
   }
 
   async function deleteProject(id: string) {
+    if (deletingId) return;
+
     const project = projects.find((item) => item.id === id);
     if (!project) return;
 
@@ -396,13 +406,18 @@ export function ProjectWorkspace({
       return;
     }
 
+    const shouldRestoreSave = (saveStates[id] ?? "saved") !== "saved";
+    setDeletingId(id);
     cancelProjectSave(id);
 
     try {
       const response = await fetch(`/api/projects/${id}`, { method: "DELETE" });
       if (!response.ok) {
         setMessage("Project could not be deleted.");
-        setProjectSaveState(id, "error");
+        if (shouldRestoreSave) {
+          setProjectSaveState(id, "unsaved");
+          queueProjectSave(project);
+        }
         return;
       }
 
@@ -416,10 +431,16 @@ export function ProjectWorkspace({
       setActiveId((current) =>
         current === id ? nextProjects[0]?.id ?? null : current,
       );
+      setMessage("");
       resetRunResult();
     } catch {
       setMessage("Project could not be deleted. Check your connection.");
-      setProjectSaveState(id, "error");
+      if (shouldRestoreSave) {
+        setProjectSaveState(id, "unsaved");
+        queueProjectSave(project);
+      }
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -500,7 +521,9 @@ export function ProjectWorkspace({
               className="project-new-button"
               type="button"
               onClick={() => setNewProjectMenuOpen((current) => !current)}
-              disabled={creating || projects.length >= MAX_SAVED_PROJECTS}
+              disabled={
+                creating || Boolean(deletingId) || projects.length >= MAX_SAVED_PROJECTS
+              }
               aria-expanded={newProjectMenuOpen}
               aria-haspopup="menu"
               title={
@@ -628,7 +651,11 @@ export function ProjectWorkspace({
                   className="project-utility-button"
                   type="button"
                   onClick={() => void duplicateProject()}
-                  disabled={duplicating || projects.length >= MAX_SAVED_PROJECTS}
+                  disabled={
+                    duplicating ||
+                    Boolean(deletingId) ||
+                    projects.length >= MAX_SAVED_PROJECTS
+                  }
                 >
                   {duplicating ? "Duplicating…" : "Duplicate"}
                 </button>
@@ -643,8 +670,9 @@ export function ProjectWorkspace({
                   className="project-delete-button"
                   type="button"
                   onClick={() => deleteProject(active.id)}
+                  disabled={Boolean(deletingId)}
                 >
-                  Delete
+                  {deletingId === active.id ? "Deleting…" : "Delete"}
                 </button>
               </div>
             </div>
