@@ -1,13 +1,11 @@
 import { redirect } from "next/navigation";
 import { TopNav } from "@/components/top-nav";
 import { ProfileSettingsForm } from "@/components/profile-settings-form";
-import { getLearningDashboard, getWebLearningDashboard } from "@/lib/learning-dashboard";
+import { getLearningDashboards } from "@/lib/learning-dashboard";
 
 export default async function ProfilePage() {
-  const [dashboard, webDashboard] = await Promise.all([
-    getLearningDashboard(),
-    getWebLearningDashboard(),
-  ]);
+  const { python: dashboard, web: webDashboard } =
+    await getLearningDashboards();
   const completedLessons =
     dashboard.completedLessons + webDashboard.completedLessons;
   const totalLessons = dashboard.totalLessons + webDashboard.totalLessons;
