@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
   getProjectCodeError,
@@ -8,24 +9,31 @@ import {
 } from "@/lib/project-validation";
 import { isSameOriginRequest } from "@/lib/request-security";
 
-export async function GET() {
+const MAX_PROJECTS = 25;
+
+async function getUserId() {
   const supabase = await createClient();
-  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
-  const userId =
-    !claimsError && claimsData?.claims && typeof claimsData.claims.sub === "string"
-      ? claimsData.claims.sub
-      : null;
+  const { data, error } = await supabase.auth.getClaims();
+
+  return !error && data?.claims && typeof data.claims.sub === "string"
+    ? data.claims.sub
+    : null;
+}
+
+export async function GET() {
+  const userId = await getUserId();
 
   if (!userId) {
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
 
+  const supabase = await createClient();
   const { data, error } = await supabase
-    .from("coding_projects")
+    .from("saved_projects")
     .select("id, title, language, code, created_at, updated_at")
     .eq("user_id", userId)
     .order("updated_at", { ascending: false })
-    .limit(50);
+    .limit(MAX_PROJECTS);
 
   if (error) {
     return NextResponse.json({ error: "Projects could not be loaded." }, { status: 500 });
@@ -40,6 +48,13 @@ export async function GET() {
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) {
     return NextResponse.json({ error: "Cross-site request blocked." }, { status: 403 });
+  }
+
+  if (!isAdminSupabaseConfigured) {
+    return NextResponse.json(
+      { error: "Project saving is temporarily unavailable." },
+      { status: 503 },
+    );
   }
 
   let payload: unknown;
@@ -57,7 +72,10 @@ export async function POST(request: Request) {
     !("language" in payload) ||
     typeof payload.language !== "string"
   ) {
-    return NextResponse.json({ error: "Project title and language are required." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Project title and language are required." },
+      { status: 400 },
+    );
   }
 
   const code =
@@ -75,19 +93,30 @@ export async function POST(request: Request) {
     );
   }
 
-  const supabase = await createClient();
-  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
-  const userId =
-    !claimsError && claimsData?.claims && typeof claimsData.claims.sub === "string"
-      ? claimsData.claims.sub
-      : null;
-
+  const userId = await getUserId();
   if (!userId) {
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("coding_projects")
+  const admin = createAdminClient();
+  const { count, error: countError } = await admin
+    .from("saved_projects")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if (countError) {
+    return NextResponse.json({ error: "Project limit could not be checked." }, { status: 503 });
+  }
+
+  if ((count ?? 0) >= MAX_PROJECTS) {
+    return NextResponse.json(
+      { error: `You can keep up to ${MAX_PROJECTS} saved projects right now.` },
+      { status: 409 },
+    );
+  }
+
+  const { data, error } = await admin
+    .from("saved_projects")
     .insert({
       user_id: userId,
       title,
