@@ -6,6 +6,13 @@ import {
   MAX_SAVED_PROJECTS,
   type ProjectLanguage,
 } from "@/lib/project-validation";
+import {
+  createWebPreviewDocument,
+  decodeWebProject,
+  encodeWebProject,
+  webProjectStarter,
+  type WebProjectFile,
+} from "@/lib/web-project";
 
 export type SavedProject = {
   id: string;
@@ -23,6 +30,7 @@ const starterCode: Record<ProjectLanguage, string> = {
   html: "<h1>Hello, CodeTrail!</h1>",
   css: "body {\n  font-family: sans-serif;\n}",
   javascript: 'console.log("Hello, CodeTrail!");',
+  web: encodeWebProject(webProjectStarter),
 };
 
 const fileNames: Record<ProjectLanguage, string> = {
@@ -30,6 +38,7 @@ const fileNames: Record<ProjectLanguage, string> = {
   html: "index.html",
   css: "styles.css",
   javascript: "script.js",
+  web: "3 files",
 };
 
 const languageLabels: Record<ProjectLanguage, string> = {
@@ -37,6 +46,7 @@ const languageLabels: Record<ProjectLanguage, string> = {
   html: "HTML",
   css: "CSS",
   javascript: "JavaScript",
+  web: "Web App",
 };
 
 const languageIcons: Record<ProjectLanguage, string> = {
@@ -44,10 +54,26 @@ const languageIcons: Record<ProjectLanguage, string> = {
   html: "🌐",
   css: "🎨",
   javascript: "⚡",
+  web: "🧩",
+};
+
+const webFileNames: Record<WebProjectFile, string> = {
+  html: "index.html",
+  css: "styles.css",
+  javascript: "script.js",
+};
+
+const webFileLabels: Record<WebProjectFile, string> = {
+  html: "HTML",
+  css: "CSS",
+  javascript: "JavaScript",
 };
 
 function getDownloadName(project: SavedProject) {
-  const extension = fileNames[project.language].split(".").pop() || "txt";
+  const extension =
+    project.language === "web"
+      ? "html"
+      : fileNames[project.language].split(".").pop() || "txt";
   const safeTitle =
     project.title
       .trim()
@@ -84,6 +110,7 @@ export function ProjectWorkspace({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [newProjectMenuOpen, setNewProjectMenuOpen] = useState(false);
   const [projectSearch, setProjectSearch] = useState("");
+  const [activeWebFile, setActiveWebFile] = useState<WebProjectFile>("html");
   const [runState, setRunState] = useState<"idle" | "running" | "done" | "error">("idle");
   const [runOutput, setRunOutput] = useState("");
   const [runError, setRunError] = useState("");
@@ -97,6 +124,20 @@ export function ProjectWorkspace({
   );
   const saveState = active ? saveStates[active.id] ?? "saved" : "saved";
   const activeDeleting = Boolean(active && deletingId === active.id);
+  const activeWebFiles = useMemo(
+    () => (active?.language === "web" ? decodeWebProject(active.code) : null),
+    [active],
+  );
+  const activeEditorValue =
+    active?.language === "web" && activeWebFiles
+      ? activeWebFiles[activeWebFile]
+      : active?.code ?? "";
+  const activeEditorName =
+    active?.language === "web"
+      ? webFileNames[activeWebFile]
+      : active
+        ? fileNames[active.language]
+        : "";
   const visibleProjects = useMemo(() => {
     const query = projectSearch.trim().toLowerCase();
     if (!query) return projects;
@@ -109,7 +150,15 @@ export function ProjectWorkspace({
   }, [projectSearch, projects]);
 
   const previewDocument = useMemo(() => {
-    if (!active || (active.language !== "html" && active.language !== "css")) {
+    if (!active) return "";
+
+    if (active.language === "web") {
+      return createWebPreviewDocument(decodeWebProject(active.code), {
+        restrictNetwork: true,
+      });
+    }
+
+    if (active.language !== "html" && active.language !== "css") {
       return "";
     }
 
@@ -281,6 +330,18 @@ export function ProjectWorkspace({
     queueProjectSave(nextProject);
   }
 
+  function updateWebFile(file: WebProjectFile, value: string) {
+    if (!active || active.language !== "web" || activeDeleting) return;
+
+    const files = decodeWebProject(active.code);
+    updateActive({
+      code: encodeWebProject({
+        ...files,
+        [file]: value,
+      }),
+    });
+  }
+
   async function createProject(language: ProjectLanguage = "python") {
     if (creating || deletingId || projects.length >= MAX_SAVED_PROJECTS) return;
     setCreating(true);
@@ -309,6 +370,7 @@ export function ProjectWorkspace({
 
       setProjects((current) => [data.project!, ...current]);
       setActiveId(data.project.id);
+      setActiveWebFile("html");
       setProjectSaveState(data.project.id, "saved");
       setProjectSearch("");
       setNewProjectMenuOpen(false);
@@ -370,7 +432,11 @@ export function ProjectWorkspace({
   function exportProject() {
     if (!active) return;
 
-    const blob = new Blob([active.code], { type: "text/plain;charset=utf-8" });
+    const exportedCode =
+      active.language === "web"
+        ? createWebPreviewDocument(decodeWebProject(active.code))
+        : active.code;
+    const blob = new Blob([exportedCode], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -501,7 +567,45 @@ export function ProjectWorkspace({
   }
 
   function changeLanguage(language: ProjectLanguage) {
-    if (!active) return;
+    if (!active || language === active.language) return;
+
+    if (language === "web") {
+      const files = { ...webProjectStarter };
+
+      if (active.language === "html") files.html = active.code;
+      if (active.language === "css") files.css = active.code;
+      if (active.language === "javascript") files.javascript = active.code;
+
+      setActiveWebFile(
+        active.language === "html" ||
+          active.language === "css" ||
+          active.language === "javascript"
+          ? active.language
+          : "html",
+      );
+      updateActive({ language, code: encodeWebProject(files) });
+      return;
+    }
+
+    if (active.language === "web") {
+      const files = decodeWebProject(active.code);
+      const nextCode =
+        language === "html" || language === "css" || language === "javascript"
+          ? files[language]
+          : starterCode.python;
+
+      if (
+        !window.confirm(
+          `Switch to ${languageLabels[language]}? This changes the project back to one file.`,
+        )
+      ) {
+        return;
+      }
+
+      updateActive({ language, code: nextCode });
+      return;
+    }
+
     const shouldReplace =
       !active.code.trim() ||
       Object.values(starterCode).some((sample) => sample === active.code);
