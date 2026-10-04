@@ -47,6 +47,15 @@ const rules: Record<string, AnswerRule> = {
     correctFeedback: "Nice. Your condition includes the comparison, colon and indented action.",
     incorrectFeedback: "Use if score >= 10: on the first line, then print Ready on the next line.",
   },
+  "condition-order": {
+    accepted: [
+      'if score >= 10:\nprint("Ready")\nelse:\nprint("Keep trying")',
+      "if score >= 10:\nprint('Ready')\nelse:\nprint('Keep trying')",
+    ],
+    indentPattern: [0, 1, 0, 1],
+    correctFeedback: "Perfect. The if block comes first, followed by the else block, with both actions indented.",
+    incorrectFeedback: "Start with the if line, place its indented action next, then else and its indented action.",
+  },
   "loop-range-output": {
     accepted: ["0, 1, 2"],
     correctFeedback: "Correct. range(3) starts at 0 and stops before 3.",
@@ -67,6 +76,12 @@ const rules: Record<string, AnswerRule> = {
     indentPattern: [0, 1],
     correctFeedback: "Great. range(1, 4) produces 1, 2 and 3.",
     incorrectFeedback: "Use range(1, 4), then print the loop variable on the next line.",
+  },
+  "loop-debug": {
+    accepted: ["for number in range(1, 4):\nprint(number)"],
+    indentPattern: [0, 1],
+    correctFeedback: "Bug fixed. The loop line has its colon and the repeated action is indented.",
+    incorrectFeedback: "Check two things: the for line needs a colon, and print(number) must be indented inside the loop.",
   },
   "function-def": {
     accepted: ["def greet():"],
