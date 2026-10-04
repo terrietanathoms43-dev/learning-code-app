@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { applyCodeEditorKey, getLineAndColumn } from "../lib/code-editor.ts";
+import { applyCodeEditorKey, getLineAndColumn, getLineSelection } from "../lib/code-editor.ts";
 
 test("Tab inserts two spaces at the caret", () => {
   assert.deepEqual(
@@ -87,5 +87,22 @@ test("line and column are one-based", () => {
   assert.deepEqual(getLineAndColumn("one\ntwo", 6), {
     line: 2,
     column: 3,
+  });
+});
+
+
+test("line selection resolves a one-based line and column", () => {
+  assert.deepEqual(getLineSelection("one\ntwo\nthree", 2, 2), {
+    start: 4,
+    end: 7,
+    caret: 5,
+  });
+});
+
+test("line selection clamps beyond the final line", () => {
+  assert.deepEqual(getLineSelection("one\ntwo", 99, 99), {
+    start: 4,
+    end: 7,
+    caret: 7,
   });
 });
