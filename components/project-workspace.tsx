@@ -96,6 +96,7 @@ export function ProjectWorkspace({
     [activeId, projects],
   );
   const saveState = active ? saveStates[active.id] ?? "saved" : "saved";
+  const activeDeleting = Boolean(active && deletingId === active.id);
   const visibleProjects = useMemo(() => {
     const query = projectSearch.trim().toLowerCase();
     if (!query) return projects;
@@ -266,7 +267,7 @@ export function ProjectWorkspace({
   }
 
   function updateActive(changes: Partial<SavedProject>) {
-    if (!active) return;
+    if (!active || activeDeleting) return;
 
     const nextProject = { ...active, ...changes };
     resetRunResult();
@@ -382,7 +383,7 @@ export function ProjectWorkspace({
   }
 
   function saveActiveNow() {
-    if (!active || saveState === "saving") return;
+    if (!active || activeDeleting || saveState === "saving") return;
     queueProjectSave(active);
     flushProjectSave(active.id);
   }
@@ -445,7 +446,11 @@ export function ProjectWorkspace({
   }
 
   async function runCode() {
-    if (!active || (active.language !== "python" && active.language !== "javascript")) {
+    if (
+      !active ||
+      activeDeleting ||
+      (active.language !== "python" && active.language !== "javascript")
+    ) {
       return;
     }
 
@@ -610,6 +615,7 @@ export function ProjectWorkspace({
                 onChange={(event) => updateActive({ title: event.target.value })}
                 onBlur={() => flushProjectSave(active.id)}
                 onKeyDown={handleSaveShortcut}
+                disabled={activeDeleting}
               />
 
               <div className="project-toolbar-actions">
@@ -617,7 +623,11 @@ export function ProjectWorkspace({
                   className="project-save-button"
                   type="button"
                   onClick={saveActiveNow}
-                  disabled={saveState === "saved" || saveState === "saving"}
+                  disabled={
+                    activeDeleting ||
+                    saveState === "saved" ||
+                    saveState === "saving"
+                  }
                 >
                   {saveState === "error"
                     ? "Retry save"
