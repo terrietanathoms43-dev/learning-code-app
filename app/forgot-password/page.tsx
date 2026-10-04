@@ -1,21 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { getRecoveryAuthMessage } from "@/lib/auth-redirect";
 
-export default function ForgotPasswordPage() {
-  const [message, setMessage] = useState("");
+function ForgotPasswordPageContent() {
+  const searchParams = useSearchParams();
+  const [message, setMessage] = useState(() =>
+    getRecoveryAuthMessage(searchParams.get("auth")),
+  );
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
-
-  useEffect(() => {
-    const authMessage = getRecoveryAuthMessage(
-      new URLSearchParams(window.location.search).get("auth"),
-    );
-    if (authMessage) setMessage(authMessage);
-  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -98,5 +95,14 @@ export default function ForgotPasswordPage() {
         </Link>
       </section>
     </main>
+  );
+}
+
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={<main className="auth-page" aria-busy="true" />}>
+      <ForgotPasswordPageContent />
+    </Suspense>
   );
 }
