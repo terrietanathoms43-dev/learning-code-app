@@ -6,6 +6,20 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
+function getSafeNextPath(origin: string, value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
+    return "/learn";
+  }
+
+  try {
+    const candidate = new URL(value, origin);
+    if (candidate.origin !== origin) return "/learn";
+    return `${candidate.pathname}${candidate.search}${candidate.hash}`;
+  } catch {
+    return "/learn";
+  }
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signup");
@@ -32,6 +46,10 @@ export default function LoginPage() {
 
     setBusy(true);
     const supabase = createClient();
+    const nextPath = getSafeNextPath(
+      window.location.origin,
+      new URLSearchParams(window.location.search).get("next"),
+    );
 
     try {
       if (mode === "signup") {
@@ -39,13 +57,13 @@ export default function LoginPage() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
+            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
           },
         });
         if (error) throw error;
 
         if (data.session) {
-          router.push("/learn");
+          router.push(nextPath);
           router.refresh();
           return;
         }
@@ -54,7 +72,7 @@ export default function LoginPage() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.push("/learn");
+        router.push(nextPath);
         router.refresh();
       }
     } catch (error) {
