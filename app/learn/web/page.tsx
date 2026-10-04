@@ -17,6 +17,7 @@ export default async function WebLearnPage() {
   return (
     <div className="site-shell learn-page web-world-page">
       <TopNav
+        signInHref="/login?next=/learn/web"
         stats={{
           streak: dashboard.streak,
           totalXp: dashboard.totalXp,
@@ -66,7 +67,7 @@ export default async function WebLearnPage() {
               </p>
             </div>
             {!dashboard.signedIn && (
-              <Link className="trail-signin" href="/login">Sign in</Link>
+              <Link className="trail-signin" href="/login?next=/learn/web">Sign in</Link>
             )}
           </div>
 
