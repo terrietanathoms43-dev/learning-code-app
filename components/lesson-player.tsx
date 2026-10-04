@@ -71,7 +71,33 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     (lesson.exercises.length / Math.max(lesson.exercises.length + mistakes, 1)) * 100,
   );
 
+  const orderedLines =
+    exercise?.type === "order" && answer
+      ? answer.split("\n")
+      : [];
+  const remainingOrderLines =
+    exercise?.type === "order" && exercise.options
+      ? exercise.options.filter((line) => !orderedLines.includes(line))
+      : [];
+
   const outOfEnergy = energy <= 0 && !feedback?.correct;
+
+  function addOrderedLine(line: string) {
+    if (checking || saving || feedback?.correct) return;
+    setAnswer((current) => (current ? `${current}\n${line}` : line));
+    setFeedback(null);
+  }
+
+  function removeOrderedLine(lineIndex: number) {
+    if (checking || saving || feedback?.correct) return;
+    setAnswer((current) =>
+      current
+        .split("\n")
+        .filter((_, index) => index !== lineIndex)
+        .join("\n"),
+    );
+    setFeedback(null);
+  }
 
   function restartLesson() {
     setIndex(0);
@@ -296,7 +322,14 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           </div>
         </div>
 
-        {exercise.code && <pre className="code-panel"><code>{exercise.code}</code></pre>}
+        {exercise.code && (
+          <div className={exercise.type === "debug" ? "bug-panel" : undefined}>
+            {exercise.type === "debug" && <span className="bug-label">Buggy code</span>}
+            <pre className={`code-panel ${exercise.type === "debug" ? "code-panel--buggy" : ""}`}>
+              <code>{exercise.code}</code>
+            </pre>
+          </div>
+        )}
 
         {exercise.type === "choice" && exercise.options && (
           <div className="answer-options" role="radiogroup" aria-label="Answer choices">
@@ -335,14 +368,68 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           />
         )}
 
-        {exercise.type === "code" && (
-          <div className="mini-editor">
+        {exercise.type === "order" && exercise.options && (
+          <div className="code-order-builder">
+            <div className="order-section">
+              <div className="order-section-title">
+                <strong>Available lines</strong>
+                <span>Tap each line in the right order.</span>
+              </div>
+              <div className="order-bank">
+                {remainingOrderLines.length ? (
+                  remainingOrderLines.map((line) => (
+                    <button
+                      type="button"
+                      className="order-line order-line--available"
+                      key={line}
+                      onClick={() => addOrderedLine(line)}
+                      disabled={checking || saving || Boolean(feedback?.correct)}
+                    >
+                      <code>{line}</code>
+                      <span aria-hidden="true">＋</span>
+                    </button>
+                  ))
+                ) : (
+                  <span className="order-bank-empty">All lines are in your answer.</span>
+                )}
+              </div>
+            </div>
+
+            <div className="order-section">
+              <div className="order-section-title">
+                <strong>Your code</strong>
+                <span>Tap a line to move it back.</span>
+              </div>
+              <div className="order-result">
+                {orderedLines.length ? (
+                  orderedLines.map((line, lineIndex) => (
+                    <button
+                      type="button"
+                      className="order-line order-line--selected"
+                      key={`${line}-${lineIndex}`}
+                      onClick={() => removeOrderedLine(lineIndex)}
+                      disabled={checking || saving || Boolean(feedback?.correct)}
+                    >
+                      <span className="order-number">{lineIndex + 1}</span>
+                      <code>{line}</code>
+                    </button>
+                  ))
+                ) : (
+                  <div className="order-placeholder">Your ordered code will appear here.</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {(exercise.type === "code" || exercise.type === "debug") && (
+          <div className={`mini-editor ${exercise.type === "debug" ? "debug-editor" : ""}`}>
             <div className="editor-bar">
               <span /><span /><span />
-              <strong>main.py</strong>
+              <strong>{exercise.type === "debug" ? "fixed.py" : "main.py"}</strong>
             </div>
             <textarea
-              aria-label="Code answer"
+              aria-label={exercise.type === "debug" ? "Corrected code answer" : "Code answer"}
               value={answer}
               placeholder={exercise.placeholder}
               onChange={(event) => {
