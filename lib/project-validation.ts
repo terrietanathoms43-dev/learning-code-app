@@ -1,4 +1,4 @@
-export const projectLanguages = ["python", "html", "css", "javascript"] as const;
+export const projectLanguages = ["python", "html", "css", "javascript", "web"] as const;
 export const MAX_SAVED_PROJECTS = 25;
 export const MAX_PROJECT_CODE_LENGTH = 20_000;
 
