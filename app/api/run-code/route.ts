@@ -6,7 +6,7 @@ import { isSameOriginRequest } from "@/lib/request-security";
 
 export const maxDuration = 20;
 
-const MAX_CODE_LENGTH = 10_000;
+const MAX_CODE_LENGTH = 20_000;
 const MAX_OUTPUT_LENGTH = 12_000;
 const HOURLY_RUN_LIMIT = 30;
 
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
 
   if (code.length > MAX_CODE_LENGTH) {
     return NextResponse.json(
-      { error: "Runnable code must be 10,000 characters or fewer." },
+      { error: "Runnable code must be 20,000 characters or fewer." },
       { status: 400 },
     );
   }
