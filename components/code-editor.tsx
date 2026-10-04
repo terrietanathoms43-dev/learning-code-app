@@ -1,13 +1,18 @@
 "use client";
 
 import {
+  useEffect,
   useMemo,
   useRef,
   useState,
   type KeyboardEvent,
   type SyntheticEvent,
 } from "react";
-import { applyCodeEditorKey, getLineAndColumn } from "@/lib/code-editor";
+import {
+  applyCodeEditorKey,
+  getLineAndColumn,
+  getLineSelection,
+} from "@/lib/code-editor";
 import {
   tokenizeCode,
   type HighlightLanguage,
@@ -51,6 +56,34 @@ export function CodeEditor({
     [language, value],
   );
   const position = getLineAndColumn(value, cursor);
+
+  useEffect(() => {
+    if (!jumpTo) return;
+
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const target = getLineSelection(
+      value,
+      jumpTo.line,
+      jumpTo.column ?? 1,
+    );
+
+    window.requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.setSelectionRange(target.caret, target.caret);
+      const lineHeight = Number.parseFloat(
+        window.getComputedStyle(textarea).lineHeight,
+      );
+      if (Number.isFinite(lineHeight)) {
+        textarea.scrollTop = Math.max(0, (jumpTo.line - 2) * lineHeight);
+        if (lineNumbersRef.current) {
+          lineNumbersRef.current.scrollTop = textarea.scrollTop;
+        }
+      }
+      setCursor(target.caret);
+    });
+  }, [jumpTo, value]);
 
   function restoreSelection(start: number, end: number) {
     window.requestAnimationFrame(() => {
@@ -135,7 +168,28 @@ export function CodeEditor({
 
   return (
     <div className="code-editor-shell">
-      <div className="code-editor-mobile-tools" aria-label="Editor tools">
+      <div className="code-editor-actions" aria-label="Editor actions">
+        <button type="button" onClick={() => void copyCode()} disabled={!value}>
+          {copied ? "Copied" : "Copy code"}
+        </button>
+        {onReset && (
+          <button type="button" onClick={onReset} disabled={disabled}>
+            Reset file
+          </button>
+        )}
+        {onRun && (
+          <button
+            type="button"
+            className="code-editor-action-run"
+            onClick={onRun}
+            disabled={disabled || !canRun}
+          >
+            ▶ Run
+          </button>
+        )}
+      </div>
+
+      <div className="code-editor-mobile-tools" aria-label="Mobile editor tools">
         <button type="button" onClick={() => applyKeyboardEdit("Tab")} disabled={disabled}>
           Tab
         </button>
