@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { CodeEditor } from "@/components/code-editor";
 import {
   MAX_PROJECT_CODE_LENGTH,
   MAX_SAVED_PROJECTS,
@@ -112,7 +113,8 @@ export function ProjectWorkspace({
   const [projectSearch, setProjectSearch] = useState("");
   const [activeWebFile, setActiveWebFile] = useState<WebProjectFile>("html");
   const [runState, setRunState] = useState<"idle" | "running" | "done" | "error">("idle");
-  const [runOutput, setRunOutput] = useState("");
+  const [runStdout, setRunStdout] = useState("");
+  const [runStderr, setRunStderr] = useState("");
   const [runError, setRunError] = useState("");
   const [runExitCode, setRunExitCode] = useState<number | null>(null);
   const [runRemaining, setRunRemaining] = useState<number | null>(null);
@@ -309,7 +311,8 @@ export function ProjectWorkspace({
 
   function resetRunResult() {
     setRunState("idle");
-    setRunOutput("");
+    setRunStdout("");
+    setRunStderr("");
     setRunError("");
     setRunExitCode(null);
     setRunRemaining(null);
@@ -530,7 +533,8 @@ export function ProjectWorkspace({
     if (runState === "running") return;
 
     setRunState("running");
-    setRunOutput("");
+    setRunStdout("");
+    setRunStderr("");
     setRunError("");
     setRunExitCode(null);
 
@@ -558,12 +562,8 @@ export function ProjectWorkspace({
         return;
       }
 
-      const outputParts = [
-        data.stdout?.trim() ? data.stdout : "",
-        data.stderr?.trim() ? data.stderr : "",
-      ].filter(Boolean);
-
-      setRunOutput(outputParts.join("\n"));
+      setRunStdout(data.stdout ?? "");
+      setRunStderr(data.stderr ?? "");
       setRunExitCode(typeof data.exitCode === "number" ? data.exitCode : null);
       setRunRemaining(typeof data.remaining === "number" ? data.remaining : null);
       setRunState("done");
@@ -841,24 +841,22 @@ export function ProjectWorkspace({
                 </div>
               )}
 
-              <textarea
+              <CodeEditor
                 value={activeEditorValue}
-                aria-label={
+                ariaLabel={
                   active.language === "web"
                     ? `${activeEditorName} code`
                     : "Project code"
                 }
-                spellCheck={false}
-                autoCapitalize="none"
-                autoCorrect="off"
+                fileName={activeEditorName}
                 maxLength={MAX_PROJECT_CODE_LENGTH}
-                onChange={(event) =>
+                onChange={(value) =>
                   active.language === "web"
-                    ? updateWebFile(activeWebFile, event.target.value)
-                    : updateActive({ code: event.target.value })
+                    ? updateWebFile(activeWebFile, value)
+                    : updateActive({ code: value })
                 }
                 onBlur={() => flushProjectSave(active.id)}
-                onKeyDown={handleSaveShortcut}
+                onSave={saveActiveNow}
                 disabled={activeDeleting}
               />
             </div>
@@ -896,16 +894,38 @@ export function ProjectWorkspace({
                   <p className="project-output-error">{runError}</p>
                 )}
                 {runState === "done" && (
-                  <>
-                    <pre className="project-output-terminal">
-                      {runOutput || "(Program finished with no output.)"}
-                    </pre>
-                    <small>
-                      {runExitCode === 0
-                        ? "Finished successfully."
-                        : `Process exited with code ${runExitCode ?? "unknown"}.`}
-                    </small>
-                  </>
+                  <div className="project-output-results">
+                    <div
+                      className={`project-run-status ${runExitCode === 0 ? "is-success" : "is-error"}`}
+                    >
+                      <strong>
+                        {runExitCode === 0 ? "✓ Finished successfully" : "⚠ Run finished with errors"}
+                      </strong>
+                      <span>Exit code {runExitCode ?? "unknown"}</span>
+                    </div>
+
+                    {runStdout.trim() && (
+                      <div className="project-output-stream">
+                        <span className="project-output-label">Program output</span>
+                        <pre className="project-output-terminal">{runStdout}</pre>
+                      </div>
+                    )}
+
+                    {runStderr.trim() && (
+                      <div className="project-output-stream project-output-stream--error">
+                        <span className="project-output-label">Errors</span>
+                        <pre className="project-output-terminal project-output-terminal--error">
+                          {runStderr}
+                        </pre>
+                      </div>
+                    )}
+
+                    {!runStdout.trim() && !runStderr.trim() && (
+                      <p className="project-output-placeholder">
+                        Program finished with no printed output.
+                      </p>
+                    )}
+                  </div>
                 )}
               </section>
             )}
