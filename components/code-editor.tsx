@@ -116,6 +116,17 @@ export function CodeEditor({
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (
+      (event.ctrlKey || event.metaKey) &&
+      event.key === "Enter" &&
+      onRun &&
+      canRun
+    ) {
+      event.preventDefault();
+      onRun();
+      return;
+    }
+
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
       event.preventDefault();
       onSave?.();
