@@ -137,6 +137,81 @@ const rules: Record<string, AnswerRule> = {
     correctFeedback: "Project finished. The final score is displayed with print().",
     incorrectFeedback: "Print the score variable directly.",
   },
+  "web-html-heading": {
+    accepted: ["<h1>Hello</h1>"],
+    correctFeedback: "Correct. h1 is the page's main heading level.",
+    incorrectFeedback: "Look for the heading tag with the largest heading level.",
+  },
+  "web-html-paragraph": {
+    accepted: ["p"],
+    correctFeedback: "Correct. The p tag creates a paragraph.",
+    incorrectFeedback: "HTML uses a one-letter tag name for a paragraph.",
+  },
+  "web-html-code": {
+    accepted: ["<h2>Welcome</h2>"],
+    correctFeedback: "Nice. You opened and closed an h2 around the heading text.",
+    incorrectFeedback: "Use an opening h2 tag, the word Welcome, then a closing h2 tag.",
+  },
+  "web-css-color": {
+    accepted: ["color"],
+    correctFeedback: "Correct. The color property changes text color.",
+    incorrectFeedback: "Choose the property specifically used for foreground text color.",
+  },
+  "web-css-selector": {
+    accepted: ["h1"],
+    correctFeedback: "Correct. The h1 selector targets every h1 element.",
+    incorrectFeedback: "Use the element name itself as the selector.",
+  },
+  "web-css-debug": {
+    accepted: ["h1 {\ncolor: blue;\n}", "h1 {\ncolor: blue\n}"],
+    correctFeedback: "Bug fixed. CSS properties use a colon between the property and value.",
+    incorrectFeedback: "Keep the h1 rule, then write color: blue inside the braces.",
+  },
+  "web-js-variable": {
+    accepted: ["let score = 5;"],
+    correctFeedback: "Correct. let creates a JavaScript variable and = assigns its value.",
+    incorrectFeedback: "Look for let followed by the variable name and an assignment.",
+  },
+  "web-js-console": {
+    accepted: ["log"],
+    correctFeedback: "Correct. console.log() writes a value to the developer console.",
+    incorrectFeedback: "The method name is the same word used when developers say they log a value.",
+  },
+  "web-js-code": {
+    accepted: [
+      'const name = "Ada";\nconsole.log(name)',
+      "const name = 'Ada';\nconsole.log(name)",
+      'const name = "Ada"\nconsole.log(name)',
+      "const name = 'Ada'\nconsole.log(name)",
+    ],
+    correctFeedback: "Great. You created a constant and logged its stored value.",
+    incorrectFeedback: "Create const name with the text Ada, then call console.log(name) on the next line.",
+  },
+  "web-project-html": {
+    accepted: ["<button>Start</button>"],
+    correctFeedback: "Great. Your page now has a button with visible text.",
+    incorrectFeedback: "Wrap the word Start between opening and closing button tags.",
+  },
+  "web-project-css": {
+    accepted: [
+      "button {\nbackground: blue;\n}",
+      "button {\nbackground: blue\n}",
+      "button {\nbackground-color: blue;\n}",
+      "button {\nbackground-color: blue\n}",
+    ],
+    correctFeedback: "Nice. The button now has a blue background rule.",
+    incorrectFeedback: "Target button, then set its background or background-color to blue inside braces.",
+  },
+  "web-project-js": {
+    accepted: [
+      'const message = "Ready";\nconsole.log(message)',
+      "const message = 'Ready';\nconsole.log(message)",
+      'const message = "Ready"\nconsole.log(message)',
+      "const message = 'Ready'\nconsole.log(message)",
+    ],
+    correctFeedback: "Project logic complete. You stored Ready and logged the variable.",
+    incorrectFeedback: "Create const message with Ready, then log message on the next line.",
+  },
 };
 
 const punctuation = new Set(["(", ")", "[", "]", "{", "}", ":", ",", "=", ">", "<", "+", "-", "*", "/", "%"]);
