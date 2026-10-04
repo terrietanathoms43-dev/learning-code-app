@@ -144,7 +144,7 @@ export async function POST(request: Request) {
 
     const result = await sandbox.runCommand({
       ...command,
-      timeout: 3_000,
+      timeoutMs: 3_000,
     });
 
     const [stdout, stderr] = await Promise.all([
