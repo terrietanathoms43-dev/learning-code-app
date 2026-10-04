@@ -11,7 +11,7 @@ export default async function ProfilePage() {
   const totalLessons = dashboard.totalLessons + webDashboard.totalLessons;
 
   if (!dashboard.signedIn) {
-    redirect("/login");
+    redirect("/login?next=/profile");
   }
 
   return (
