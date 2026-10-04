@@ -113,3 +113,23 @@ test("validates bug-fix challenges", () => {
   assert.equal(checkAnswer("loop-debug", fixed)?.correct, true);
   assert.equal(checkAnswer("loop-debug", missingIndent)?.correct, false);
 });
+
+
+test("validates Web Foundations answers", () => {
+  assert.equal(checkAnswer("web-html-heading", "<h1>Hello</h1>")?.correct, true);
+  assert.equal(checkAnswer("web-html-heading", "<p>Hello</p>")?.correct, false);
+
+  const fixedCss = [
+    "h1 {",
+    "  color: blue;",
+    "}",
+  ].join("\n");
+  assert.equal(checkAnswer("web-css-debug", fixedCss)?.correct, true);
+  assert.equal(checkAnswer("web-css-debug", "h1 {\n  color blue\n}")?.correct, false);
+
+  const javascript = [
+    'const name = "Ada";',
+    "console.log(name);",
+  ].join("\n");
+  assert.equal(checkAnswer("web-js-code", javascript)?.correct, true);
+});
