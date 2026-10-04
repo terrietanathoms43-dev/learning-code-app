@@ -4,20 +4,29 @@ import { getLesson } from "@/lib/course-data";
 import { getLearningDashboards } from "@/lib/learning-dashboard";
 
 export default async function PracticePage() {
-  const { python: dashboard, web: webDashboard } =
-    await getLearningDashboards();
+  const {
+    python: dashboard,
+    web: webDashboard,
+    javascript: javascriptDashboard,
+  } = await getLearningDashboards();
   const completedCount =
-    dashboard.completedLessons + webDashboard.completedLessons;
+    dashboard.completedLessons +
+    webDashboard.completedLessons +
+    javascriptDashboard.completedLessons;
   const completedLessons = [
     ...dashboard.completedLessonSlugs,
     ...webDashboard.completedLessonSlugs,
+    ...javascriptDashboard.completedLessonSlugs,
   ]
     .map((slug) => getLesson(slug))
     .filter(Boolean);
-  const preferredTrail =
-    webDashboard.completedLessons > dashboard.completedLessons
-      ? "/learn/web"
-      : "/learn";
+  const preferredTrail = [
+    { href: "/learn", completed: dashboard.completedLessons },
+    { href: "/learn/web", completed: webDashboard.completedLessons },
+    { href: "/learn/javascript", completed: javascriptDashboard.completedLessons },
+  ].reduce((best, world) =>
+    world.completed > best.completed ? world : best,
+  ).href;
 
   return (
     <div className="site-shell">
