@@ -4,11 +4,19 @@ import { ProfileSettingsForm } from "@/components/profile-settings-form";
 import { getLearningDashboards } from "@/lib/learning-dashboard";
 
 export default async function ProfilePage() {
-  const { python: dashboard, web: webDashboard } =
-    await getLearningDashboards();
+  const {
+    python: dashboard,
+    web: webDashboard,
+    javascript: javascriptDashboard,
+  } = await getLearningDashboards();
   const completedLessons =
-    dashboard.completedLessons + webDashboard.completedLessons;
-  const totalLessons = dashboard.totalLessons + webDashboard.totalLessons;
+    dashboard.completedLessons +
+    webDashboard.completedLessons +
+    javascriptDashboard.completedLessons;
+  const totalLessons =
+    dashboard.totalLessons +
+    webDashboard.totalLessons +
+    javascriptDashboard.totalLessons;
 
   if (!dashboard.signedIn) {
     redirect("/login?next=/profile");
