@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { TopNav } from "@/components/top-nav";
-import { getLearningDashboard, getWebLearningDashboard } from "@/lib/learning-dashboard";
+import { getLearningDashboards } from "@/lib/learning-dashboard";
 import { getAchievements } from "@/lib/achievements";
 
 function formatActivityDate(value: string, timeZone: string) {
@@ -12,10 +12,8 @@ function formatActivityDate(value: string, timeZone: string) {
 }
 
 export default async function ProgressPage() {
-  const [dashboard, webDashboard] = await Promise.all([
-    getLearningDashboard(),
-    getWebLearningDashboard(),
-  ]);
+  const { python: dashboard, web: webDashboard } =
+    await getLearningDashboards();
   const lessonsCleared = dashboard.completedLessons + webDashboard.completedLessons;
   const dailyPercent = Math.min(100, Math.round((dashboard.todayXp / Math.max(dashboard.dailyGoalXp, 1)) * 100));
   const achievements = getAchievements(dashboard, webDashboard);
