@@ -17,7 +17,7 @@ export default async function ProjectsPage() {
   const [dashboard, projectsResult] = await Promise.all([
     getLearningDashboard(),
     supabase
-      .from("coding_projects")
+      .from("saved_projects")
       .select("id, title, language, code, created_at, updated_at")
       .eq("user_id", userId)
       .order("updated_at", { ascending: false })
