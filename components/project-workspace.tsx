@@ -223,6 +223,14 @@ export function ProjectWorkspace({
     const pending = pendingSaves.current.get(projectId);
     if (!pending) return;
 
+    const activeController = saveControllers.current.get(projectId);
+    if (activeController && !activeController.signal.aborted) {
+      return;
+    }
+    if (activeController?.signal.aborted) {
+      saveControllers.current.delete(projectId);
+    }
+
     const timeout = saveTimers.current.get(projectId);
     if (timeout !== undefined) {
       window.clearTimeout(timeout);
