@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { TopNav } from "@/components/top-nav";
-import { getLearningDashboard } from "@/lib/learning-dashboard";
+import { getLearningDashboard, getWebLearningDashboard } from "@/lib/learning-dashboard";
 import { getAchievements } from "@/lib/achievements";
 
 function formatActivityDate(value: string, timeZone: string) {
@@ -12,7 +12,11 @@ function formatActivityDate(value: string, timeZone: string) {
 }
 
 export default async function ProgressPage() {
-  const dashboard = await getLearningDashboard();
+  const [dashboard, webDashboard] = await Promise.all([
+    getLearningDashboard(),
+    getWebLearningDashboard(),
+  ]);
+  const lessonsCleared = dashboard.completedLessons + webDashboard.completedLessons;
   const dailyPercent = Math.min(100, Math.round((dashboard.todayXp / Math.max(dashboard.dailyGoalXp, 1)) * 100));
   const achievements = getAchievements(dashboard);
   const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length;
@@ -41,7 +45,7 @@ export default async function ProgressPage() {
         <section className="progress-stat-grid">
           <article><span>⭐</span><strong>{dashboard.totalXp}</strong><small>Total XP</small></article>
           <article><span>🔥</span><strong>{dashboard.streak}</strong><small>Day streak</small></article>
-          <article><span>✓</span><strong>{dashboard.completedLessons}</strong><small>Lessons cleared</small></article>
+          <article><span>✓</span><strong>{lessonsCleared}</strong><small>Lessons cleared</small></article>
           <article><span>🎯</span><strong>{dashboard.todayXp}/{dashboard.dailyGoalXp}</strong><small>Today&apos;s XP</small></article>
         </section>
 
@@ -58,11 +62,21 @@ export default async function ProgressPage() {
 
           <article className="progress-panel">
             <div className="progress-panel-heading">
+              <div><p className="eyebrow">Web Foundations</p><h2>Pixel Garden</h2></div>
+              <strong>{webDashboard.progressPercent}%</strong>
+            </div>
+            <div className="big-progress-track"><span style={{ width: `${webDashboard.progressPercent}%` }} /></div>
+            <p>{webDashboard.completedLessons} of {webDashboard.totalLessons} currently available web lessons completed.</p>
+            <Link className="secondary-button" href="/learn/web">Continue in Pixel Garden</Link>
+          </article>
+
+          <article className="progress-panel">
+            <div className="progress-panel-heading">
               <div><p className="eyebrow">Daily goal</p><h2>{dailyPercent}% complete</h2></div>
               <strong>{dashboard.todayXp} XP</strong>
             </div>
             <div className="big-progress-track daily"><span style={{ width: `${dailyPercent}%` }} /></div>
-            <p>Your current daily target is {dashboard.dailyGoalXp} XP.</p>
+            <p>Your current daily target is {dashboard.dailyGoalXp} XP across every learning world.</p>
           </article>
         </section>
 
