@@ -133,3 +133,28 @@ test("validates Web Foundations answers", () => {
   ].join("\n");
   assert.equal(checkAnswer("web-js-code", javascript)?.correct, true);
 });
+
+
+test("validates JavaScript Foundations answers", () => {
+  assert.equal(checkAnswer("js-variable-console", "log")?.correct, true);
+  assert.equal(checkAnswer("js-strict-equality", "false")?.correct, true);
+
+  const condition = [
+    "if (score >= 10) {",
+    '  console.log("Level up");',
+    "}",
+  ].join("\n");
+  assert.equal(checkAnswer("js-condition-code", condition)?.correct, true);
+  assert.equal(
+    checkAnswer("js-condition-code", 'if (score >= 10) {\nconsole.log("Level up");\n}')?.correct,
+    false,
+  );
+
+  const project = [
+    "let total = 0;",
+    "for (const score of scores) {",
+    "  total = total + score;",
+    "}",
+  ].join("\n");
+  assert.equal(checkAnswer("js-project-total", project)?.correct, true);
+});
