@@ -18,7 +18,7 @@ export default async function ProgressPage() {
   ]);
   const lessonsCleared = dashboard.completedLessons + webDashboard.completedLessons;
   const dailyPercent = Math.min(100, Math.round((dashboard.todayXp / Math.max(dashboard.dailyGoalXp, 1)) * 100));
-  const achievements = getAchievements(dashboard);
+  const achievements = getAchievements(dashboard, webDashboard);
   const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length;
 
   return (
