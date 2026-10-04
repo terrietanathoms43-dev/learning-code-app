@@ -1,6 +1,6 @@
 export type Exercise = {
   id: string;
-  type: "choice" | "text" | "code";
+  type: "choice" | "text" | "code" | "order" | "debug";
   eyebrow: string;
   prompt: string;
   code?: string;
@@ -124,6 +124,18 @@ export const lessons: Record<string, Lesson> = {
         prompt: "Write an if statement that prints Ready when score is at least 10.",
         placeholder: "if score >= 10:\n    print(\"Ready\")",
       },
+      {
+        id: "condition-order",
+        type: "order",
+        eyebrow: "Order the code",
+        prompt: "Put these lines in the correct order to handle both outcomes.",
+        options: [
+          '    print("Keep trying")',
+          "else:",
+          "if score >= 10:",
+          '    print("Ready")',
+        ],
+      },
     ],
   },
   loops: {
@@ -163,6 +175,14 @@ export const lessons: Record<string, Lesson> = {
         eyebrow: "Write code",
         prompt: "Write a loop that prints the numbers 1, 2 and 3 using range.",
         placeholder: "for number in range(1, 4):\n    print(number)",
+      },
+      {
+        id: "loop-debug",
+        type: "debug",
+        eyebrow: "Fix the bug",
+        prompt: "Repair this loop so it runs correctly.",
+        code: "for number in range(1, 4)\nprint(number)",
+        placeholder: "Rewrite the corrected loop",
       },
     ],
   },
