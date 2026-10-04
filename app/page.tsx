@@ -16,14 +16,17 @@ export default function Home() {
               <span> moving forward.</span>
             </h1>
             <p>
-              Short lessons, real coding practice, bright rewards, and a trail that
-              grows with every skill you master.
+              Short lessons, real coding practice, bright rewards, and learning worlds
+              for Python and web development that grow with every skill you master.
             </p>
             <div className="hero-actions">
               <Link className="primary-button primary-button--large" href="/learn">
-                Start the Python trail
+                Start Python
               </Link>
-              <Link className="secondary-button" href="/login">
+              <Link className="secondary-button" href="/learn/web">
+                Start Web
+              </Link>
+              <Link className="text-link" href="/login">
                 Sign in
               </Link>
             </div>
