@@ -271,34 +271,47 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     const finalAccuracy = completion?.accuracy ?? localAccuracy;
     const isPythonFinalProject = lesson.slug === "mini-project";
     const isWebFinalProject = lesson.slug === "web-mini-project";
-    const isFinalProject = isPythonFinalProject || isWebFinalProject;
+    const isJavaScriptFinalProject = lesson.slug === "js-mini-project";
+    const isFinalProject = isCourseFinalProject(lesson.slug);
 
     return (
       <main className={`lesson-shell lesson-finish ${isFinalProject ? "course-finish" : ""}`}>
         <div className="celebration-burst" aria-hidden="true">✦</div>
         <div className="lesson-finish-icon" aria-hidden="true">
-          {isWebFinalProject ? "🌐" : isPythonFinalProject ? "🎓" : "🏆"}
+          {isWebFinalProject
+            ? "🌐"
+            : isJavaScriptFinalProject
+              ? "⚡"
+              : isPythonFinalProject
+                ? "🎓"
+                : "🏆"}
         </div>
         <p className="eyebrow">
           {isWebFinalProject
             ? "Web Foundations complete"
-            : isPythonFinalProject
-              ? "Python Foundations complete"
-              : "Trail cleared"}
+            : isJavaScriptFinalProject
+              ? "JavaScript Foundations complete"
+              : isPythonFinalProject
+                ? "Python Foundations complete"
+                : "Trail cleared"}
         </p>
         <h1>
           {isWebFinalProject
             ? "Pixel Garden is in bloom!"
-            : isPythonFinalProject
-              ? "You cleared Beginner Meadow!"
-              : `${lesson.title} complete!`}
+            : isJavaScriptFinalProject
+              ? "You powered through Logic Lab!"
+              : isPythonFinalProject
+                ? "You cleared Beginner Meadow!"
+                : `${lesson.title} complete!`}
         </h1>
         <p>
           {isWebFinalProject
             ? "You combined HTML, CSS and JavaScript to finish your first web-building trail."
-            : isPythonFinalProject
-              ? "You combined variables, data types, operators, conditions, loops and functions in your first coding project."
-              : "You finished every challenge in this lesson."}
+            : isJavaScriptFinalProject
+              ? "You combined values, decisions, arrays, loops and functions to finish your JavaScript score tracker."
+              : isPythonFinalProject
+                ? "You combined variables, data types, operators, conditions, loops and functions in your first coding project."
+                : "You finished every challenge in this lesson."}
         </p>
 
         <div className="reward-grid">
