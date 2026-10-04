@@ -13,7 +13,11 @@ export default async function LessonPage({
 
   if (!lesson) notFound();
 
-  const worldHome = slug.startsWith("web-") ? "/learn/web" : "/learn";
+  const worldHome = slug.startsWith("web-")
+    ? "/learn/web"
+    : slug.startsWith("js-")
+      ? "/learn/javascript"
+      : "/learn";
 
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
