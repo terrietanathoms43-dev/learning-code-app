@@ -10,13 +10,18 @@ export type Achievement = {
   target: number;
 };
 
+type AchievementDashboard = Pick<
+  LearningDashboard,
+  "completedLessons" | "completedLessonSlugs" | "streak" | "totalXp"
+>;
+
 export function getAchievements(
-  dashboard: Pick<
-    LearningDashboard,
-    "completedLessons" | "completedLessonSlugs" | "streak" | "totalXp"
-  >,
+  dashboard: AchievementDashboard,
+  additionalDashboard?: Pick<LearningDashboard, "completedLessons">,
 ): Achievement[] {
   const completed = new Set(dashboard.completedLessonSlugs);
+  const allCompletedLessons =
+    dashboard.completedLessons + (additionalDashboard?.completedLessons ?? 0);
 
   return [
     {
@@ -24,8 +29,8 @@ export function getAchievements(
       title: "First Step",
       description: "Complete your first coding lesson.",
       icon: "🌱",
-      unlocked: dashboard.completedLessons >= 1,
-      progress: Math.min(dashboard.completedLessons, 1),
+      unlocked: allCompletedLessons >= 1,
+      progress: Math.min(allCompletedLessons, 1),
       target: 1,
     },
     {
