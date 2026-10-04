@@ -78,3 +78,38 @@ test("validates username format and reserved handles", () => {
   assert.equal(getUsernameError("Admin"), "That username is reserved. Choose another one.");
   assert.equal(getUsernameError(""), null);
 });
+
+
+test("validates ordered code challenges including indentation", () => {
+  const correct = [
+    "if score >= 10:",
+    '    print("Ready")',
+    "else:",
+    '    print("Keep trying")',
+  ].join("\n");
+
+  const wrongOrder = [
+    "else:",
+    '    print("Keep trying")',
+    "if score >= 10:",
+    '    print("Ready")',
+  ].join("\n");
+
+  assert.equal(checkAnswer("condition-order", correct)?.correct, true);
+  assert.equal(checkAnswer("condition-order", wrongOrder)?.correct, false);
+});
+
+test("validates bug-fix challenges", () => {
+  const fixed = [
+    "for number in range(1, 4):",
+    "    print(number)",
+  ].join("\n");
+
+  const missingIndent = [
+    "for number in range(1, 4):",
+    "print(number)",
+  ].join("\n");
+
+  assert.equal(checkAnswer("loop-debug", fixed)?.correct, true);
+  assert.equal(checkAnswer("loop-debug", missingIndent)?.correct, false);
+});
