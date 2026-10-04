@@ -23,11 +23,16 @@ test("mobile public learning flow stays usable", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByRole("link", { name: "Start Python" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Start Web" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Start JavaScript" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
   await page.getByRole("link", { name: "Start Web" }).click();
   await expect(page).toHaveURL(/\/learn\/web$/);
   await expect(page.getByRole("heading", { name: "Pixel Garden" })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+
+  await page.goto("/learn/javascript");
+  await expect(page.getByRole("heading", { name: "Logic Lab" })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
   await page.goto("/login?next=/projects");
