@@ -212,6 +212,123 @@ const rules: Record<string, AnswerRule> = {
     correctFeedback: "Project logic complete. You stored Ready and logged the variable.",
     incorrectFeedback: "Create const message with Ready, then log message on the next line.",
   },
+
+  "js-variable-console": {
+    accepted: ["log"],
+    correctFeedback: "Correct. console.log() is JavaScript's standard console output method.",
+    incorrectFeedback: "Complete console.___ with the method developers use to log a value.",
+  },
+  "js-variable-let": {
+    accepted: ["let score = 5;"],
+    correctFeedback: "Correct. let creates a variable whose value can change later.",
+    incorrectFeedback: "Use JavaScript's let keyword, then the variable name and assignment.",
+  },
+  "js-variable-code": {
+    accepted: [
+      'const language = "JavaScript";\nconsole.log(language)',
+      "const language = 'JavaScript';\nconsole.log(language)",
+      'const language = "JavaScript"\nconsole.log(language)',
+      "const language = 'JavaScript'\nconsole.log(language)",
+    ],
+    correctFeedback: "Nice. The constant stores the text and console.log reads the variable.",
+    incorrectFeedback: "Create const language with JavaScript, then log language on the next line.",
+  },
+  "js-type-boolean": {
+    accepted: ["Boolean"],
+    correctFeedback: "Correct. true and false are JavaScript boolean values.",
+    incorrectFeedback: "This value represents a yes/no state rather than text or a number.",
+  },
+  "js-strict-equality": {
+    accepted: ["false"],
+    correctFeedback: "Correct. === checks both value and type, so number 5 is not the same as string \"5\".",
+    incorrectFeedback: "Remember that === compares type as well as value.",
+  },
+  "js-operator-code": {
+    accepted: [
+      "let score = 8;\nscore = score + 2",
+      "let score = 8\nscore = score + 2",
+    ],
+    correctFeedback: "Correct. You created score, then stored the updated value back into it.",
+    incorrectFeedback: "Start with let score = 8, then assign score + 2 back to score.",
+  },
+  "js-condition-syntax": {
+    accepted: ["if (score >= 10) {"],
+    correctFeedback: "Correct. JavaScript puts the condition in parentheses and opens the block with {.",
+    incorrectFeedback: "Look for parentheses around the condition and an opening curly brace.",
+  },
+  "js-condition-output": {
+    accepted: ["Ready"],
+    correctFeedback: "Correct. 16 meets the age >= 13 condition, so Ready is logged.",
+    incorrectFeedback: "Check whether 16 makes age >= 13 true.",
+  },
+  "js-condition-code": {
+    accepted: [
+      'if (score >= 10) {\nconsole.log("Level up");\n}',
+      "if (score >= 10) {\nconsole.log('Level up');\n}",
+      'if (score >= 10) {\nconsole.log("Level up")\n}',
+      "if (score >= 10) {\nconsole.log('Level up')\n}",
+    ],
+    indentPattern: [0, 1, 0],
+    correctFeedback: "Great. Your if block checks the score and runs the indented log statement.",
+    incorrectFeedback: "Use if (score >= 10) {, put console.log inside the block, then close it with }.",
+  },
+  "js-array-index": {
+    accepted: ["blue"],
+    correctFeedback: "Correct. JavaScript arrays start at index 0, so colors[0] is blue.",
+    incorrectFeedback: "Array positions start counting at 0.",
+  },
+  "js-loop-output": {
+    accepted: ["1, 2, 3"],
+    correctFeedback: "Correct. The loop starts at 1 and runs while i is at most 3.",
+    incorrectFeedback: "Follow i from its starting value until the <= 3 condition becomes false.",
+  },
+  "js-loop-code": {
+    accepted: [
+      "for (const item of items) {\nconsole.log(item);\n}",
+      "for (const item of items) {\nconsole.log(item)\n}",
+    ],
+    indentPattern: [0, 1, 0],
+    correctFeedback: "Correct. for...of visits each array value and logs it.",
+    incorrectFeedback: "Use for (const item of items) {, log item inside, then close the block.",
+  },
+  "js-function-syntax": {
+    accepted: ["function greet(name) {"],
+    correctFeedback: "Correct. A JavaScript function starts with function, its name, parameters and an opening brace.",
+    incorrectFeedback: "Look for JavaScript's function keyword followed by greet(name).",
+  },
+  "js-function-return": {
+    accepted: ["return"],
+    correctFeedback: "Correct. return sends a result back to the code that called the function.",
+    incorrectFeedback: "Use the keyword that gives the calculated value back to the caller.",
+  },
+  "js-function-code": {
+    accepted: [
+      "function double(number) {\nreturn number * 2;\n}",
+      "function double(number) {\nreturn number * 2\n}",
+    ],
+    indentPattern: [0, 1, 0],
+    correctFeedback: "Excellent. The function accepts a number and returns twice its value.",
+    incorrectFeedback: "Define double(number), return number * 2 inside the block, then close the brace.",
+  },
+  "js-project-array": {
+    accepted: ["const scores = [4, 7, 9];"],
+    correctFeedback: "Correct. Square brackets create the array and commas separate its values.",
+    incorrectFeedback: "Use const scores = followed by the three numbers inside square brackets.",
+  },
+  "js-project-total": {
+    accepted: [
+      "let total = 0;\nfor (const score of scores) {\ntotal = total + score;\n}",
+      "let total = 0\nfor (const score of scores) {\ntotal = total + score\n}",
+    ],
+    indentPattern: [0, 0, 1, 0],
+    correctFeedback: "Project logic works. Each score is added into the running total.",
+    incorrectFeedback: "Start total at 0, loop over scores, and add each score to total inside the loop.",
+  },
+  "js-project-output": {
+    accepted: ["console.log(total);", "console.log(total)"],
+    correctFeedback: "Project complete. The final total is now printed to the console.",
+    incorrectFeedback: "Log the total variable directly with console.log.",
+  },
 };
 
 const punctuation = new Set(["(", ")", "[", "]", "{", "}", ":", ",", "=", ">", "<", "+", "-", "*", "/", "%"]);
