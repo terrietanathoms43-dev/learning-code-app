@@ -67,7 +67,7 @@ test.describe("authenticated learner flow", () => {
     const title = page.getByLabel("Project title");
     await expect(title).toBeVisible();
     await title.fill(uniqueTitle);
-    await title.press("ControlOrMeta+s");
+    await title.press("Control+s");
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
 
     await page.getByRole("tab", { name: /HTML/ }).click();
@@ -87,7 +87,7 @@ test.describe("authenticated learner flow", () => {
         'document.querySelector("#e2e-button")?.addEventListener("click", () => { document.querySelector("#e2e-heading").textContent = "JavaScript works"; });',
       );
 
-    await page.getByLabel("script.js code").press("ControlOrMeta+s");
+    await page.getByLabel("script.js code").press("Control+s");
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
 
     const preview = page.frameLocator('iframe[title$="preview"]');
@@ -102,7 +102,9 @@ test.describe("authenticated learner flow", () => {
 
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Delete" }).click();
-    await expect(page.getByDisplayValue(uniqueTitle)).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: new RegExp(uniqueTitle) }),
+    ).toHaveCount(0);
 
     await page.goto("/profile");
     await expect(page.getByRole("heading", { name: /learner profile/i })).toBeVisible();
