@@ -1,11 +1,23 @@
 import Link from "next/link";
 import { TopNav } from "@/components/top-nav";
 import { getLesson } from "@/lib/course-data";
-import { getLearningDashboard } from "@/lib/learning-dashboard";
+import { getLearningDashboards } from "@/lib/learning-dashboard";
 
 export default async function PracticePage() {
-  const dashboard = await getLearningDashboard();
-  const completedLessons = dashboard.completedLessonSlugs.map((slug) => getLesson(slug)).filter(Boolean);
+  const { python: dashboard, web: webDashboard } =
+    await getLearningDashboards();
+  const completedCount =
+    dashboard.completedLessons + webDashboard.completedLessons;
+  const completedLessons = [
+    ...dashboard.completedLessonSlugs,
+    ...webDashboard.completedLessonSlugs,
+  ]
+    .map((slug) => getLesson(slug))
+    .filter(Boolean);
+  const preferredTrail =
+    webDashboard.completedLessons > dashboard.completedLessons
+      ? "/learn/web"
+      : "/learn";
 
   return (
     <div className="site-shell">
@@ -25,15 +37,15 @@ export default async function PracticePage() {
             <h1>Strengthen skills you already unlocked.</h1>
             <p>Replay completed lessons to review concepts without duplicate completion XP.</p>
           </div>
-          <Link className="secondary-button" href="/learn">Back to trail</Link>
+          <Link className="secondary-button" href={preferredTrail}>Back to trail</Link>
         </section>
 
-        {dashboard.completedLessons < 3 ? (
+        {completedCount < 3 ? (
           <section className="practice-locked">
             <div className="practice-lock-icon">🔒</div>
-            <h2>Complete 3 lessons to unlock your practice deck.</h2>
-            <p>You have cleared {dashboard.completedLessons} so far. Keep moving down the trail.</p>
-            <Link className="primary-button" href="/learn">Continue learning</Link>
+            <h2>Complete 3 lessons across your learning worlds to unlock your practice deck.</h2>
+            <p>You have cleared {completedCount} so far. Keep moving down the trail.</p>
+            <Link className="primary-button" href={preferredTrail}>Continue learning</Link>
           </section>
         ) : (
           <section className="practice-grid">
