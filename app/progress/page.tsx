@@ -22,6 +22,7 @@ export default async function ProgressPage() {
   return (
     <div className="site-shell">
       <TopNav
+        signInHref="/login?next=/progress"
         stats={{
           streak: dashboard.streak,
           totalXp: dashboard.totalXp,
@@ -37,7 +38,11 @@ export default async function ProgressPage() {
             <h1>Progress that feels like progress.</h1>
             <p>Track completed lessons, XP, daily goals and the coding habit you are building.</p>
           </div>
-          {!dashboard.signedIn && <Link className="primary-button" href="/login">Sign in to save progress</Link>}
+          {!dashboard.signedIn && (
+            <Link className="primary-button" href="/login?next=/progress">
+              Sign in to save progress
+            </Link>
+          )}
         </section>
 
         <section className="progress-stat-grid">
