@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TimezoneSync } from "@/components/timezone-sync";
 
 type TopNavProps = {
+  signInHref?: string;
   stats?: {
     streak: number;
     totalXp: number;
@@ -11,7 +12,7 @@ type TopNavProps = {
   };
 };
 
-export function TopNav({ stats }: TopNavProps) {
+export function TopNav({ stats, signInHref = "/login" }: TopNavProps) {
   return (
     <>
       <TimezoneSync
@@ -29,11 +30,11 @@ export function TopNav({ stats }: TopNavProps) {
         <Link href="/practice">Practice</Link>
         {stats?.signedIn && <Link href="/projects">Projects</Link>}
         <Link href="/progress">Progress</Link>
-        {stats?.signedIn ? <Link href="/profile">Profile</Link> : <Link href="/login">Sign in</Link>}
+        {stats?.signedIn ? <Link href="/profile">Profile</Link> : <Link href={signInHref}>Sign in</Link>}
       </nav>
 
       <div className="top-stats" aria-label="Learning stats">
-        <Link className="profile-chip" href={stats?.signedIn ? "/profile" : "/login"}>
+        <Link className="profile-chip" href={stats?.signedIn ? "/profile" : signInHref}>
           {stats?.signedIn ? (stats.username ? `@${stats.username}` : "👤") : "Sign in"}
         </Link>
         <span className="stat-chip">🔥 <strong>{stats?.streak ?? 0}</strong></span>
