@@ -35,12 +35,33 @@ export function ProjectWorkspace({
   const [activeId, setActiveId] = useState(initialProjects[0]?.id ?? null);
   const [saveState, setSaveState] = useState<"saved" | "unsaved" | "saving" | "error">("saved");
   const [creating, setCreating] = useState(false);
+  const [runState, setRunState] = useState<"idle" | "running" | "done" | "error">("idle");
+  const [runOutput, setRunOutput] = useState("");
+  const [runError, setRunError] = useState("");
+  const [runExitCode, setRunExitCode] = useState<number | null>(null);
+  const [runRemaining, setRunRemaining] = useState<number | null>(null);
   const [message, setMessage] = useState("");
 
   const active = useMemo(
     () => projects.find((project) => project.id === activeId) ?? null,
     [activeId, projects],
   );
+
+  const previewDocument = useMemo(() => {
+    if (!active || (active.language !== "html" && active.language !== "css")) {
+      return "";
+    }
+
+    const csp =
+      "default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'none'; font-src 'none'; connect-src 'none';";
+
+    if (active.language === "html") {
+      return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${csp}"><style>body{font-family:system-ui,sans-serif;padding:24px;color:#18203b}</style></head><body>${active.code}</body></html>`;
+    }
+
+    const safeCss = active.code.replace(/<\/style/gi, "<\\/style");
+    return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${csp}"><style>${safeCss}</style></head><body><main><h1>CodeTrail Preview</h1><p>Edit your CSS to style this sample page.</p><button type="button">Sample button</button></main></body></html>`;
+  }, [active]);
 
   useEffect(() => {
     if (!active || saveState !== "unsaved") return;
@@ -92,8 +113,17 @@ export function ProjectWorkspace({
     };
   }, [active, saveState]);
 
+  function resetRunResult() {
+    setRunState("idle");
+    setRunOutput("");
+    setRunError("");
+    setRunExitCode(null);
+    setRunRemaining(null);
+  }
+
   function updateActive(changes: Partial<SavedProject>) {
     if (!activeId) return;
+    resetRunResult();
     setProjects((current) =>
       current.map((project) =>
         project.id === activeId ? { ...project, ...changes } : project,
@@ -132,6 +162,7 @@ export function ProjectWorkspace({
       setProjects((current) => [data.project!, ...current]);
       setActiveId(data.project.id);
       setSaveState("saved");
+      resetRunResult();
     } catch {
       setMessage("Project could not be created. Check your connection.");
     } finally {
@@ -159,6 +190,58 @@ export function ProjectWorkspace({
       current === id ? nextProjects[0]?.id ?? null : current,
     );
     setSaveState("saved");
+    resetRunResult();
+  }
+
+  async function runCode() {
+    if (!active || (active.language !== "python" && active.language !== "javascript")) {
+      return;
+    }
+
+    if (runState === "running") return;
+
+    setRunState("running");
+    setRunOutput("");
+    setRunError("");
+    setRunExitCode(null);
+
+    try {
+      const response = await fetch("/api/run-code", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          language: active.language,
+          code: active.code,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        stdout?: string;
+        stderr?: string;
+        exitCode?: number;
+        remaining?: number;
+        error?: string;
+      };
+
+      if (!response.ok) {
+        setRunError(data.error || "Code could not be run.");
+        setRunState("error");
+        return;
+      }
+
+      const outputParts = [
+        data.stdout?.trim() ? data.stdout : "",
+        data.stderr?.trim() ? data.stderr : "",
+      ].filter(Boolean);
+
+      setRunOutput(outputParts.join("\n"));
+      setRunExitCode(typeof data.exitCode === "number" ? data.exitCode : null);
+      setRunRemaining(typeof data.remaining === "number" ? data.remaining : null);
+      setRunState("done");
+    } catch {
+      setRunError("The secure runner could not be reached. Try again.");
+      setRunState("error");
+    }
   }
 
   function changeLanguage(language: ProjectLanguage) {
@@ -202,6 +285,7 @@ export function ProjectWorkspace({
                   setActiveId(project.id);
                   setSaveState("saved");
                   setMessage("");
+                  resetRunResult();
                 }}
               >
                 <strong>{project.title}</strong>
@@ -230,6 +314,16 @@ export function ProjectWorkspace({
               />
 
               <div className="project-toolbar-actions">
+                {(active.language === "python" || active.language === "javascript") && (
+                  <button
+                    className="project-run-button"
+                    type="button"
+                    onClick={runCode}
+                    disabled={runState === "running" || !active.code.trim()}
+                  >
+                    {runState === "running" ? "Running…" : "▶ Run"}
+                  </button>
+                )}
                 <select
                   aria-label="Project language"
                   value={active.language}
@@ -281,6 +375,58 @@ export function ProjectWorkspace({
               <span>{active.code.length.toLocaleString()} / 20,000 characters</span>
               <span>Saved privately to your CodeTrail account.</span>
             </div>
+
+            {(active.language === "python" || active.language === "javascript") && (
+              <section className="project-output-panel" aria-live="polite">
+                <div className="project-output-heading">
+                  <strong>Output</strong>
+                  <span>
+                    {runRemaining !== null
+                      ? `${runRemaining} secure runs left this hour`
+                      : "Isolated sandbox · network disabled"}
+                  </span>
+                </div>
+                {runState === "idle" && (
+                  <p className="project-output-placeholder">
+                    Run your code to see printed output and errors here.
+                  </p>
+                )}
+                {runState === "running" && (
+                  <p className="project-output-placeholder">Starting a secure sandbox…</p>
+                )}
+                {runState === "error" && (
+                  <p className="project-output-error">{runError}</p>
+                )}
+                {runState === "done" && (
+                  <>
+                    <pre className="project-output-terminal">
+                      {runOutput || "(Program finished with no output.)"}
+                    </pre>
+                    <small>
+                      {runExitCode === 0
+                        ? "Finished successfully."
+                        : `Process exited with code ${runExitCode ?? "unknown"}.`}
+                    </small>
+                  </>
+                )}
+              </section>
+            )}
+
+            {(active.language === "html" || active.language === "css") && (
+              <section className="project-preview-panel">
+                <div className="project-output-heading">
+                  <strong>Live preview</strong>
+                  <span>Scripts and network requests are blocked</span>
+                </div>
+                <iframe
+                  className="project-preview-frame"
+                  title={`${active.title} preview`}
+                  sandbox=""
+                  srcDoc={previewDocument}
+                />
+              </section>
+            )}
+
             {message && <p className="form-message" aria-live="polite">{message}</p>}
           </>
         ) : (
