@@ -369,7 +369,9 @@ export function ProjectWorkspace({
     }
 
     updateActive({ code: nextCode });
-  }\n\n  function resetActiveEditor() {
+  }
+
+  function resetActiveEditor() {
     if (!active || activeDeleting) return;
 
     const starterValue =
