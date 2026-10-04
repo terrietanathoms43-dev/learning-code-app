@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
+import { implementedLessonSlugs } from "@/lib/course-data";
 
 export const dynamic = "force-dynamic";
 
@@ -39,12 +40,12 @@ export async function GET() {
       },
     });
 
-    const { count, error } = await supabase
+    const { data: publishedRows, error } = await supabase
       .from("lessons")
-      .select("id", { count: "exact", head: true })
+      .select("slug")
       .eq("is_published", true);
 
-    if (error || (count ?? 0) < 1) {
+    if (error || !publishedRows) {
       return healthResponse(
         {
           status: "not_ready",
@@ -55,6 +56,16 @@ export async function GET() {
         503,
       );
     }
+
+    const publishedSlugs = new Set(
+      publishedRows
+        .map((lesson) => lesson.slug)
+        .filter((slug): slug is string => typeof slug === "string"),
+    );
+    const missingLessons = implementedLessonSlugs.filter(
+      (slug) => !publishedSlugs.has(slug),
+    );
+    const contentReady = missingLessons.length === 0;
 
     let persistenceReady = false;
 
@@ -68,13 +79,15 @@ export async function GET() {
       persistenceReady = !persistenceError;
     }
 
-    const fullyConfigured = openAIConfigured && persistenceReady;
+    const fullyConfigured = openAIConfigured && persistenceReady && contentReady;
 
     return healthResponse(
       {
-        status: fullyConfigured ? "ok" : "degraded",
-        database: "ok",
-        publishedLessons: count,
+        status: fullyConfigured ? "ok" : contentReady ? "degraded" : "not_ready",
+        database: contentReady ? "ok" : "content_incomplete",
+        publishedLessons: publishedRows.length,
+        expectedPublishedLessons: implementedLessonSlugs.length,
+        missingLessons: missingLessons.length,
         persistence: persistenceReady
           ? "configured"
           : isAdminSupabaseConfigured
