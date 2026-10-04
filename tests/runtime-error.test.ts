@@ -24,7 +24,7 @@ test("parses Node eval line and column", () => {
   assert.deepEqual(result, {
     line: 4,
     column: 7,
-    summary: "at [eval]:4:7",
+    summary: "ReferenceError: score is not defined",
   });
 });
 
