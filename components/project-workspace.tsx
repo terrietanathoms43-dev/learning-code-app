@@ -371,28 +371,6 @@ export function ProjectWorkspace({
     updateActive({ code: nextCode });
   }
 
-  function resetActiveEditor() {
-    if (!active || activeDeleting) return;
-
-    const starterValue =
-      active.language === "web"
-        ? webProjectStarter[activeWebFile]
-        : starterCode[active.language];
-
-    if (activeEditorValue === starterValue) return;
-
-    if (!window.confirm(`Reset ${activeEditorName} to its starter code?`)) {
-      return;
-    }
-
-    if (active.language === "web") {
-      updateWebFile(activeWebFile, starterValue);
-      return;
-    }
-
-    updateActive({ code: starterValue });
-  }
-
   async function createProject(language: ProjectLanguage = "python") {
     if (creating || deletingId || projects.length >= MAX_SAVED_PROJECTS) return;
     setCreating(true);
@@ -945,6 +923,17 @@ export function ProjectWorkspace({
                     ? webProjectStarter[activeWebFile]
                     : starterCode[active.language])
                 }
+                onRun={
+                  active.language === "python" || active.language === "javascript"
+                    ? () => void runCode()
+                    : undefined
+                }
+                canRun={
+                  (active.language === "python" || active.language === "javascript") &&
+                  Boolean(activeEditorValue.trim()) &&
+                  runState !== "running"
+                }
+                jumpTo={editorJump}
                 disabled={activeDeleting}
               />
             </div>
