@@ -20,6 +20,7 @@ export default async function LearnPage() {
   return (
     <div className="site-shell learn-page">
       <TopNav
+        signInHref="/login?next=/learn"
         stats={{
           streak: dashboard.streak,
           totalXp: dashboard.totalXp,
@@ -64,7 +65,9 @@ export default async function LearnPage() {
                   : "Try the first lesson now. Sign in to save XP, streaks and progress."}
               </p>
             </div>
-            {!dashboard.signedIn && <Link className="trail-signin" href="/login">Sign in</Link>}
+            {!dashboard.signedIn && (
+              <Link className="trail-signin" href="/login?next=/learn">Sign in</Link>
+            )}
           </div>
 
           {courseComplete && (
