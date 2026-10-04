@@ -10,7 +10,11 @@ function lastUsefulLine(stderr: string) {
     .map((line) => line.trim())
     .filter(Boolean);
 
-  return lines.at(-1) ?? "Runtime error";
+  const namedError = [...lines]
+    .reverse()
+    .find((line) => /(?:Error|Exception|Traceback):?/i.test(line));
+
+  return namedError ?? lines.at(-1) ?? "Runtime error";
 }
 
 export function parseRuntimeError(
