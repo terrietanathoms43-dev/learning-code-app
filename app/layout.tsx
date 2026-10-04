@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: "%s | CodeTrail",
   },
   description:
-    "Learn Python through short lessons, real coding challenges, progress tracking, and an AI Code Coach.",
+    "Learn Python and web development through short lessons, real coding challenges, saved projects, progress tracking, and an AI Code Coach.",
   icons: {
     icon: "/mascot.svg",
   },
@@ -21,13 +21,13 @@ export const metadata: Metadata = {
     siteName: "CodeTrail",
     title: "CodeTrail — Learn coding one step at a time",
     description:
-      "Learn Python through short lessons, real coding challenges, progress tracking, and an AI Code Coach.",
+      "Learn Python and web development through short lessons, real coding challenges, saved projects, progress tracking, and an AI Code Coach.",
   },
   twitter: {
     card: "summary",
     title: "CodeTrail — Learn coding one step at a time",
     description:
-      "Learn Python through short lessons, real coding challenges, progress tracking, and an AI Code Coach.",
+      "Learn Python and web development through short lessons, real coding challenges, saved projects, progress tracking, and an AI Code Coach.",
   },
   robots: {
     index: true,
