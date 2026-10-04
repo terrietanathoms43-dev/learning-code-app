@@ -77,3 +77,20 @@ test("auth error messages are explicit", () => {
   assert.match(getLoginAuthMessage("missing-code"), /incomplete/i);
   assert.match(getRecoveryAuthMessage("recovery-error"), /invalid or expired/i);
 });
+
+
+test("generic achievements count multiple additional learning worlds", () => {
+  const achievements = getAchievements(
+    {
+      completedLessons: 0,
+      completedLessonSlugs: [],
+      streak: 0,
+      totalXp: 0,
+    },
+    [{ completedLessons: 0 }, { completedLessons: 1 }],
+  );
+
+  const firstStep = achievements.find((achievement) => achievement.id === "first-step");
+  assert.equal(firstStep?.unlocked, true);
+  assert.equal(firstStep?.progress, 1);
+});
