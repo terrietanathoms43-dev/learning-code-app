@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createAdminClient, isAdminSupabaseConfigured } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
   getProjectCodeError,
@@ -71,6 +72,13 @@ export async function PATCH(
 
   updates.updated_at = new Date().toISOString();
 
+  if (!isAdminSupabaseConfigured) {
+    return NextResponse.json(
+      { error: "Project saving is temporarily unavailable." },
+      { status: 503 },
+    );
+  }
+
   const supabase = await createClient();
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
   const userId =
@@ -82,8 +90,9 @@ export async function PATCH(
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
 
-  const { data, error } = await supabase
-    .from("coding_projects")
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("saved_projects")
     .update(updates)
     .eq("id", id)
     .eq("user_id", userId)
@@ -114,6 +123,13 @@ export async function DELETE(
     return NextResponse.json({ error: "Invalid project." }, { status: 400 });
   }
 
+  if (!isAdminSupabaseConfigured) {
+    return NextResponse.json(
+      { error: "Project deletion is temporarily unavailable." },
+      { status: 503 },
+    );
+  }
+
   const supabase = await createClient();
   const { data: claimsData, error: claimsError } = await supabase.auth.getClaims();
   const userId =
@@ -125,8 +141,9 @@ export async function DELETE(
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
 
-  const { error } = await supabase
-    .from("coding_projects")
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("saved_projects")
     .delete()
     .eq("id", id)
     .eq("user_id", userId);
