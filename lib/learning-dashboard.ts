@@ -70,6 +70,21 @@ type WorldDefinition = {
   lessonSlugs: string[];
 };
 
+type DashboardContext = {
+  signedIn: boolean;
+  snapshot: DashboardSnapshot | null;
+};
+
+const pythonWorld: WorldDefinition = {
+  path: pythonPath,
+  lessonSlugs: pythonLessonSlugs,
+};
+
+const webWorld: WorldDefinition = {
+  path: webPath,
+  lessonSlugs: webLessonSlugs,
+};
+
 function buildNodes(
   path: PathNode[],
   completedSlugs: Set<string>,
@@ -91,12 +106,15 @@ function buildNodes(
   });
 }
 
-function guestDashboard(world: WorldDefinition): LearningDashboard {
+function emptyDashboard(
+  world: WorldDefinition,
+  signedIn = false,
+): LearningDashboard {
   const firstLesson = world.lessonSlugs[0];
   const available = new Set<string>(firstLesson ? [firstLesson] : []);
 
   return {
-    signedIn: false,
+    signedIn,
     displayName: "Coder",
     username: null,
     nodes: buildNodes(world.path, new Set<string>(), available),
@@ -113,17 +131,15 @@ function guestDashboard(world: WorldDefinition): LearningDashboard {
   };
 }
 
-async function getWorldDashboard(
-  world: WorldDefinition,
-): Promise<LearningDashboard> {
-  const worldSet = new Set(world.lessonSlugs);
-
+async function loadDashboardContext(): Promise<DashboardContext> {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   ) {
-    return guestDashboard(world);
+    return { signedIn: false, snapshot: null };
   }
+
+  let signedIn = false;
 
   try {
     const supabase = await createClient();
@@ -133,7 +149,8 @@ async function getWorldDashboard(
         ? claimsData.claims.sub
         : null;
 
-    if (!userId) return guestDashboard(world);
+    if (!userId) return { signedIn: false, snapshot: null };
+    signedIn = true;
 
     const { data, error } = await supabase.rpc("get_learning_dashboard_snapshot");
 
@@ -142,85 +159,102 @@ async function getWorldDashboard(
         code: error?.code ?? null,
         message: error?.message?.slice(0, 180) ?? "empty snapshot",
       });
-      return guestDashboard(world);
+      return { signedIn: true, snapshot: null };
     }
 
-    const snapshot = data as DashboardSnapshot;
-    const profile = snapshot.profile ?? null;
-    const stats = snapshot.stats ?? null;
-    const publishedLessons = Array.isArray(snapshot.published_lessons)
-      ? snapshot.published_lessons
-      : [];
-    const progressRows = Array.isArray(snapshot.progress) ? snapshot.progress : [];
-    const recentRows = Array.isArray(snapshot.recent_events) ? snapshot.recent_events : [];
-
-    const publishedWorldSlugs = publishedLessons
-      .map((lesson) => lesson.slug)
-      .filter((slug): slug is string => Boolean(slug && worldSet.has(slug)));
-
-    const availableSlugs = new Set<string>(
-      publishedWorldSlugs.length ? publishedWorldSlugs : world.lessonSlugs,
-    );
-
-    const completedSlugs = new Set<string>();
-    for (const row of progressRows) {
-      if (row.status !== "completed" || !row.slug) continue;
-      if (worldSet.has(row.slug)) completedSlugs.add(row.slug);
-    }
-
-    const nodes = buildNodes(world.path, completedSlugs, availableSlugs);
-    const totalLessons = availableSlugs.size;
-    const completedLessons = world.lessonSlugs.filter(
-      (slug) => availableSlugs.has(slug) && completedSlugs.has(slug),
-    ).length;
-    const totalXp = Number(stats?.total_xp || 0);
-    const todayXp = Number(stats?.today_xp || 0);
-    const streak = Number(stats?.streak || 0);
-    const dailyGoalXp = Number(profile?.daily_goal_xp || 50);
-    const timeZone = profile?.time_zone || "UTC";
-
-    return {
-      signedIn: true,
-      displayName: profile?.display_name || "Coder",
-      username: profile?.username || null,
-      nodes,
-      totalXp,
-      todayXp,
-      streak,
-      dailyGoalXp,
-      completedLessons,
-      totalLessons,
-      progressPercent:
-        totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0,
-      completedLessonSlugs: world.lessonSlugs.filter((slug) =>
-        completedSlugs.has(slug),
-      ),
-      timeZone,
-      recentEvents: recentRows.map((event) => ({
-        amount: Number(event.amount || 0),
-        createdAt: event.created_at || new Date(0).toISOString(),
-        lessonSlug: event.slug || null,
-        lessonTitle: event.title || "Coding activity",
-      })),
-    };
+    return { signedIn: true, snapshot: data as DashboardSnapshot };
   } catch (error) {
     console.error("[dashboard_snapshot]", {
       message: error instanceof Error ? error.message.slice(0, 180) : "unknown error",
     });
-    return guestDashboard(world);
+    return { signedIn, snapshot: null };
   }
 }
 
-export function getLearningDashboard() {
-  return getWorldDashboard({
-    path: pythonPath,
-    lessonSlugs: pythonLessonSlugs,
-  });
+function buildWorldDashboard(
+  world: WorldDefinition,
+  context: DashboardContext,
+): LearningDashboard {
+  if (!context.snapshot) {
+    return emptyDashboard(world, context.signedIn);
+  }
+
+  const worldSet = new Set(world.lessonSlugs);
+  const snapshot = context.snapshot;
+  const profile = snapshot.profile ?? null;
+  const stats = snapshot.stats ?? null;
+  const publishedLessons = Array.isArray(snapshot.published_lessons)
+    ? snapshot.published_lessons
+    : [];
+  const progressRows = Array.isArray(snapshot.progress) ? snapshot.progress : [];
+  const recentRows = Array.isArray(snapshot.recent_events) ? snapshot.recent_events : [];
+
+  const publishedWorldSlugs = publishedLessons
+    .map((lesson) => lesson.slug)
+    .filter((slug): slug is string => Boolean(slug && worldSet.has(slug)));
+
+  const availableSlugs = new Set<string>(
+    publishedWorldSlugs.length ? publishedWorldSlugs : world.lessonSlugs,
+  );
+
+  const completedSlugs = new Set<string>();
+  for (const row of progressRows) {
+    if (row.status !== "completed" || !row.slug) continue;
+    if (worldSet.has(row.slug)) completedSlugs.add(row.slug);
+  }
+
+  const nodes = buildNodes(world.path, completedSlugs, availableSlugs);
+  const totalLessons = availableSlugs.size;
+  const completedLessons = world.lessonSlugs.filter(
+    (slug) => availableSlugs.has(slug) && completedSlugs.has(slug),
+  ).length;
+  const totalXp = Number(stats?.total_xp || 0);
+  const todayXp = Number(stats?.today_xp || 0);
+  const streak = Number(stats?.streak || 0);
+  const dailyGoalXp = Number(profile?.daily_goal_xp || 50);
+  const timeZone = profile?.time_zone || "UTC";
+
+  return {
+    signedIn: true,
+    displayName: profile?.display_name || "Coder",
+    username: profile?.username || null,
+    nodes,
+    totalXp,
+    todayXp,
+    streak,
+    dailyGoalXp,
+    completedLessons,
+    totalLessons,
+    progressPercent:
+      totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0,
+    completedLessonSlugs: world.lessonSlugs.filter((slug) =>
+      completedSlugs.has(slug),
+    ),
+    timeZone,
+    recentEvents: recentRows.map((event) => ({
+      amount: Number(event.amount || 0),
+      createdAt: event.created_at || new Date(0).toISOString(),
+      lessonSlug: event.slug || null,
+      lessonTitle: event.title || "Coding activity",
+    })),
+  };
 }
 
-export function getWebLearningDashboard() {
-  return getWorldDashboard({
-    path: webPath,
-    lessonSlugs: webLessonSlugs,
-  });
+export async function getLearningDashboard() {
+  const context = await loadDashboardContext();
+  return buildWorldDashboard(pythonWorld, context);
+}
+
+export async function getWebLearningDashboard() {
+  const context = await loadDashboardContext();
+  return buildWorldDashboard(webWorld, context);
+}
+
+export async function getLearningDashboards() {
+  const context = await loadDashboardContext();
+
+  return {
+    python: buildWorldDashboard(pythonWorld, context),
+    web: buildWorldDashboard(webWorld, context),
+  };
 }
