@@ -16,7 +16,7 @@ export default async function ProjectsPage() {
   if (!userId) redirect("/login?next=/projects");
 
   const [dashboard, projectsResult] = await Promise.all([
-    getLearningDashboard(),
+    getLearningDashboard({ supabase, userId }),
     supabase
       .from("saved_projects")
       .select("id, title, language, code, created_at, updated_at")
