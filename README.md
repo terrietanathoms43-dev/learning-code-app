@@ -1,6 +1,6 @@
 # CodeTrail
 
-A gamified coding-learning app built around visual learning worlds. CodeTrail currently includes Python Foundations and Web Foundations, interactive exercises, saved coding projects, secure code execution, progress tracking, and a Supabase-authenticated architecture.
+A gamified coding-learning app built around visual learning worlds. CodeTrail currently includes Python Foundations, Web Foundations and JavaScript Foundations, interactive exercises, saved coding projects, secure code execution, progress tracking, and a Supabase-authenticated architecture.
 
 ## What is already built
 
@@ -13,15 +13,22 @@ A gamified coding-learning app built around visual learning worlds. CodeTrail cu
 - Supabase SSR client/server/proxy utilities
 - Email/password sign-up and sign-in screen
 - Auth callback route
-- Supabase migrations with RLS, explicit Data API grants, Python content and Web Foundations content
+- Supabase migrations with RLS, explicit Data API grants, and Python, Web and JavaScript learning content
 - Signed-in exercise-attempt persistence through a server-only Supabase secret key
 - Verified completion, one-time XP rewards, streak calculations and automatic path unlocking
 - Cross-world progress dashboard and practice deck
 - Full Python Foundations path through Conditions, Loops, Functions and the Mini Project
 - AI Code Coach with hint / explain / similar-example modes
-- Achievement badges including Python Pioneer
+- Cross-world achievement badges including Python Pioneer, Web Builder and Logic Lab Graduate
 - Editable learner profile and daily XP goals
-- Timezone-aware streaks and activity dates\n- Web Foundations path covering HTML, CSS, JavaScript and a mini project\n- Private saved-project workspace for Python, HTML, CSS and JavaScript\n- Sandboxed Python and JavaScript execution with network isolation and hourly quotas\n- HTML/CSS project previews with scripts and network requests blocked\n- Username support and production health checks
+- Timezone-aware streaks and activity dates
+- Web Foundations path covering HTML, CSS, JavaScript and a mini project
+- JavaScript Foundations path covering variables, types, decisions, arrays, loops, functions and a score-tracker project
+- Private saved-project workspace for Python, HTML, CSS, JavaScript and three-file web apps
+- Sandboxed Python and JavaScript execution with network isolation and hourly quotas
+- HTML/CSS and isolated multi-file web previews
+- Lightweight syntax highlighting, line numbers, smart indentation, bracket pairing, reset/copy/run controls and runtime error jump-to-line support
+- Username support and production health checks
 
 ## Run locally
 
@@ -82,6 +89,7 @@ The AI Code Coach uses the Responses API, stores no model response history throu
 
 ### Phase 6 — Multiple learning worlds
 - Web Foundations
+- JavaScript Foundations
 - Cross-world progress and practice
 - World-aware achievements and navigation
 
