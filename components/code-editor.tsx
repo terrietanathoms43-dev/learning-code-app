@@ -30,6 +30,13 @@ type CodeEditorProps = {
   onSave?: () => void;
   onReset?: () => void;
   canReset?: boolean;
+  onRun?: () => void;
+  canRun?: boolean;
+  jumpTo?: {
+    line: number;
+    column: number | null;
+    requestId: number;
+  } | null;
 };
 
 export function CodeEditor({
@@ -44,11 +51,13 @@ export function CodeEditor({
   onSave,
   onReset,
   canReset = false,
+  onRun,
+  canRun = false,
+  jumpTo = null,
 }: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const valueRef = useRef(value);
-  valueRef.current = value;
   const highlightRef = useRef<HTMLPreElement>(null);
   const [cursor, setCursor] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -58,6 +67,10 @@ export function CodeEditor({
     [language, value],
   );
   const position = getLineAndColumn(value, cursor);
+
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   useEffect(() => {
     if (!jumpTo) return;
@@ -81,6 +94,10 @@ export function CodeEditor({
         textarea.scrollTop = Math.max(0, (jumpTo.line - 2) * lineHeight);
         if (lineNumbersRef.current) {
           lineNumbersRef.current.scrollTop = textarea.scrollTop;
+        }
+        if (highlightRef.current) {
+          highlightRef.current.scrollTop = textarea.scrollTop;
+          highlightRef.current.scrollLeft = textarea.scrollLeft;
         }
       }
       setCursor(target.caret);
