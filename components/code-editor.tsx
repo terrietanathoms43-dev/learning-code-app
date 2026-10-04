@@ -8,16 +8,23 @@ import {
   type SyntheticEvent,
 } from "react";
 import { applyCodeEditorKey, getLineAndColumn } from "@/lib/code-editor";
+import {
+  tokenizeCode,
+  type HighlightLanguage,
+} from "@/lib/code-highlight";
 
 type CodeEditorProps = {
   value: string;
   onChange: (value: string) => void;
   ariaLabel: string;
   fileName: string;
+  language: HighlightLanguage;
   maxLength: number;
   disabled?: boolean;
   onBlur?: () => void;
   onSave?: () => void;
+  onReset?: () => void;
+  canReset?: boolean;
 };
 
 export function CodeEditor({
@@ -25,16 +32,24 @@ export function CodeEditor({
   onChange,
   ariaLabel,
   fileName,
+  language,
   maxLength,
   disabled = false,
   onBlur,
   onSave,
+  onReset,
+  canReset = false,
 }: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
+  const highlightRef = useRef<HTMLPreElement>(null);
   const [cursor, setCursor] = useState(0);
   const [copied, setCopied] = useState(false);
   const lineCount = useMemo(() => Math.max(1, value.split("\n").length), [value]);
+  const highlightedTokens = useMemo(
+    () => tokenizeCode(value, language),
+    [language, value],
+  );
   const position = getLineAndColumn(value, cursor);
 
   function restoreSelection(start: number, end: number) {
@@ -90,9 +105,17 @@ export function CodeEditor({
   }
 
   function syncLineNumbers(event: SyntheticEvent<HTMLTextAreaElement>) {
+    const textarea = event.currentTarget;
     const lineNumbers = lineNumbersRef.current;
+    const highlight = highlightRef.current;
+
     if (lineNumbers) {
-      lineNumbers.scrollTop = event.currentTarget.scrollTop;
+      lineNumbers.scrollTop = textarea.scrollTop;
+    }
+
+    if (highlight) {
+      highlight.scrollTop = textarea.scrollTop;
+      highlight.scrollLeft = textarea.scrollLeft;
     }
   }
 
@@ -124,9 +147,7 @@ export function CodeEditor({
         >
           Outdent
         </button>
-        <button type="button" onClick={() => void copyCode()} disabled={!value}>
-          {copied ? "Copied" : "Copy"}
-        </button>
+
       </div>
 
       <div className="code-editor-body">
@@ -135,30 +156,51 @@ export function CodeEditor({
             <span key={index + 1}>{index + 1}</span>
           ))}
         </div>
-        <textarea
-          ref={textareaRef}
-          value={value}
-          aria-label={ariaLabel}
-          aria-describedby="project-editor-position"
-          spellCheck={false}
-          autoCapitalize="none"
-          autoCorrect="off"
-          wrap="off"
-          maxLength={maxLength}
-          onChange={(event) => onChange(event.target.value)}
-          onBlur={onBlur}
-          onKeyDown={handleKeyDown}
-          onKeyUp={syncCursor}
-          onClick={syncCursor}
-          onSelect={syncCursor}
-          onScroll={syncLineNumbers}
-          disabled={disabled}
-        />
+        <div className="code-editor-pane">
+          <pre className="code-highlight-layer" ref={highlightRef} aria-hidden="true">
+            <code>
+              {highlightedTokens.map((token, index) => (
+                <span className={`syntax-token syntax-token--${token.type}`} key={index}>
+                  {token.text}
+                </span>
+              ))}
+            </code>
+          </pre>
+          <textarea
+            ref={textareaRef}
+            value={value}
+            aria-label={ariaLabel}
+            aria-describedby="project-editor-position"
+            spellCheck={false}
+            autoCapitalize="none"
+            autoCorrect="off"
+            wrap="off"
+            maxLength={maxLength}
+            onChange={(event) => onChange(event.target.value)}
+            onBlur={onBlur}
+            onKeyDown={handleKeyDown}
+            onKeyUp={syncCursor}
+            onClick={syncCursor}
+            onSelect={syncCursor}
+            onScroll={syncLineNumbers}
+            disabled={disabled}
+          />
+        </div>
       </div>
 
       <div className="code-editor-status" id="project-editor-position">
         <span>{fileName}</span>
-        <span>Ln {position.line}, Col {position.column}</span>
+        <div className="code-editor-status-actions">
+          <span>Ln {position.line}, Col {position.column}</span>
+          <button type="button" onClick={() => void copyCode()} disabled={!value}>
+            {copied ? "Copied" : "Copy"}
+          </button>
+          {onReset && (
+            <button type="button" onClick={onReset} disabled={disabled || !canReset}>
+              Reset
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
