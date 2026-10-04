@@ -2,27 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { FormEvent, Suspense, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 import { getLoginAuthMessage, getSafeNextPath } from "@/lib/auth-redirect";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
-  const [mode, setMode] = useState<"signin" | "signup">("signup");
-  const [message, setMessage] = useState("");
+  const searchParams = useSearchParams();
+  const initialAuthMessage = getLoginAuthMessage(searchParams.get("auth"));
+  const [mode, setMode] = useState<"signin" | "signup">(
+    initialAuthMessage ? "signin" : "signup",
+  );
+  const [message, setMessage] = useState(initialAuthMessage);
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    const authMessage = getLoginAuthMessage(
-      new URLSearchParams(window.location.search).get("auth"),
-    );
-
-    if (authMessage) {
-      setMode("signin");
-      setMessage(authMessage);
-    }
-  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -142,5 +135,14 @@ export default function LoginPage() {
         </Link>
       </section>
     </main>
+  );
+}
+
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="auth-page" aria-busy="true" />}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
