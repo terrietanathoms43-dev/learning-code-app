@@ -123,16 +123,20 @@ export function ProjectWorkspace({
   }, [active]);
 
   useEffect(() => {
+    const timers = saveTimers.current;
+    const controllers = saveControllers.current;
+    const pending = pendingSaves.current;
+
     return () => {
-      for (const timeout of saveTimers.current.values()) {
+      for (const timeout of timers.values()) {
         window.clearTimeout(timeout);
       }
 
-      for (const controller of saveControllers.current.values()) {
+      for (const controller of controllers.values()) {
         controller.abort();
       }
 
-      for (const { project } of pendingSaves.current.values()) {
+      for (const { project } of pending.values()) {
         void fetch(`/api/projects/${project.id}`, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
