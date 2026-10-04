@@ -94,3 +94,34 @@ test("generic achievements count multiple additional learning worlds", () => {
   assert.equal(firstStep?.unlocked, true);
   assert.equal(firstStep?.progress, 1);
 });
+
+
+test("unlocks JavaScript and Web completion badges from their world slugs", () => {
+  const achievements = getAchievements(
+    {
+      completedLessons: 0,
+      completedLessonSlugs: [],
+      streak: 0,
+      totalXp: 0,
+    },
+    [
+      {
+        completedLessons: 4,
+        completedLessonSlugs: ["web-mini-project"],
+      },
+      {
+        completedLessons: 6,
+        completedLessonSlugs: ["js-mini-project"],
+      },
+    ],
+  );
+
+  assert.equal(
+    achievements.find((achievement) => achievement.id === "web-builder")?.unlocked,
+    true,
+  );
+  assert.equal(
+    achievements.find((achievement) => achievement.id === "logic-lab-graduate")?.unlocked,
+    true,
+  );
+});
