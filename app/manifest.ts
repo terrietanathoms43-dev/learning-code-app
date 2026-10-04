@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "CodeTrail",
     short_name: "CodeTrail",
     description:
-      "A playful coding trail for Python and web development with real challenges, saved projects, progress tracking, and an AI Code Coach.",
+      "A playful coding trail for Python, web development and JavaScript with real challenges, saved projects, progress tracking, and an AI Code Coach.",
     start_url: "/learn",
     display: "standalone",
     icons: [
