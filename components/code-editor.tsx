@@ -14,10 +14,6 @@ import {
   getLineSelection,
 } from "@/lib/code-editor";
 import {
-  highlightCode,
-  type HighlightLanguage,
-} from "@/lib/syntax-highlight";
-import {
   tokenizeCode,
   type HighlightLanguage,
 } from "@/lib/code-highlight";
@@ -29,7 +25,6 @@ type CodeEditorProps = {
   fileName: string;
   language: HighlightLanguage;
   maxLength: number;
-  language: HighlightLanguage;
   disabled?: boolean;
   onBlur?: () => void;
   onSave?: () => void;
@@ -51,7 +46,6 @@ export function CodeEditor({
   fileName,
   language,
   maxLength,
-  language,
   disabled = false,
   onBlur,
   onSave,
@@ -65,10 +59,13 @@ export function CodeEditor({
   const lineNumbersRef = useRef<HTMLDivElement>(null);
   const highlightRef = useRef<HTMLPreElement>(null);
   const valueRef = useRef(value);
-  const highlightRef = useRef<HTMLPreElement>(null);
   const [cursor, setCursor] = useState(0);
   const [copied, setCopied] = useState(false);
-  const lineCount = useMemo(() => Math.max(1, value.split("\n").length), [value]);
+
+  const lineCount = useMemo(
+    () => Math.max(1, value.split("\n").length),
+    [value],
+  );
   const highlightedTokens = useMemo(
     () => tokenizeCode(value, language),
     [language, value],
@@ -94,19 +91,20 @@ export function CodeEditor({
     window.requestAnimationFrame(() => {
       textarea.focus();
       textarea.setSelectionRange(target.caret, target.caret);
+
       const lineHeight = Number.parseFloat(
         window.getComputedStyle(textarea).lineHeight,
       );
       if (Number.isFinite(lineHeight)) {
         textarea.scrollTop = Math.max(0, (jumpTo.line - 2) * lineHeight);
-        if (lineNumbersRef.current) {
-          lineNumbersRef.current.scrollTop = textarea.scrollTop;
-        }
+        lineNumbersRef.current &&
+          (lineNumbersRef.current.scrollTop = textarea.scrollTop);
         if (highlightRef.current) {
           highlightRef.current.scrollTop = textarea.scrollTop;
           highlightRef.current.scrollLeft = textarea.scrollLeft;
         }
       }
+
       setCursor(target.caret);
     });
   }, [jumpTo]);
@@ -115,6 +113,7 @@ export function CodeEditor({
     window.requestAnimationFrame(() => {
       const textarea = textareaRef.current;
       if (!textarea) return;
+
       textarea.focus();
       textarea.setSelectionRange(start, end);
       setCursor(end);
@@ -174,18 +173,16 @@ export function CodeEditor({
     restoreSelection(edit.selectionStart, edit.selectionEnd);
   }
 
-  function syncLineNumbers(event: SyntheticEvent<HTMLTextAreaElement>) {
+  function syncScroll(event: SyntheticEvent<HTMLTextAreaElement>) {
     const textarea = event.currentTarget;
-    const lineNumbers = lineNumbersRef.current;
-    const highlight = highlightRef.current;
 
-    if (lineNumbers) {
-      lineNumbers.scrollTop = textarea.scrollTop;
+    if (lineNumbersRef.current) {
+      lineNumbersRef.current.scrollTop = textarea.scrollTop;
     }
 
-    if (highlight) {
-      highlight.scrollTop = textarea.scrollTop;
-      highlight.scrollLeft = textarea.scrollLeft;
+    if (highlightRef.current) {
+      highlightRef.current.scrollTop = textarea.scrollTop;
+      highlightRef.current.scrollLeft = textarea.scrollLeft;
     }
   }
 
@@ -210,7 +207,11 @@ export function CodeEditor({
           {copied ? "Copied" : "Copy code"}
         </button>
         {onReset && (
-          <button type="button" onClick={onReset} disabled={disabled}>
+          <button
+            type="button"
+            onClick={onReset}
+            disabled={disabled || !canReset}
+          >
             Reset file
           </button>
         )}
@@ -227,7 +228,11 @@ export function CodeEditor({
       </div>
 
       <div className="code-editor-mobile-tools" aria-label="Mobile editor tools">
-        <button type="button" onClick={() => applyKeyboardEdit("Tab")} disabled={disabled}>
+        <button
+          type="button"
+          onClick={() => applyKeyboardEdit("Tab")}
+          disabled={disabled}
+        >
           Tab
         </button>
         <button
@@ -238,7 +243,18 @@ export function CodeEditor({
         >
           Outdent
         </button>
-
+        <button type="button" onClick={() => applyKeyboardEdit("(")} disabled={disabled}>
+          ( )
+        </button>
+        <button type="button" onClick={() => applyKeyboardEdit("[")} disabled={disabled}>
+          [ ]
+        </button>
+        <button type="button" onClick={() => applyKeyboardEdit("{")} disabled={disabled}>
+          {"{ }"}
+        </button>
+        <button type="button" onClick={() => applyKeyboardEdit('"')} disabled={disabled}>
+          &quot; &quot;
+        </button>
       </div>
 
       <div className="code-editor-body">
@@ -247,16 +263,25 @@ export function CodeEditor({
             <span key={index + 1}>{index + 1}</span>
           ))}
         </div>
+
         <div className="code-editor-pane">
-          <pre className="code-highlight-layer" ref={highlightRef} aria-hidden="true">
+          <pre
+            className="code-highlight-layer"
+            ref={highlightRef}
+            aria-hidden="true"
+          >
             <code>
               {highlightedTokens.map((token, index) => (
-                <span className={`syntax-token syntax-token--${token.type}`} key={index}>
+                <span
+                  className={`syntax-token syntax-token--${token.type}`}
+                  key={index}
+                >
                   {token.text}
                 </span>
               ))}
             </code>
           </pre>
+
           <textarea
             ref={textareaRef}
             value={value}
@@ -273,7 +298,7 @@ export function CodeEditor({
             onKeyUp={syncCursor}
             onClick={syncCursor}
             onSelect={syncCursor}
-            onScroll={syncLineNumbers}
+            onScroll={syncScroll}
             disabled={disabled}
           />
         </div>
@@ -281,17 +306,9 @@ export function CodeEditor({
 
       <div className="code-editor-status" id="project-editor-position">
         <span>{fileName}</span>
-        <div className="code-editor-status-actions">
-          <span>Ln {position.line}, Col {position.column}</span>
-          <button type="button" onClick={() => void copyCode()} disabled={!value}>
-            {copied ? "Copied" : "Copy"}
-          </button>
-          {onReset && (
-            <button type="button" onClick={onReset} disabled={disabled || !canReset}>
-              Reset
-            </button>
-          )}
-        </div>
+        <span>
+          Ln {position.line}, Col {position.column}
+        </span>
       </div>
     </div>
   );
