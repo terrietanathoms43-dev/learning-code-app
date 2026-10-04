@@ -18,8 +18,14 @@ type AchievementDashboard = Pick<
 export function getAchievements(
   dashboard: AchievementDashboard,
   additionalDashboards?:
-    | Pick<LearningDashboard, "completedLessons">
-    | Array<Pick<LearningDashboard, "completedLessons">>,
+    | (Pick<LearningDashboard, "completedLessons"> & {
+        completedLessonSlugs?: string[];
+      })
+    | Array<
+        Pick<LearningDashboard, "completedLessons"> & {
+          completedLessonSlugs?: string[];
+        }
+      >,
 ): Achievement[] {
   const completed = new Set(dashboard.completedLessonSlugs);
   const extras = Array.isArray(additionalDashboards)
@@ -30,6 +36,9 @@ export function getAchievements(
   const allCompletedLessons =
     dashboard.completedLessons +
     extras.reduce((total, world) => total + world.completedLessons, 0);
+  const additionalCompleted = new Set(
+    extras.flatMap((world) => world.completedLessonSlugs ?? []),
+  );
 
   return [
     {
@@ -93,6 +102,24 @@ export function getAchievements(
       icon: "🎓",
       unlocked: completed.has("mini-project"),
       progress: completed.has("mini-project") ? 1 : 0,
+      target: 1,
+    },
+    {
+      id: "web-builder",
+      title: "Web Builder",
+      description: "Finish the Web Foundations mini project.",
+      icon: "🌐",
+      unlocked: additionalCompleted.has("web-mini-project"),
+      progress: additionalCompleted.has("web-mini-project") ? 1 : 0,
+      target: 1,
+    },
+    {
+      id: "logic-lab-graduate",
+      title: "Logic Lab Graduate",
+      description: "Finish the JavaScript Foundations score-tracker project.",
+      icon: "⚡",
+      unlocked: additionalCompleted.has("js-mini-project"),
+      progress: additionalCompleted.has("js-mini-project") ? 1 : 0,
       target: 1,
     },
     {
