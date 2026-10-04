@@ -74,14 +74,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid exercise, answer or lesson session." }, { status: 400 });
   }
 
-  const result = checkAnswer(payload.exerciseId, payload.answer);
+  const exerciseId = payload.exerciseId;
+  const answer = payload.answer;
+  const sessionId = payload.sessionId;
+  const result = checkAnswer(exerciseId, answer);
 
   if (!result) {
     return NextResponse.json({ error: "Exercise not found." }, { status: 404 });
   }
 
   after(async () => {
-    await recordAttempt(payload.exerciseId, result.correct, payload.sessionId);
+    await recordAttempt(exerciseId, result.correct, sessionId);
   });
 
   return NextResponse.json(result);
