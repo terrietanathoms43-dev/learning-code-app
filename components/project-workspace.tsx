@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import {
   MAX_PROJECT_CODE_LENGTH,
   MAX_SAVED_PROJECTS,
@@ -32,6 +32,39 @@ const fileNames: Record<ProjectLanguage, string> = {
   javascript: "script.js",
 };
 
+const languageLabels: Record<ProjectLanguage, string> = {
+  python: "Python",
+  html: "HTML",
+  css: "CSS",
+  javascript: "JavaScript",
+};
+
+const languageIcons: Record<ProjectLanguage, string> = {
+  python: "🐍",
+  html: "🌐",
+  css: "🎨",
+  javascript: "⚡",
+};
+
+function getDownloadName(project: SavedProject) {
+  const extension = fileNames[project.language].split(".").pop() || "txt";
+  const safeTitle =
+    project.title
+      .trim()
+      .replace(/[^a-z0-9-_ ]/gi, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "")
+      .toLowerCase() || "codetrail-project";
+
+  return `${safeTitle}.${extension}`;
+}
+
+function getCopyTitle(title: string) {
+  const suffix = " copy";
+  return `${title.slice(0, 80 - suffix.length).trim()}${suffix}`;
+}
+
 export function ProjectWorkspace({
   initialProjects,
 }: {
@@ -47,6 +80,9 @@ export function ProjectWorkspace({
   const saveRevisions = useRef(new Map<string, number>());
   const pendingSaves = useRef(new Map<string, { project: SavedProject; revision: number }>());
   const [creating, setCreating] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
+  const [newProjectMenuOpen, setNewProjectMenuOpen] = useState(false);
+  const [projectSearch, setProjectSearch] = useState("");
   const [runState, setRunState] = useState<"idle" | "running" | "done" | "error">("idle");
   const [runOutput, setRunOutput] = useState("");
   const [runError, setRunError] = useState("");
@@ -59,6 +95,16 @@ export function ProjectWorkspace({
     [activeId, projects],
   );
   const saveState = active ? saveStates[active.id] ?? "saved" : "saved";
+  const visibleProjects = useMemo(() => {
+    const query = projectSearch.trim().toLowerCase();
+    if (!query) return projects;
+
+    return projects.filter(
+      (project) =>
+        project.title.toLowerCase().includes(query) ||
+        languageLabels[project.language].toLowerCase().includes(query),
+    );
+  }, [projectSearch, projects]);
 
   const previewDocument = useMemo(() => {
     if (!active || (active.language !== "html" && active.language !== "css")) {
@@ -221,8 +267,8 @@ export function ProjectWorkspace({
     queueProjectSave(nextProject);
   }
 
-  async function createProject() {
-    if (creating) return;
+  async function createProject(language: ProjectLanguage = "python") {
+    if (creating || projects.length >= MAX_SAVED_PROJECTS) return;
     setCreating(true);
     setMessage("");
 
@@ -231,9 +277,9 @@ export function ProjectWorkspace({
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          title: "Untitled project",
-          language: "python",
-          code: starterCode.python,
+          title: `Untitled ${languageLabels[language]} project`,
+          language,
+          code: starterCode[language],
         }),
       });
 
@@ -250,11 +296,80 @@ export function ProjectWorkspace({
       setProjects((current) => [data.project!, ...current]);
       setActiveId(data.project.id);
       setProjectSaveState(data.project.id, "saved");
+      setProjectSearch("");
+      setNewProjectMenuOpen(false);
       resetRunResult();
     } catch {
       setMessage("Project could not be created. Check your connection.");
     } finally {
       setCreating(false);
+    }
+  }
+
+  async function duplicateProject() {
+    if (!active || duplicating || projects.length >= MAX_SAVED_PROJECTS) return;
+
+    flushProjectSave(active.id);
+    setDuplicating(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: getCopyTitle(active.title),
+          language: active.language,
+          code: active.code,
+        }),
+      });
+
+      const data = (await response.json()) as {
+        project?: SavedProject;
+        error?: string;
+      };
+
+      if (!response.ok || !data.project) {
+        setMessage(data.error || "Project could not be duplicated.");
+        return;
+      }
+
+      setProjects((current) => [data.project!, ...current]);
+      setActiveId(data.project.id);
+      setProjectSaveState(data.project.id, "saved");
+      setProjectSearch("");
+      resetRunResult();
+    } catch {
+      setMessage("Project could not be duplicated. Check your connection.");
+    } finally {
+      setDuplicating(false);
+    }
+  }
+
+  function exportProject() {
+    if (!active) return;
+
+    const blob = new Blob([active.code], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = getDownloadName(active);
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function saveActiveNow() {
+    if (!active || saveState === "saving") return;
+    queueProjectSave(active);
+    flushProjectSave(active.id);
+  }
+
+  function handleSaveShortcut(
+    event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+      event.preventDefault();
+      saveActiveNow();
     }
   }
 
@@ -363,25 +478,60 @@ export function ProjectWorkspace({
           <div>
             <p className="eyebrow">Cloud workspace</p>
             <h1>My Projects</h1>
+            <small>{projects.length} / {MAX_SAVED_PROJECTS} saved</small>
           </div>
-          <button
-            className="project-new-button"
-            type="button"
-            onClick={createProject}
-            disabled={creating || projects.length >= MAX_SAVED_PROJECTS}
-            title={
-              projects.length >= MAX_SAVED_PROJECTS
-                ? `Project limit reached (${MAX_SAVED_PROJECTS})`
-                : "Create project"
-            }
-          >
-            {creating ? "…" : "+"}
-          </button>
+          <div className="project-new-wrap">
+            <button
+              className="project-new-button"
+              type="button"
+              onClick={() => setNewProjectMenuOpen((current) => !current)}
+              disabled={creating || projects.length >= MAX_SAVED_PROJECTS}
+              aria-expanded={newProjectMenuOpen}
+              aria-haspopup="menu"
+              title={
+                projects.length >= MAX_SAVED_PROJECTS
+                  ? `Project limit reached (${MAX_SAVED_PROJECTS})`
+                  : "Create project"
+              }
+            >
+              {creating ? "…" : "+"}
+            </button>
+            {newProjectMenuOpen && (
+              <div className="project-new-menu" role="menu">
+                {(Object.keys(starterCode) as ProjectLanguage[]).map((language) => (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    key={language}
+                    onClick={() => void createProject(language)}
+                  >
+                    <span aria-hidden="true">{languageIcons[language]}</span>
+                    <span>
+                      <strong>{languageLabels[language]}</strong>
+                      <small>{fileNames[language]}</small>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
+        {projects.length > 0 && (
+          <label className="project-search">
+            <span className="sr-only">Search projects</span>
+            <input
+              type="search"
+              value={projectSearch}
+              onChange={(event) => setProjectSearch(event.target.value)}
+              placeholder="Search projects"
+            />
+          </label>
+        )}
+
         <div className="project-list">
-          {projects.length ? (
-            projects.map((project) => (
+          {visibleProjects.length ? (
+            visibleProjects.map((project) => (
               <button
                 type="button"
                 key={project.id}
@@ -400,7 +550,11 @@ export function ProjectWorkspace({
           ) : (
             <div className="project-empty-mini">
               <span>🗂️</span>
-              <p>No saved projects yet.</p>
+              <p>
+                {projects.length
+                  ? "No projects match that search."
+                  : "No saved projects yet."}
+              </p>
             </div>
           )}
         </div>
@@ -417,9 +571,22 @@ export function ProjectWorkspace({
                 aria-label="Project title"
                 onChange={(event) => updateActive({ title: event.target.value })}
                 onBlur={() => flushProjectSave(active.id)}
+                onKeyDown={handleSaveShortcut}
               />
 
               <div className="project-toolbar-actions">
+                <button
+                  className="project-save-button"
+                  type="button"
+                  onClick={saveActiveNow}
+                  disabled={saveState === "saved" || saveState === "saving"}
+                >
+                  {saveState === "error"
+                    ? "Retry save"
+                    : saveState === "saving"
+                      ? "Saving…"
+                      : "Save"}
+                </button>
                 {(active.language === "python" || active.language === "javascript") && (
                   <button
                     className="project-run-button"
@@ -442,6 +609,21 @@ export function ProjectWorkspace({
                   <option value="css">CSS</option>
                   <option value="javascript">JavaScript</option>
                 </select>
+                <button
+                  className="project-utility-button"
+                  type="button"
+                  onClick={() => void duplicateProject()}
+                  disabled={duplicating || projects.length >= MAX_SAVED_PROJECTS}
+                >
+                  {duplicating ? "Duplicating…" : "Duplicate"}
+                </button>
+                <button
+                  className="project-utility-button"
+                  type="button"
+                  onClick={exportProject}
+                >
+                  Export
+                </button>
                 <button
                   className="project-delete-button"
                   type="button"
@@ -476,6 +658,7 @@ export function ProjectWorkspace({
                 maxLength={MAX_PROJECT_CODE_LENGTH}
                 onChange={(event) => updateActive({ code: event.target.value })}
                 onBlur={() => flushProjectSave(active.id)}
+                onKeyDown={handleSaveShortcut}
               />
             </div>
 
@@ -483,7 +666,9 @@ export function ProjectWorkspace({
               <span>
                 {active.code.length.toLocaleString()} / {MAX_PROJECT_CODE_LENGTH.toLocaleString()} characters
               </span>
-              <span>Saved privately to your CodeTrail account.</span>
+              <span>
+                Saved privately to your CodeTrail account · Ctrl/Cmd + S saves now.
+              </span>
             </div>
 
             {(active.language === "python" || active.language === "javascript") && (
@@ -544,9 +729,19 @@ export function ProjectWorkspace({
             <span>💻</span>
             <h2>Start your first coding project.</h2>
             <p>Create a private workspace and keep your code saved across devices.</p>
-            <button className="primary-button" type="button" onClick={createProject}>
-              Create project
-            </button>
+            <div className="project-empty-actions">
+              {(Object.keys(starterCode) as ProjectLanguage[]).map((language) => (
+                <button
+                  className="secondary-button"
+                  type="button"
+                  key={language}
+                  onClick={() => void createProject(language)}
+                  disabled={creating}
+                >
+                  {languageIcons[language]} {languageLabels[language]}
+                </button>
+              ))}
+            </div>
             {message && <p className="form-message" aria-live="polite">{message}</p>}
           </div>
         )}
