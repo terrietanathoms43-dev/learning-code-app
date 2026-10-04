@@ -22,6 +22,7 @@ export default async function PracticePage() {
   return (
     <div className="site-shell">
       <TopNav
+        signInHref="/login?next=/practice"
         stats={{
           streak: dashboard.streak,
           totalXp: dashboard.totalXp,
