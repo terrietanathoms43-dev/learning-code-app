@@ -3149,3 +3149,106 @@ button { color: inherit; }
   }
 }
 
+
+
+/* Project editor actions and runtime diagnostics */
+.code-editor-actions {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  padding: 7px 9px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: #111524;
+}
+
+.code-editor-actions button,
+.project-output-error-heading button {
+  min-height: 30px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 9px;
+  padding: 0 10px;
+  color: #dce4ff;
+  background: #20263d;
+  font: inherit;
+  font-size: .66rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.code-editor-actions button:hover:not(:disabled),
+.code-editor-actions button:focus-visible,
+.project-output-error-heading button:hover,
+.project-output-error-heading button:focus-visible {
+  outline: none;
+  border-color: #8f87ff;
+  background: #292f4a;
+}
+
+.code-editor-actions button:disabled {
+  cursor: not-allowed;
+  opacity: .48;
+}
+
+.code-editor-actions .code-editor-action-run {
+  border-color: rgba(45,212,191,.35);
+  color: #b9f7df;
+  background: rgba(15,118,110,.22);
+}
+
+.project-output-error-heading {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.project-output-error-heading .project-output-label {
+  border-bottom: 0;
+}
+
+.project-output-error-heading button {
+  margin-right: 9px;
+  border-color: rgba(254,202,202,.28);
+  color: #ffd7d7;
+  background: rgba(127,46,53,.38);
+}
+
+.project-error-summary {
+  margin: 0;
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  color: #ffd7d7;
+  background: rgba(127,46,53,.22);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: .72rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .code-editor-actions {
+    justify-content: stretch;
+    overflow-x: auto;
+  }
+
+  .code-editor-actions button {
+    min-height: 36px;
+    flex: 1 0 auto;
+  }
+
+  .project-output-error-heading {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0;
+    padding-bottom: 9px;
+  }
+
+  .project-output-error-heading button {
+    align-self: flex-start;
+    margin: 0 11px;
+  }
+}
