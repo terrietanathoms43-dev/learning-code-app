@@ -1,6 +1,6 @@
 # CodeTrail
 
-A gamified coding-learning app built around a visual learning path. The current foundation focuses on the first Python course, short interactive exercises, progress-ready data structures, and a Supabase-authenticated architecture.
+A gamified coding-learning app built around visual learning worlds. CodeTrail currently includes Python Foundations and Web Foundations, interactive exercises, saved coding projects, secure code execution, progress tracking, and a Supabase-authenticated architecture.
 
 ## What is already built
 
@@ -13,15 +13,15 @@ A gamified coding-learning app built around a visual learning path. The current 
 - Supabase SSR client/server/proxy utilities
 - Email/password sign-up and sign-in screen
 - Auth callback route
-- Initial Supabase migration with RLS, explicit Data API grants and Python seed content
+- Supabase migrations with RLS, explicit Data API grants, Python content and Web Foundations content
 - Signed-in exercise-attempt persistence through a server-only Supabase secret key
 - Verified completion, one-time XP rewards, streak calculations and automatic path unlocking
-- Progress dashboard and practice deck
+- Cross-world progress dashboard and practice deck
 - Full Python Foundations path through Conditions, Loops, Functions and the Mini Project
 - AI Code Coach with hint / explain / similar-example modes
 - Achievement badges including Python Pioneer
 - Editable learner profile and daily XP goals
-- Timezone-aware streaks and activity dates
+- Timezone-aware streaks and activity dates\n- Web Foundations path covering HTML, CSS, JavaScript and a mini project\n- Private saved-project workspace for Python, HTML, CSS and JavaScript\n- Sandboxed Python and JavaScript execution with network isolation and hourly quotas\n- HTML/CSS project previews with scripts and network requests blocked\n- Username support and production health checks
 
 ## Run locally
 
@@ -75,15 +75,21 @@ The AI Code Coach uses the Responses API, stores no model response history throu
 - Editable profile and daily XP goals
 
 ### Phase 5 — Rich coding practice
-- Sandboxed Python execution
-- Automated tests for free-form code
-- Project workspace and saved code
+- Sandboxed Python and JavaScript execution
+- Saved project workspace
+- HTML/CSS previews
+- Expanded exercise types including ordering and debugging
 
-### Phase 5 — Growth features
+### Phase 6 — Multiple learning worlds
+- Web Foundations
+- Cross-world progress and practice
+- World-aware achievements and navigation
+
+### Phase 7 — Growth features
 - Admin course editor
-- More languages
-- Leaderboards
-- Friend challenges and social learning
+- Additional learning worlds
+- Richer project tooling
+- Leaderboards, friend challenges and social learning
 
 ## Database
 
