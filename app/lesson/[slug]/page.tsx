@@ -1,6 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import { LessonPlayer } from "@/components/lesson-player";
-import { getLesson, guestAccessibleLessonSlugs } from "@/lib/course-data";
+import {
+  getLesson,
+  getLessonWorldHome,
+  guestAccessibleLessonSlugs,
+} from "@/lib/course-data";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function LessonPage({
@@ -13,11 +17,7 @@ export default async function LessonPage({
 
   if (!lesson) notFound();
 
-  const worldHome = slug.startsWith("web-")
-    ? "/learn/web"
-    : slug.startsWith("js-")
-      ? "/learn/javascript"
-      : "/learn";
+  const worldHome = getLessonWorldHome(slug);
 
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
