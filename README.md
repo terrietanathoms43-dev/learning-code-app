@@ -100,3 +100,15 @@ Important security choices:
 - User progress is protected with Row Level Security.
 - Correct exercise answers live in the private schema rather than a public Data API table.
 - XP events are readable by their owner but are not directly insertable from the browser.
+
+## Browser E2E checks
+
+CodeTrail includes a Playwright browser suite under `e2e/` and an opt-in GitHub Actions workflow named **Browser E2E**.
+
+The public mobile flow always runs when the workflow is started. Authenticated checks require a dedicated non-personal test account configured as GitHub Actions secrets:
+
+- `E2E_TEST_EMAIL`
+- `E2E_TEST_PASSWORD`
+
+The authenticated suite verifies sign-in return routing, the Projects workspace, multi-file Web App editing, autosave, the live JavaScript preview, HTML export, project deletion, Profile access, and sign-out. Keep these credentials limited to a test account; never use a real learner account in CI.
+
