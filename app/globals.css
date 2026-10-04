@@ -3044,3 +3044,108 @@ button { color: inherit; }
   }
 }
 
+/* Syntax highlighting layer */
+.code-editor-pane {
+  position: relative;
+  min-width: 0;
+  height: 420px;
+  min-height: 398px;
+  overflow: hidden;
+  background: #15192a;
+}
+
+.code-highlight-layer {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 420px;
+  margin: 0;
+  overflow: hidden;
+  padding: 20px 22px 20px 14px;
+  color: #edf2ff;
+  background: #15192a;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: .86rem;
+  line-height: 1.65;
+  tab-size: 4;
+  white-space: pre;
+  pointer-events: none;
+}
+
+.code-highlight-layer code {
+  font: inherit;
+}
+
+.project-code-editor .code-editor-pane textarea {
+  position: relative;
+  z-index: 2;
+  height: 420px;
+  color: transparent;
+  caret-color: #f8fbff;
+  background: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.project-code-editor .code-editor-pane textarea::selection {
+  background: rgba(119, 107, 255, .42);
+}
+
+.syntax-token--plain { color: #edf2ff; }
+.syntax-token--comment { color: #77819f; font-style: italic; }
+.syntax-token--string { color: #a7f3d0; }
+.syntax-token--keyword { color: #c4b5fd; font-weight: 700; }
+.syntax-token--number { color: #fde68a; }
+.syntax-token--tag { color: #7dd3fc; }
+.syntax-token--property { color: #f0abfc; }
+.syntax-token--color { color: #fda4af; }
+
+.code-editor-status-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.code-editor-status-actions button {
+  min-height: 24px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 7px;
+  padding: 0 8px;
+  color: #cfd7ee;
+  background: #20263d;
+  font-family: inherit;
+  font-size: .6rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.code-editor-status-actions button:disabled {
+  cursor: not-allowed;
+  opacity: .42;
+}
+
+@media (max-width: 760px) {
+  .code-editor-pane,
+  .code-highlight-layer,
+  .project-code-editor .code-editor-pane textarea {
+    height: 380px;
+    min-height: 360px;
+  }
+
+  .code-highlight-layer {
+    padding-left: 12px;
+    font-size: .82rem;
+  }
+
+  .code-editor-status {
+    align-items: flex-start;
+    min-height: 42px;
+    padding-block: 7px;
+  }
+
+  .code-editor-status-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
