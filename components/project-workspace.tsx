@@ -945,7 +945,10 @@ export function ProjectWorkspace({
                   : `${active.code.length.toLocaleString()} / ${MAX_PROJECT_CODE_LENGTH.toLocaleString()} characters`}
               </span>
               <span>
-                Saved privately to your CodeTrail account · Ctrl/Cmd + S saves now.
+                Saved privately to your CodeTrail account · Ctrl/Cmd + S saves
+                {active.language === "python" || active.language === "javascript"
+                  ? " · Ctrl/Cmd + Enter runs."
+                  : "."}
               </span>
             </div>
 
