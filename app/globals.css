@@ -2302,3 +2302,150 @@ button { color: inherit; }
     flex-direction: column;
   }
 }
+
+
+/* Interactive code ordering and debugging */
+.code-order-builder {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.order-section {
+  display: grid;
+  gap: 9px;
+}
+
+.order-section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.order-section-title strong {
+  font-size: .8rem;
+}
+
+.order-section-title span {
+  color: var(--muted);
+  font-size: .67rem;
+}
+
+.order-bank,
+.order-result {
+  min-height: 78px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px dashed #cbcfe0;
+  border-radius: 16px;
+  background: #f8f9ff;
+}
+
+.order-line {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #dfe3ef;
+  border-radius: 12px;
+  padding: 9px 11px;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+}
+
+.order-line:disabled {
+  cursor: default;
+  opacity: .74;
+}
+
+.order-line code {
+  flex: 1;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: .78rem;
+}
+
+.order-line--available:hover:not(:disabled) {
+  border-color: #bbb6ff;
+  background: #f8f7ff;
+}
+
+.order-line--available > span:last-child {
+  color: var(--indigo);
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.order-line--selected {
+  border-color: #c8c4ff;
+  background: #f2f1ff;
+}
+
+.order-number {
+  flex: 0 0 auto;
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: white;
+  background: var(--indigo);
+  font-size: .68rem;
+  font-weight: 900;
+}
+
+.order-placeholder,
+.order-bank-empty {
+  align-self: center;
+  justify-self: center;
+  color: var(--muted);
+  font-size: .72rem;
+  text-align: center;
+}
+
+.bug-panel {
+  margin-top: 12px;
+}
+
+.bug-label {
+  display: inline-flex;
+  margin: 0 0 6px 7px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #b42318;
+  background: #fff1f0;
+  font-size: .64rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.code-panel--buggy {
+  border: 1px solid #fecaca;
+  box-shadow: inset 4px 0 0 #ef4444;
+}
+
+.debug-editor {
+  margin-top: 12px;
+}
+
+.debug-editor .editor-bar strong::before {
+  content: "✓ ";
+  color: var(--mint);
+}
+
+@media (max-width: 560px) {
+  .order-section-title {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .order-line {
+    min-height: 50px;
+  }
+}
