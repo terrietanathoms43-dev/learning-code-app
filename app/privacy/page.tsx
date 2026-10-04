@@ -62,6 +62,21 @@ export default function PrivacyPage() {
           </section>
 
           <section>
+            <h2>Running saved code</h2>
+            <p>
+              Signed-in learners can run Python and JavaScript projects in a temporary,
+              isolated Vercel Sandbox with outbound network access disabled. CodeTrail
+              limits execution time and hourly runs. The run-usage record stores metadata
+              such as language, time, exit code and runtime; it does not store a separate
+              copy of the code in that usage record.
+            </p>
+            <p>
+              HTML and CSS projects use a browser sandboxed preview with scripts and
+              network requests blocked.
+            </p>
+          </section>
+
+          <section>
             <h2>AI Code Coach</h2>
             <p>
               When you choose an AI Coach action, CodeTrail sends the current lesson,
