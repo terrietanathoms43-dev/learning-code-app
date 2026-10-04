@@ -142,14 +142,20 @@ export async function DELETE(
   }
 
   const admin = createAdminClient();
-  const { error } = await admin
+  const { data, error } = await admin
     .from("saved_projects")
     .delete()
     .eq("id", id)
-    .eq("user_id", userId);
+    .eq("user_id", userId)
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     return NextResponse.json({ error: "Project could not be deleted." }, { status: 500 });
+  }
+
+  if (!data) {
+    return NextResponse.json({ error: "Project not found." }, { status: 404 });
   }
 
   return NextResponse.json({ deleted: true });
