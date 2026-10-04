@@ -3,28 +3,26 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
-
-function getSafeNextPath(origin: string, value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
-    return "/learn";
-  }
-
-  try {
-    const candidate = new URL(value, origin);
-    if (candidate.origin !== origin) return "/learn";
-    return `${candidate.pathname}${candidate.search}${candidate.hash}`;
-  } catch {
-    return "/learn";
-  }
-}
+import { getLoginAuthMessage, getSafeNextPath } from "@/lib/auth-redirect";
 
 export default function LoginPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signup");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const authMessage = getLoginAuthMessage(
+      new URLSearchParams(window.location.search).get("auth"),
+    );
+
+    if (authMessage) {
+      setMode("signin");
+      setMessage(authMessage);
+    }
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
