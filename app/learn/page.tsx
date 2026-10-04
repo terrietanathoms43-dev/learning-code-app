@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { LearningPath } from "@/components/learning-path";
 import { TopNav } from "@/components/top-nav";
-import { getLearningDashboard } from "@/lib/learning-dashboard";
+import { getLearningDashboards } from "@/lib/learning-dashboard";
 
 export default async function LearnPage() {
-  const dashboard = await getLearningDashboard();
+  const { python: dashboard, web: webDashboard } =
+    await getLearningDashboards();
+  const completedAcrossWorlds =
+    dashboard.completedLessons + webDashboard.completedLessons;
   const dailyPercent = Math.min(
     100,
     Math.round((dashboard.todayXp / Math.max(dashboard.dailyGoalXp, 1)) * 100),
@@ -113,7 +116,7 @@ export default async function LearnPage() {
             <p className="eyebrow">Practice deck</p>
             <h2>Warm up your skills</h2>
             <p>Review completed lessons without earning duplicate completion XP.</p>
-            {dashboard.completedLessons >= 3 ? (
+            {completedAcrossWorlds >= 3 ? (
               <Link className="secondary-button secondary-button--full" href="/practice">
                 Open practice deck
               </Link>
