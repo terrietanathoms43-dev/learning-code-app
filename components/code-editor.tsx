@@ -14,6 +14,10 @@ import {
   getLineSelection,
 } from "@/lib/code-editor";
 import {
+  highlightCode,
+  type HighlightLanguage,
+} from "@/lib/syntax-highlight";
+import {
   tokenizeCode,
   type HighlightLanguage,
 } from "@/lib/code-highlight";
@@ -25,6 +29,7 @@ type CodeEditorProps = {
   fileName: string;
   language: HighlightLanguage;
   maxLength: number;
+  language: HighlightLanguage;
   disabled?: boolean;
   onBlur?: () => void;
   onSave?: () => void;
@@ -46,6 +51,7 @@ export function CodeEditor({
   fileName,
   language,
   maxLength,
+  language,
   disabled = false,
   onBlur,
   onSave,
@@ -57,6 +63,7 @@ export function CodeEditor({
 }: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
+  const highlightRef = useRef<HTMLPreElement>(null);
   const valueRef = useRef(value);
   const highlightRef = useRef<HTMLPreElement>(null);
   const [cursor, setCursor] = useState(0);
