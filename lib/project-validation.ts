@@ -1,4 +1,6 @@
 export const projectLanguages = ["python", "html", "css", "javascript"] as const;
+export const MAX_SAVED_PROJECTS = 25;
+export const MAX_PROJECT_CODE_LENGTH = 20_000;
 
 export type ProjectLanguage = (typeof projectLanguages)[number];
 
@@ -18,5 +20,7 @@ export function isProjectLanguage(value: string): value is ProjectLanguage {
 }
 
 export function getProjectCodeError(value: string) {
-  return value.length > 20000 ? "Projects can contain at most 20,000 characters." : null;
+  return value.length > MAX_PROJECT_CODE_LENGTH
+    ? `Projects can contain at most ${MAX_PROJECT_CODE_LENGTH.toLocaleString()} characters.`
+    : null;
 }
