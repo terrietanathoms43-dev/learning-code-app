@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { Lesson } from "@/lib/course-data";
+import {
+  getLessonWorldHome,
+  isCourseFinalProject,
+  type Lesson,
+} from "@/lib/course-data";
 
 type Feedback = {
   correct: boolean;
@@ -63,8 +67,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [coachNotice, setCoachNotice] = useState("");
 
   const exercise = lesson.exercises[index];
-  const isWebWorld = lesson.slug.startsWith("web-");
-  const worldHome = isWebWorld ? "/learn/web" : "/learn";
+  const worldHome = getLessonWorldHome(lesson.slug);
   const editorFileName =
     exercise?.id.includes("html")
       ? "index.html"
