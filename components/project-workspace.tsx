@@ -1,7 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import type { ProjectLanguage } from "@/lib/project-validation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  MAX_PROJECT_CODE_LENGTH,
+  MAX_SAVED_PROJECTS,
+  type ProjectLanguage,
+} from "@/lib/project-validation";
 
 export type SavedProject = {
   id: string;
@@ -11,6 +15,8 @@ export type SavedProject = {
   created_at: string;
   updated_at: string;
 };
+
+type SaveState = "saved" | "unsaved" | "saving" | "error";
 
 const starterCode: Record<ProjectLanguage, string> = {
   python: 'print("Hello, CodeTrail!")',
@@ -33,7 +39,13 @@ export function ProjectWorkspace({
 }) {
   const [projects, setProjects] = useState(initialProjects);
   const [activeId, setActiveId] = useState(initialProjects[0]?.id ?? null);
-  const [saveState, setSaveState] = useState<"saved" | "unsaved" | "saving" | "error">("saved");
+  const [saveStates, setSaveStates] = useState<Record<string, SaveState>>(() =>
+    Object.fromEntries(initialProjects.map((project) => [project.id, "saved"])) as Record<string, SaveState>,
+  );
+  const saveTimers = useRef(new Map<string, number>());
+  const saveControllers = useRef(new Map<string, AbortController>());
+  const saveRevisions = useRef(new Map<string, number>());
+  const pendingSaves = useRef(new Map<string, { project: SavedProject; revision: number }>());
   const [creating, setCreating] = useState(false);
   const [runState, setRunState] = useState<"idle" | "running" | "done" | "error">("idle");
   const [runOutput, setRunOutput] = useState("");
@@ -46,6 +58,7 @@ export function ProjectWorkspace({
     () => projects.find((project) => project.id === activeId) ?? null,
     [activeId, projects],
   );
+  const saveState = active ? saveStates[active.id] ?? "saved" : "saved";
 
   const previewDocument = useMemo(() => {
     if (!active || (active.language !== "html" && active.language !== "css")) {
@@ -64,54 +77,126 @@ export function ProjectWorkspace({
   }, [active]);
 
   useEffect(() => {
-    if (!active || saveState !== "unsaved") return;
+    return () => {
+      for (const timeout of saveTimers.current.values()) {
+        window.clearTimeout(timeout);
+      }
 
-    const controller = new AbortController();
-    const timeout = window.setTimeout(async () => {
-      setSaveState("saving");
+      for (const controller of saveControllers.current.values()) {
+        controller.abort();
+      }
 
-      try {
-        const response = await fetch(`/api/projects/${active.id}`, {
+      for (const { project } of pendingSaves.current.values()) {
+        void fetch(`/api/projects/${project.id}`, {
           method: "PATCH",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({
-            title: active.title,
-            language: active.language,
-            code: active.code,
+            title: project.title,
+            language: project.language,
+            code: project.code,
           }),
-          signal: controller.signal,
-        });
-
-        const data = (await response.json()) as {
-          project?: SavedProject;
-          error?: string;
-        };
-
-        if (!response.ok || !data.project) {
-          setMessage(data.error || "Project could not be saved.");
-          setSaveState("error");
-          return;
-        }
-
-        setProjects((current) =>
-          current.map((project) =>
-            project.id === data.project?.id ? data.project : project,
-          ),
-        );
-        setMessage("");
-        setSaveState("saved");
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setMessage("Project could not be saved. Check your connection.");
-        setSaveState("error");
+          keepalive: true,
+        }).catch(() => undefined);
       }
+    };
+  }, []);
+
+  function setProjectSaveState(projectId: string, state: SaveState) {
+    setSaveStates((current) => ({ ...current, [projectId]: state }));
+  }
+
+  async function persistProject(project: SavedProject, revision: number) {
+    const controller = new AbortController();
+    saveControllers.current.set(project.id, controller);
+    setProjectSaveState(project.id, "saving");
+
+    try {
+      const response = await fetch(`/api/projects/${project.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          title: project.title,
+          language: project.language,
+          code: project.code,
+        }),
+        signal: controller.signal,
+      });
+
+      const data = (await response.json()) as {
+        project?: SavedProject;
+        error?: string;
+      };
+
+      if (saveRevisions.current.get(project.id) !== revision) return;
+
+      if (!response.ok || !data.project) {
+        setMessage(data.error || "Project could not be saved.");
+        setProjectSaveState(project.id, "error");
+        return;
+      }
+
+      pendingSaves.current.delete(project.id);
+      setProjects((current) =>
+        current.map((item) => (item.id === data.project?.id ? data.project : item)),
+      );
+      setMessage("");
+      setProjectSaveState(project.id, "saved");
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      if (saveRevisions.current.get(project.id) !== revision) return;
+      setMessage("Project could not be saved. Check your connection.");
+      setProjectSaveState(project.id, "error");
+    } finally {
+      if (saveControllers.current.get(project.id) === controller) {
+        saveControllers.current.delete(project.id);
+      }
+    }
+  }
+
+  function queueProjectSave(project: SavedProject) {
+    const previousTimer = saveTimers.current.get(project.id);
+    if (previousTimer !== undefined) {
+      window.clearTimeout(previousTimer);
+    }
+
+    saveControllers.current.get(project.id)?.abort();
+
+    const revision = (saveRevisions.current.get(project.id) ?? 0) + 1;
+    saveRevisions.current.set(project.id, revision);
+    pendingSaves.current.set(project.id, { project, revision });
+
+    const timeout = window.setTimeout(() => {
+      saveTimers.current.delete(project.id);
+      void persistProject(project, revision);
     }, 700);
 
-    return () => {
-      controller.abort();
+    saveTimers.current.set(project.id, timeout);
+  }
+
+  function flushProjectSave(projectId: string) {
+    const pending = pendingSaves.current.get(projectId);
+    if (!pending) return;
+
+    const timeout = saveTimers.current.get(projectId);
+    if (timeout !== undefined) {
       window.clearTimeout(timeout);
-    };
-  }, [active, saveState]);
+      saveTimers.current.delete(projectId);
+    }
+
+    void persistProject(pending.project, pending.revision);
+  }
+
+  function cancelProjectSave(projectId: string) {
+    const timeout = saveTimers.current.get(projectId);
+    if (timeout !== undefined) {
+      window.clearTimeout(timeout);
+      saveTimers.current.delete(projectId);
+    }
+    saveControllers.current.get(projectId)?.abort();
+    saveControllers.current.delete(projectId);
+    pendingSaves.current.delete(projectId);
+    saveRevisions.current.delete(projectId);
+  }
 
   function resetRunResult() {
     setRunState("idle");
@@ -122,15 +207,18 @@ export function ProjectWorkspace({
   }
 
   function updateActive(changes: Partial<SavedProject>) {
-    if (!activeId) return;
+    if (!active) return;
+
+    const nextProject = { ...active, ...changes };
     resetRunResult();
     setProjects((current) =>
       current.map((project) =>
-        project.id === activeId ? { ...project, ...changes } : project,
+        project.id === active.id ? nextProject : project,
       ),
     );
-    setSaveState("unsaved");
+    setProjectSaveState(active.id, "unsaved");
     setMessage("");
+    queueProjectSave(nextProject);
   }
 
   async function createProject() {
@@ -161,7 +249,7 @@ export function ProjectWorkspace({
 
       setProjects((current) => [data.project!, ...current]);
       setActiveId(data.project.id);
-      setSaveState("saved");
+      setProjectSaveState(data.project.id, "saved");
       resetRunResult();
     } catch {
       setMessage("Project could not be created. Check your connection.");
@@ -178,19 +266,31 @@ export function ProjectWorkspace({
       return;
     }
 
-    const response = await fetch(`/api/projects/${id}`, { method: "DELETE" });
-    if (!response.ok) {
-      setMessage("Project could not be deleted.");
-      return;
-    }
+    cancelProjectSave(id);
 
-    const nextProjects = projects.filter((item) => item.id !== id);
-    setProjects(nextProjects);
-    setActiveId((current) =>
-      current === id ? nextProjects[0]?.id ?? null : current,
-    );
-    setSaveState("saved");
-    resetRunResult();
+    try {
+      const response = await fetch(`/api/projects/${id}`, { method: "DELETE" });
+      if (!response.ok) {
+        setMessage("Project could not be deleted.");
+        setProjectSaveState(id, "error");
+        return;
+      }
+
+      const nextProjects = projects.filter((item) => item.id !== id);
+      setProjects(nextProjects);
+      setSaveStates((current) => {
+        const next = { ...current };
+        delete next[id];
+        return next;
+      });
+      setActiveId((current) =>
+        current === id ? nextProjects[0]?.id ?? null : current,
+      );
+      resetRunResult();
+    } catch {
+      setMessage("Project could not be deleted. Check your connection.");
+      setProjectSaveState(id, "error");
+    }
   }
 
   async function runCode() {
@@ -268,7 +368,12 @@ export function ProjectWorkspace({
             className="project-new-button"
             type="button"
             onClick={createProject}
-            disabled={creating}
+            disabled={creating || projects.length >= MAX_SAVED_PROJECTS}
+            title={
+              projects.length >= MAX_SAVED_PROJECTS
+                ? `Project limit reached (${MAX_SAVED_PROJECTS})`
+                : "Create project"
+            }
           >
             {creating ? "…" : "+"}
           </button>
@@ -282,8 +387,8 @@ export function ProjectWorkspace({
                 key={project.id}
                 className={`project-list-item ${activeId === project.id ? "is-active" : ""}`}
                 onClick={() => {
+                  if (active) flushProjectSave(active.id);
                   setActiveId(project.id);
-                  setSaveState("saved");
                   setMessage("");
                   resetRunResult();
                 }}
@@ -311,6 +416,7 @@ export function ProjectWorkspace({
                 maxLength={80}
                 aria-label="Project title"
                 onChange={(event) => updateActive({ title: event.target.value })}
+                onBlur={() => flushProjectSave(active.id)}
               />
 
               <div className="project-toolbar-actions">
@@ -367,12 +473,16 @@ export function ProjectWorkspace({
                 spellCheck={false}
                 autoCapitalize="none"
                 autoCorrect="off"
+                maxLength={MAX_PROJECT_CODE_LENGTH}
                 onChange={(event) => updateActive({ code: event.target.value })}
+                onBlur={() => flushProjectSave(active.id)}
               />
             </div>
 
             <div className="project-editor-footer">
-              <span>{active.code.length.toLocaleString()} / 20,000 characters</span>
+              <span>
+                {active.code.length.toLocaleString()} / {MAX_PROJECT_CODE_LENGTH.toLocaleString()} characters
+              </span>
               <span>Saved privately to your CodeTrail account.</span>
             </div>
 
