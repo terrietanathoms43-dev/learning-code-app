@@ -40,6 +40,20 @@ export const pythonPath: PathNode[] = [
   { slug: "mini-project", title: "Mini Project", subtitle: "Build a tiny quiz game", icon: "🚀", kind: "project", status: "locked", xp: 100 },
 ];
 
+export const webPath: PathNode[] = [
+  { slug: "web-html-basics", title: "HTML Basics", subtitle: "Build the structure of a page", icon: "🏗️", kind: "lesson", status: "current", xp: 25 },
+  { slug: "web-css-basics", title: "CSS Basics", subtitle: "Style what you built", icon: "🎨", kind: "lesson", status: "locked", xp: 30 },
+  { slug: "web-js-basics", title: "JavaScript Basics", subtitle: "Make pages react", icon: "⚡", kind: "lesson", status: "locked", xp: 35 },
+  { slug: "web-mini-project", title: "Mini Web Project", subtitle: "Put HTML, CSS and JS together", icon: "🌐", kind: "project", status: "locked", xp: 80 },
+];
+
+export const pythonLessonSlugs = pythonPath.map((node) => node.slug);
+export const webLessonSlugs = webPath.map((node) => node.slug);
+export const guestAccessibleLessonSlugs = [
+  pythonLessonSlugs[0],
+  webLessonSlugs[0],
+];
+
 export const lessons: Record<string, Lesson> = {
   "hello-world": {
     slug: "hello-world", title: "Hello, Python!", subtitle: "Learn how Python displays information.", icon: "👋", xp: 20, duration: "4 min",
@@ -271,6 +285,134 @@ export const lessons: Record<string, Lesson> = {
         eyebrow: "Finish the project",
         prompt: "Print the final score using the score variable.",
         placeholder: "print(score)",
+      },
+    ],
+  },
+  "web-html-basics": {
+    slug: "web-html-basics",
+    title: "HTML Basics",
+    subtitle: "Learn the tags that give a web page its structure.",
+    icon: "🏗️",
+    xp: 25,
+    duration: "6 min",
+    exercises: [
+      {
+        id: "web-html-heading",
+        type: "choice",
+        eyebrow: "Choose the tag",
+        prompt: "Which HTML creates a main heading that says Hello?",
+        options: ["<h1>Hello</h1>", "<p>Hello</p>", "<title>Hello</title>", "<heading>Hello</heading>"],
+      },
+      {
+        id: "web-html-paragraph",
+        type: "text",
+        eyebrow: "Fill the tag",
+        prompt: "Which tag name creates a paragraph? Type only the tag name.",
+        code: "<____>Welcome to my page</____>",
+        placeholder: "Tag name",
+      },
+      {
+        id: "web-html-code",
+        type: "code",
+        eyebrow: "Write HTML",
+        prompt: "Create an h2 heading containing the text Welcome.",
+        placeholder: "<h2>Welcome</h2>",
+      },
+    ],
+  },
+  "web-css-basics": {
+    slug: "web-css-basics",
+    title: "CSS Basics",
+    subtitle: "Use selectors and properties to style a page.",
+    icon: "🎨",
+    xp: 30,
+    duration: "7 min",
+    exercises: [
+      {
+        id: "web-css-color",
+        type: "choice",
+        eyebrow: "Choose the property",
+        prompt: "Which CSS property changes text color?",
+        options: ["color", "background", "font-style", "text-value"],
+      },
+      {
+        id: "web-css-selector",
+        type: "text",
+        eyebrow: "Name the selector",
+        prompt: "Which selector targets every h1 element? Type only the selector.",
+        code: "____ {\n  color: blue;\n}",
+        placeholder: "Selector",
+      },
+      {
+        id: "web-css-debug",
+        type: "debug",
+        eyebrow: "Fix the CSS",
+        prompt: "Repair this rule so the heading becomes blue.",
+        code: "h1 {\n  color blue\n}",
+        placeholder: "h1 {\n  color: blue;\n}",
+      },
+    ],
+  },
+  "web-js-basics": {
+    slug: "web-js-basics",
+    title: "JavaScript Basics",
+    subtitle: "Store values and send output from the browser language.",
+    icon: "⚡",
+    xp: 35,
+    duration: "7 min",
+    exercises: [
+      {
+        id: "web-js-variable",
+        type: "choice",
+        eyebrow: "Choose the variable",
+        prompt: "Which line creates a JavaScript variable named score with the value 5?",
+        options: ["let score = 5;", "score == 5;", "5 = score;", "variable score = 5;"],
+      },
+      {
+        id: "web-js-console",
+        type: "text",
+        eyebrow: "Fill the method",
+        prompt: "Complete the browser-console output method.",
+        code: "console.____(\"Hello\");",
+        placeholder: "Method name",
+      },
+      {
+        id: "web-js-code",
+        type: "code",
+        eyebrow: "Write JavaScript",
+        prompt: "Create a constant named name with the text Ada, then log name.",
+        placeholder: "const name = \"Ada\";\nconsole.log(name);",
+      },
+    ],
+  },
+  "web-mini-project": {
+    slug: "web-mini-project",
+    title: "Mini Web Project",
+    subtitle: "Combine the three web languages into a tiny page.",
+    icon: "🌐",
+    xp: 80,
+    duration: "10 min",
+    exercises: [
+      {
+        id: "web-project-html",
+        type: "code",
+        eyebrow: "Build the content",
+        prompt: "Create a button whose visible text is Start.",
+        placeholder: "<button>Start</button>",
+      },
+      {
+        id: "web-project-css",
+        type: "code",
+        eyebrow: "Style the button",
+        prompt: "Write a CSS rule that gives button elements a blue background.",
+        placeholder: "button {\n  background: blue;\n}",
+      },
+      {
+        id: "web-project-js",
+        type: "code",
+        eyebrow: "Add JavaScript",
+        prompt: "Create a constant named message containing Ready, then log it.",
+        placeholder: "const message = \"Ready\";\nconsole.log(message);",
       },
     ],
   },
