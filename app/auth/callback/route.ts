@@ -1,28 +1,17 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-
-function getSafeNext(origin: string, value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
-    return "/learn";
-  }
-
-  try {
-    const candidate = new URL(value, origin);
-    if (candidate.origin !== origin) return "/learn";
-    return `${candidate.pathname}${candidate.search}${candidate.hash}`;
-  } catch {
-    return "/learn";
-  }
-}
+import { getAuthCallbackErrorRedirect, getSafeNextPath } from "@/lib/auth-redirect";
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const redirectOrigin = url.origin;
   const code = url.searchParams.get("code");
-  const safeNext = getSafeNext(redirectOrigin, url.searchParams.get("next"));
+  const safeNext = getSafeNextPath(redirectOrigin, url.searchParams.get("next"));
 
   if (!code) {
-    return NextResponse.redirect(new URL("/login?auth=missing-code", redirectOrigin));
+    return NextResponse.redirect(
+      getAuthCallbackErrorRedirect(redirectOrigin, safeNext, "missing-code"),
+    );
   }
 
   try {
@@ -30,10 +19,14 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
-      return NextResponse.redirect(new URL("/login?auth=callback-error", redirectOrigin));
+      return NextResponse.redirect(
+        getAuthCallbackErrorRedirect(redirectOrigin, safeNext, "callback-error"),
+      );
     }
   } catch {
-    return NextResponse.redirect(new URL("/login?auth=callback-error", redirectOrigin));
+    return NextResponse.redirect(
+      getAuthCallbackErrorRedirect(redirectOrigin, safeNext, "callback-error"),
+    );
   }
 
   return NextResponse.redirect(new URL(safeNext, redirectOrigin));
