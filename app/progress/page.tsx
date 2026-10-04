@@ -12,11 +12,23 @@ function formatActivityDate(value: string, timeZone: string) {
 }
 
 export default async function ProgressPage() {
-  const { python: dashboard, web: webDashboard } =
-    await getLearningDashboards();
-  const lessonsCleared = dashboard.completedLessons + webDashboard.completedLessons;
-  const dailyPercent = Math.min(100, Math.round((dashboard.todayXp / Math.max(dashboard.dailyGoalXp, 1)) * 100));
-  const achievements = getAchievements(dashboard, webDashboard);
+  const {
+    python: dashboard,
+    web: webDashboard,
+    javascript: javascriptDashboard,
+  } = await getLearningDashboards();
+  const lessonsCleared =
+    dashboard.completedLessons +
+    webDashboard.completedLessons +
+    javascriptDashboard.completedLessons;
+  const dailyPercent = Math.min(
+    100,
+    Math.round((dashboard.todayXp / Math.max(dashboard.dailyGoalXp, 1)) * 100),
+  );
+  const achievements = getAchievements(dashboard, [
+    webDashboard,
+    javascriptDashboard,
+  ]);
   const unlockedAchievements = achievements.filter((achievement) => achievement.unlocked).length;
 
   return (
@@ -71,6 +83,16 @@ export default async function ProgressPage() {
             <div className="big-progress-track"><span style={{ width: `${webDashboard.progressPercent}%` }} /></div>
             <p>{webDashboard.completedLessons} of {webDashboard.totalLessons} currently available web lessons completed.</p>
             <Link className="secondary-button" href="/learn/web">Continue in Pixel Garden</Link>
+          </article>
+
+          <article className="progress-panel">
+            <div className="progress-panel-heading">
+              <div><p className="eyebrow">JavaScript Foundations</p><h2>Logic Lab</h2></div>
+              <strong>{javascriptDashboard.progressPercent}%</strong>
+            </div>
+            <div className="big-progress-track"><span style={{ width: `${javascriptDashboard.progressPercent}%` }} /></div>
+            <p>{javascriptDashboard.completedLessons} of {javascriptDashboard.totalLessons} currently available JavaScript lessons completed.</p>
+            <Link className="secondary-button" href="/learn/javascript">Continue in Logic Lab</Link>
           </article>
 
           <article className="progress-panel">
