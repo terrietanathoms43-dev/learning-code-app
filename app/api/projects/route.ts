@@ -11,8 +11,9 @@ import {
 import { isSameOriginRequest } from "@/lib/request-security";
 
 
-async function getUserId() {
-  const supabase = await createClient();
+type ServerSupabaseClient = Awaited<ReturnType<typeof createClient>>;
+
+async function getUserId(supabase: ServerSupabaseClient) {
   const { data, error } = await supabase.auth.getClaims();
 
   return !error && data?.claims && typeof data.claims.sub === "string"
@@ -21,13 +22,13 @@ async function getUserId() {
 }
 
 export async function GET() {
-  const userId = await getUserId();
+  const supabase = await createClient();
+  const userId = await getUserId(supabase);
 
   if (!userId) {
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
 
-  const supabase = await createClient();
   const { data, error } = await supabase
     .from("saved_projects")
     .select("id, title, language, code, created_at, updated_at")
@@ -93,7 +94,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const userId = await getUserId();
+  const supabase = await createClient();
+  const userId = await getUserId(supabase);
   if (!userId) {
     return NextResponse.json({ error: "Sign in required." }, { status: 401 });
   }
