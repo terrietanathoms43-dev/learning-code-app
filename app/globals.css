@@ -2523,6 +2523,19 @@ button { color: inherit; }
     white;
 }
 
+.world-banner--javascript {
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.15), transparent 45%),
+    linear-gradient(135deg, #7c3aed, #6d28d9 58%, #4c1d95);
+}
+
+.javascript-world-page .trail-column {
+  background:
+    radial-gradient(circle at 12% 28%, rgba(139,92,246,.11), transparent 16rem),
+    radial-gradient(circle at 88% 62%, rgba(250,204,21,.09), transparent 18rem),
+    white;
+}
+
 @media (max-width: 620px) {
   .world-switcher {
     width: min(100% - 22px, 1120px);
