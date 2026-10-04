@@ -1,13 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
+import { getRecoveryAuthMessage } from "@/lib/auth-redirect";
 
 export default function ForgotPasswordPage() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    const authMessage = getRecoveryAuthMessage(
+      new URLSearchParams(window.location.search).get("auth"),
+    );
+    if (authMessage) setMessage(authMessage);
+  }, []);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
