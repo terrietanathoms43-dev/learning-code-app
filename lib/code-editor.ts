@@ -221,3 +221,29 @@ export function getLineAndColumn(value: string, cursor: number) {
     column: (lines.at(-1)?.length ?? 0) + 1,
   };
 }
+
+
+export function getLineSelection(
+  value: string,
+  line: number,
+  column = 1,
+) {
+  const safeLine = Math.max(1, Math.floor(line));
+  const safeColumn = Math.max(1, Math.floor(column));
+  const lines = value.split("\n");
+  const lineIndex = Math.min(safeLine - 1, Math.max(0, lines.length - 1));
+
+  let start = 0;
+  for (let index = 0; index < lineIndex; index += 1) {
+    start += lines[index].length + 1;
+  }
+
+  const currentLine = lines[lineIndex] ?? "";
+  const caret = start + Math.min(safeColumn - 1, currentLine.length);
+
+  return {
+    start,
+    end: start + currentLine.length,
+    caret,
+  };
+}
