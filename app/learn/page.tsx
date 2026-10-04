@@ -26,6 +26,17 @@ export default async function LearnPage() {
         }}
       />
 
+      <nav className="world-switcher" aria-label="Learning worlds">
+        <Link className="world-switcher-link is-active" href="/learn">
+          <span aria-hidden="true">🐍</span>
+          <span><strong>Python Foundations</strong><small>Beginner Meadow</small></span>
+        </Link>
+        <Link className="world-switcher-link" href="/learn/web">
+          <span aria-hidden="true">🌐</span>
+          <span><strong>Web Foundations</strong><small>Pixel Garden</small></span>
+        </Link>
+      </nav>
+
       <main className="learn-layout">
         <section className="trail-column">
           <div className="world-banner">
