@@ -7,6 +7,7 @@ import {
   MAX_SAVED_PROJECTS,
   type ProjectLanguage,
 } from "@/lib/project-validation";
+import { parseRuntimeError } from "@/lib/runtime-error";
 import {
   createWebPreviewDocument,
   decodeWebProject,
@@ -118,6 +119,11 @@ export function ProjectWorkspace({
   const [runError, setRunError] = useState("");
   const [runExitCode, setRunExitCode] = useState<number | null>(null);
   const [runRemaining, setRunRemaining] = useState<number | null>(null);
+  const [editorJump, setEditorJump] = useState<{
+    line: number;
+    column: number | null;
+    requestId: number;
+  } | null>(null);
   const [message, setMessage] = useState("");
 
   const active = useMemo(
@@ -140,6 +146,18 @@ export function ProjectWorkspace({
       : active
         ? fileNames[active.language]
         : "";
+  const runErrorLocation = useMemo(() => {
+    if (
+      !active ||
+      (active.language !== "python" && active.language !== "javascript") ||
+      !runStderr.trim()
+    ) {
+      return null;
+    }
+
+    return parseRuntimeError(active.language, runStderr);
+  }, [active, runStderr]);
+
   const visibleProjects = useMemo(() => {
     const query = projectSearch.trim().toLowerCase();
     if (!query) return projects;
@@ -311,6 +329,7 @@ export function ProjectWorkspace({
 
   function resetRunResult() {
     setRunState("idle");
+    setEditorJump(null);
     setRunStdout("");
     setRunStderr("");
     setRunError("");
@@ -482,6 +501,41 @@ export function ProjectWorkspace({
     if (!active || activeDeleting || saveState === "saving") return;
     queueProjectSave(active);
     flushProjectSave(active.id);
+  }
+
+  function resetActiveEditor() {
+    if (!active || activeDeleting) return;
+
+    const nextValue =
+      active.language === "web"
+        ? webProjectStarter[activeWebFile]
+        : starterCode[active.language];
+
+    if (activeEditorValue === nextValue) return;
+
+    if (
+      !window.confirm(
+        `Reset ${activeEditorName} to its starter code? Your current edits in this file will be replaced.`,
+      )
+    ) {
+      return;
+    }
+
+    if (active.language === "web") {
+      updateWebFile(activeWebFile, nextValue);
+    } else {
+      updateActive({ code: nextValue });
+    }
+  }
+
+  function jumpToRunError() {
+    if (!runErrorLocation) return;
+
+    setEditorJump({
+      line: runErrorLocation.line,
+      column: runErrorLocation.column,
+      requestId: Date.now(),
+    });
   }
 
   function handleSaveShortcut(
@@ -945,7 +999,19 @@ export function ProjectWorkspace({
 
                     {runStderr.trim() && (
                       <div className="project-output-stream project-output-stream--error">
-                        <span className="project-output-label">Errors</span>
+                        <div className="project-output-error-heading">
+                          <span className="project-output-label">Errors</span>
+                          {runErrorLocation && (
+                            <button type="button" onClick={jumpToRunError}>
+                              Jump to line {runErrorLocation.line}
+                            </button>
+                          )}
+                        </div>
+                        {runErrorLocation && (
+                          <p className="project-error-summary">
+                            {runErrorLocation.summary}
+                          </p>
+                        )}
                         <pre className="project-output-terminal project-output-terminal--error">
                           {runStderr}
                         </pre>
