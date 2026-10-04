@@ -627,3 +627,15 @@ export const implementedLessonSlugs = Object.keys(lessons);
 export function getLesson(slug: string) {
   return lessons[slug];
 }
+
+export function getLessonWorldHome(slug: string) {
+  if (slug.startsWith("web-")) return "/learn/web";
+  if (slug.startsWith("js-")) return "/learn/javascript";
+  return "/learn";
+}
+
+export function isCourseFinalProject(slug: string) {
+  return slug === "mini-project" ||
+    slug === "web-mini-project" ||
+    slug === "js-mini-project";
+}
