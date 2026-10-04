@@ -5,10 +5,15 @@ import { TopNav } from "@/components/top-nav";
 import { getLearningDashboards } from "@/lib/learning-dashboard";
 
 export default async function LearnPage() {
-  const { python: dashboard, web: webDashboard } =
-    await getLearningDashboards();
+  const {
+    python: dashboard,
+    web: webDashboard,
+    javascript: javascriptDashboard,
+  } = await getLearningDashboards();
   const completedAcrossWorlds =
-    dashboard.completedLessons + webDashboard.completedLessons;
+    dashboard.completedLessons +
+    webDashboard.completedLessons +
+    javascriptDashboard.completedLessons;
   const dailyPercent = Math.min(
     100,
     Math.round((dashboard.todayXp / Math.max(dashboard.dailyGoalXp, 1)) * 100),
