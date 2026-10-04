@@ -3,6 +3,7 @@ import { ProjectWorkspace, type SavedProject } from "@/components/project-worksp
 import { TopNav } from "@/components/top-nav";
 import { getLearningDashboard } from "@/lib/learning-dashboard";
 import { createClient } from "@/lib/supabase/server";
+import { MAX_SAVED_PROJECTS } from "@/lib/project-validation";
 
 export default async function ProjectsPage() {
   const supabase = await createClient();
@@ -21,8 +22,12 @@ export default async function ProjectsPage() {
       .select("id, title, language, code, created_at, updated_at")
       .eq("user_id", userId)
       .order("updated_at", { ascending: false })
-      .limit(50),
+      .limit(MAX_SAVED_PROJECTS),
   ]);
+
+  if (projectsResult.error) {
+    throw new Error("Projects could not be loaded.");
+  }
 
   const projects = (projectsResult.data ?? []) as SavedProject[];
 
