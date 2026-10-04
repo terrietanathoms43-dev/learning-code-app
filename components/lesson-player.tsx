@@ -63,6 +63,18 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [coachNotice, setCoachNotice] = useState("");
 
   const exercise = lesson.exercises[index];
+  const isWebWorld = lesson.slug.startsWith("web-");
+  const worldHome = isWebWorld ? "/learn/web" : "/learn";
+  const editorFileName =
+    exercise?.id.includes("html")
+      ? "index.html"
+      : exercise?.id.includes("css")
+        ? exercise.type === "debug" ? "fixed.css" : "styles.css"
+        : exercise?.id.includes("js")
+          ? "script.js"
+          : exercise?.type === "debug"
+            ? "fixed.py"
+            : "main.py";
   const progress = useMemo(
     () => Math.round(((finished ? lesson.exercises.length : index) / lesson.exercises.length) * 100),
     [finished, index, lesson.exercises.length],
@@ -257,24 +269,36 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   if (finished) {
     const finalAccuracy = completion?.accuracy ?? localAccuracy;
-    const isFinalProject = lesson.slug === "mini-project";
+    const isPythonFinalProject = lesson.slug === "mini-project";
+    const isWebFinalProject = lesson.slug === "web-mini-project";
+    const isFinalProject = isPythonFinalProject || isWebFinalProject;
 
     return (
       <main className={`lesson-shell lesson-finish ${isFinalProject ? "course-finish" : ""}`}>
         <div className="celebration-burst" aria-hidden="true">✦</div>
         <div className="lesson-finish-icon" aria-hidden="true">
-          {isFinalProject ? "🎓" : "🏆"}
+          {isWebFinalProject ? "🌐" : isPythonFinalProject ? "🎓" : "🏆"}
         </div>
         <p className="eyebrow">
-          {isFinalProject ? "Python Foundations complete" : "Trail cleared"}
+          {isWebFinalProject
+            ? "Web Foundations complete"
+            : isPythonFinalProject
+              ? "Python Foundations complete"
+              : "Trail cleared"}
         </p>
         <h1>
-          {isFinalProject ? "You cleared Beginner Meadow!" : `${lesson.title} complete!`}
+          {isWebFinalProject
+            ? "Pixel Garden is in bloom!"
+            : isPythonFinalProject
+              ? "You cleared Beginner Meadow!"
+              : `${lesson.title} complete!`}
         </h1>
         <p>
-          {isFinalProject
-            ? "You combined variables, data types, operators, conditions, loops and functions in your first coding project."
-            : "You finished every challenge in this lesson."}
+          {isWebFinalProject
+            ? "You combined HTML, CSS and JavaScript to finish your first web-building trail."
+            : isPythonFinalProject
+              ? "You combined variables, data types, operators, conditions, loops and functions in your first coding project."
+              : "You finished every challenge in this lesson."}
         </p>
 
         <div className="reward-grid">
@@ -296,8 +320,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         </div>
 
         {completion?.notice && <p className="completion-notice">{completion.notice}</p>}
-        <Link className="primary-button" href={isFinalProject ? "/progress" : "/learn"}>
-          {isFinalProject ? "See my achievements" : "Back to the trail"}
+        <Link className="primary-button" href={isFinalProject ? "/progress" : worldHome}>
+          {isFinalProject ? "See my progress" : "Back to the trail"}
         </Link>
       </main>
     );
@@ -306,7 +330,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   return (
     <main className="lesson-shell">
       <div className="lesson-topline">
-        <Link className="icon-button" href="/learn" aria-label="Leave lesson">×</Link>
+        <Link className="icon-button" href={worldHome} aria-label="Leave lesson">×</Link>
         <div className="lesson-progress" aria-label={`Lesson progress ${progress}%`}>
           <span style={{ width: `${progress}%` }} />
         </div>
@@ -426,7 +450,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           <div className={`mini-editor ${exercise.type === "debug" ? "debug-editor" : ""}`}>
             <div className="editor-bar">
               <span /><span /><span />
-              <strong>{exercise.type === "debug" ? "fixed.py" : "main.py"}</strong>
+              <strong>{editorFileName}</strong>
             </div>
             <textarea
               aria-label={exercise.type === "debug" ? "Corrected code answer" : "Code answer"}
