@@ -5,11 +5,11 @@ import {
   getProjectCodeError,
   getProjectTitleError,
   isProjectLanguage,
+  MAX_SAVED_PROJECTS,
   normalizeProjectTitle,
 } from "@/lib/project-validation";
 import { isSameOriginRequest } from "@/lib/request-security";
 
-const MAX_PROJECTS = 25;
 
 async function getUserId() {
   const supabase = await createClient();
@@ -33,7 +33,7 @@ export async function GET() {
     .select("id, title, language, code, created_at, updated_at")
     .eq("user_id", userId)
     .order("updated_at", { ascending: false })
-    .limit(MAX_PROJECTS);
+    .limit(MAX_SAVED_PROJECTS);
 
   if (error) {
     return NextResponse.json({ error: "Projects could not be loaded." }, { status: 500 });
@@ -108,9 +108,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Project limit could not be checked." }, { status: 503 });
   }
 
-  if ((count ?? 0) >= MAX_PROJECTS) {
+  if ((count ?? 0) >= MAX_SAVED_PROJECTS) {
     return NextResponse.json(
-      { error: `You can keep up to ${MAX_PROJECTS} saved projects right now.` },
+      { error: `You can keep up to ${MAX_SAVED_PROJECTS} saved projects right now.` },
       { status: 409 },
     );
   }
