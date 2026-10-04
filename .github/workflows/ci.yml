@@ -43,7 +43,9 @@ jobs:
 
           curl --fail --silent http://127.0.0.1:3000/ > /dev/null
           curl --fail --silent http://127.0.0.1:3000/learn > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/learn/web > /dev/null
           curl --fail --silent http://127.0.0.1:3000/lesson/hello-world > /dev/null
+          curl --fail --silent http://127.0.0.1:3000/lesson/web-html-basics > /dev/null
           curl --fail --silent http://127.0.0.1:3000/forgot-password > /dev/null
           curl --fail --silent http://127.0.0.1:3000/reset-password > /dev/null
           curl --fail --silent http://127.0.0.1:3000/privacy > /dev/null
@@ -56,6 +58,12 @@ jobs:
             -d '{"exerciseId":"hello-print-choice","answer":"print(\"Hello, coder!\")","sessionId":"550e8400-e29b-41d4-a716-446655440000"}' \
             http://127.0.0.1:3000/api/check-answer > /tmp/correct-answer.json
           grep -q '"correct":true' /tmp/correct-answer.json
+
+          curl --fail --silent \
+            -H 'content-type: application/json' \
+            -d '{"exerciseId":"web-html-heading","answer":"<h1>Hello</h1>","sessionId":"550e8400-e29b-41d4-a716-446655440001"}' \
+            http://127.0.0.1:3000/api/check-answer > /tmp/web-answer.json
+          grep -q '"correct":true' /tmp/web-answer.json
 
           BAD_SESSION_STATUS=$(curl --silent --output /tmp/bad-session.json --write-out "%{http_code}" \
             -H 'content-type: application/json' \
@@ -74,6 +82,12 @@ jobs:
             -d '{"lessonSlug":"hello-world","sessionId":"550e8400-e29b-41d4-a716-446655440000"}' \
             http://127.0.0.1:3000/api/progress/complete)
           test "$PROGRESS_STATUS" = "503"
+
+          RUN_CODE_STATUS=$(curl --silent --output /tmp/run-code.json --write-out "%{http_code}" \
+            -H 'content-type: application/json' \
+            -d '{"language":"python","code":"print(1)"}' \
+            http://127.0.0.1:3000/api/run-code)
+          test "$RUN_CODE_STATUS" = "503"
 
           HEALTH_STATUS=$(curl --silent --output /tmp/health.json --write-out "%{http_code}" http://127.0.0.1:3000/api/health)
           test "$HEALTH_STATUS" = "503"
