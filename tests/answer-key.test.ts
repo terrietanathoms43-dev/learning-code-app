@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { checkAnswer } from "../lib/answer-key.ts";
+import {
+  getLessonWorldHome,
+  isCourseFinalProject,
+} from "../lib/course-data.ts";
 import { isUuidV4 } from "../lib/validation.ts";
 import { isSameOriginRequest } from "../lib/request-security.ts";
 import { getUsernameError, normalizeUsername } from "../lib/profile-validation.ts";
@@ -157,4 +161,16 @@ test("validates JavaScript Foundations answers", () => {
     "}",
   ].join("\n");
   assert.equal(checkAnswer("js-project-total", project)?.correct, true);
+});
+
+
+test("routes each learning world and recognizes final projects", () => {
+  assert.equal(getLessonWorldHome("hello-world"), "/learn");
+  assert.equal(getLessonWorldHome("web-html-basics"), "/learn/web");
+  assert.equal(getLessonWorldHome("js-variables"), "/learn/javascript");
+
+  assert.equal(isCourseFinalProject("mini-project"), true);
+  assert.equal(isCourseFinalProject("web-mini-project"), true);
+  assert.equal(isCourseFinalProject("js-mini-project"), true);
+  assert.equal(isCourseFinalProject("js-functions"), false);
 });
