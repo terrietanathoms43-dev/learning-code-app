@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { checkAnswer } from "../lib/answer-key.ts";
+import { getCoachFallback } from "../lib/coach-fallback.ts";
 import {
   getLessonWorldHome,
   isCourseFinalProject,
@@ -173,4 +174,20 @@ test("routes each learning world and recognizes final projects", () => {
   assert.equal(isCourseFinalProject("web-mini-project"), true);
   assert.equal(isCourseFinalProject("js-mini-project"), true);
   assert.equal(isCourseFinalProject("js-functions"), false);
+});
+
+
+test("exercise-aware Coach fallbacks give specific guidance without answer dumping", () => {
+  const hint = getCoachFallback("conditions", "hint", {
+    type: "debug",
+    prompt: "Repair this condition so it runs correctly.",
+  });
+  const ask = getCoachFallback("conditions", "ask", {
+    type: "code",
+    prompt: "Write an if statement that checks score.",
+  });
+
+  assert.match(hint, /punctuation|indentation|syntax/i);
+  assert.match(hint, /Repair this condition/i);
+  assert.match(ask, /if|condition|challenge/i);
 });
