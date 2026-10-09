@@ -66,6 +66,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [coachSource, setCoachSource] = useState<"ai" | "built-in" | null>(null);
   const [coachNotice, setCoachNotice] = useState("");
   const [coachQuestion, setCoachQuestion] = useState("");
+  const [hintLevel, setHintLevel] = useState(0);
 
   const exercise = lesson.exercises[index];
   const worldHome = getLessonWorldHome(lesson.slug);
@@ -171,6 +172,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   }
 
   async function askCoach(mode: CoachMode, question = "") {
+    const requestedHintLevel = mode === "hint" ? Math.min(3, hintLevel + 1) : 0;
     const cleanQuestion = question.trim();
     if (!exercise || coachLoading || (mode === "ask" && cleanQuestion.length < 2)) return;
 
@@ -188,6 +190,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           mode,
           studentAnswer: answer,
           question: mode === "ask" ? cleanQuestion : undefined,
+          hintLevel: requestedHintLevel,
         }),
       });
 
@@ -205,6 +208,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       }
 
       setCoachReply(data.reply);
+      if (mode === "hint") setHintLevel(requestedHintLevel);
       setCoachSource(data.source ?? "ai");
       setCoachNotice(data.notice ?? "");
       setCoachRemaining(typeof data.remaining === "number" ? data.remaining : null);
@@ -274,6 +278,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     setCoachSource(null);
     setCoachNotice("");
     setCoachQuestion("");
+    setHintLevel(0);
   }
 
   if (finished) {
@@ -507,7 +512,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               onClick={() => askCoach("hint")}
               disabled={Boolean(coachLoading)}
             >
-              {coachLoading === "hint" ? "Thinking…" : "Give me a better hint"}
+              {coachLoading === "hint" ? "Thinking…" : hintLevel === 0 ? "Hint 1 · Small clue" : hintLevel === 1 ? "Hint 2 · Next step" : "Hint 3 · Guided help"}
             </button>
             <button
               type="button"
