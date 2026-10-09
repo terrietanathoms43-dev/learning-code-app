@@ -80,8 +80,9 @@ export default function PrivacyPage() {
             <h2>AI Code Coach</h2>
             <p>
               When you choose an AI Coach action, CodeTrail sends the current lesson,
-              exercise, requested help mode, and your current exercise answer to OpenAI
-              to generate coding guidance. The same text is checked by OpenAI&apos;s
+              exercise, requested help mode, your current exercise answer, and any
+              question you type into Ask the Coach to OpenAI to generate coding guidance.
+              The same learner-provided text is checked by OpenAI&apos;s
               moderation service for safety. CodeTrail requests non-stored Responses API
               output and does not save the generated coach reply in the learner database.
             </p>
@@ -106,7 +107,7 @@ export default function PrivacyPage() {
           <Link className="secondary-button" href="/login">Account access</Link>
         </div>
 
-        <small className="privacy-updated">Current app behavior · Updated October 4, 2026</small>
+        <small className="privacy-updated">Current app behavior · Updated October 9, 2026</small>
       </section>
     </main>
   );
