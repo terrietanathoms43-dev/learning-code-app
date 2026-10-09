@@ -1,9 +1,14 @@
-export type CoachMode = "hint" | "explain" | "example";
+export type CoachMode = "hint" | "explain" | "example" | "ask";
 
 type CoachFallback = {
   hint: string;
   explain: string;
   example: string;
+};
+
+type ExerciseContext = {
+  type?: "choice" | "text" | "code" | "order" | "debug";
+  prompt?: string;
 };
 
 const fallbacks: Record<string, CoachFallback> = {
@@ -74,7 +79,34 @@ const fallbacks: Record<string, CoachFallback> = {
   },
 };
 
-export function getCoachFallback(lessonSlug: string, mode: CoachMode) {
+function getExerciseNudge(context?: ExerciseContext) {
+  if (!context) return "";
+
+  const promptLead = context.prompt
+    ? `For this challenge, focus on what the prompt is asking you to produce: "${context.prompt}"`
+    : "Focus on the exact output or syntax the challenge is asking for.";
+
+  switch (context.type) {
+    case "choice":
+      return `${promptLead} Eliminate options that use the wrong language syntax before comparing the remaining choices.`;
+    case "text":
+      return `${promptLead} Look at the code around the blank and decide whether the missing piece should be a keyword, name, method, tag, or operator.`;
+    case "code":
+      return `${promptLead} Build the answer in small pieces: identify the required name/value or structure first, then check punctuation and line order.`;
+    case "order":
+      return `${promptLead} Start with the line that opens the structure, then place each indented action directly under the line it belongs to.`;
+    case "debug":
+      return `${promptLead} Compare the buggy line with the language's normal syntax and inspect punctuation, indentation, brackets, and spelling one at a time.`;
+    default:
+      return promptLead;
+  }
+}
+
+export function getCoachFallback(
+  lessonSlug: string,
+  mode: CoachMode,
+  context?: ExerciseContext,
+) {
   const lessonFallback =
     fallbacks[lessonSlug] ??
     ({
@@ -82,6 +114,22 @@ export function getCoachFallback(lessonSlug: string, mode: CoachMode) {
       explain: "Break the coding task into its smallest parts, then check the syntax and what each part is meant to do.",
       example: "Try a smaller example that uses the same coding idea without copying the exercise.",
     } satisfies CoachFallback);
+
+  const nudge = getExerciseNudge(context);
+
+  if (mode === "hint") {
+    return [nudge, lessonFallback.hint].filter(Boolean).join(" ");
+  }
+
+  if (mode === "ask") {
+    return [
+      "The live AI tutor is unavailable right now, but here is the most useful built-in guidance I can give:",
+      nudge,
+      lessonFallback.explain,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
 
   return lessonFallback[mode];
 }
