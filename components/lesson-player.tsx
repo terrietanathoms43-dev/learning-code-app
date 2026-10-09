@@ -20,7 +20,7 @@ type CompletionState = {
   notice: string;
 };
 
-type CoachMode = "hint" | "explain" | "example";
+type CoachMode = "hint" | "explain" | "example" | "ask";
 
 function isFeedback(value: unknown): value is Feedback {
   return (
@@ -65,6 +65,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [coachRemaining, setCoachRemaining] = useState<number | null>(null);
   const [coachSource, setCoachSource] = useState<"ai" | "built-in" | null>(null);
   const [coachNotice, setCoachNotice] = useState("");
+  const [coachQuestion, setCoachQuestion] = useState("");
 
   const exercise = lesson.exercises[index];
   const worldHome = getLessonWorldHome(lesson.slug);
@@ -131,6 +132,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     setCoachRemaining(null);
     setCoachSource(null);
     setCoachNotice("");
+    setCoachQuestion("");
   }
 
   async function check() {
@@ -168,8 +170,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     }
   }
 
-  async function askCoach(mode: CoachMode) {
-    if (!exercise || coachLoading) return;
+  async function askCoach(mode: CoachMode, question = "") {
+    const cleanQuestion = question.trim();
+    if (!exercise || coachLoading || (mode === "ask" && cleanQuestion.length < 2)) return;
 
     setCoachLoading(mode);
     setCoachError("");
@@ -184,6 +187,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           exerciseId: exercise.id,
           mode,
           studentAnswer: answer,
+          question: mode === "ask" ? cleanQuestion : undefined,
         }),
       });
 
@@ -204,6 +208,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       setCoachSource(data.source ?? "ai");
       setCoachNotice(data.notice ?? "");
       setCoachRemaining(typeof data.remaining === "number" ? data.remaining : null);
+      if (mode === "ask") setCoachQuestion("");
     } catch {
       setCoachError("The AI Code Coach is unavailable right now.");
     } finally {
@@ -268,6 +273,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     setCoachRemaining(null);
     setCoachSource(null);
     setCoachNotice("");
+    setCoachQuestion("");
   }
 
   if (finished) {
@@ -501,7 +507,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               onClick={() => askCoach("hint")}
               disabled={Boolean(coachLoading)}
             >
-              {coachLoading === "hint" ? "Thinking…" : "Give me a hint"}
+              {coachLoading === "hint" ? "Thinking…" : "Give me a better hint"}
             </button>
             <button
               type="button"
@@ -520,6 +526,43 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               {coachLoading === "example" ? "Thinking…" : "Similar example"}
             </button>
           </div>
+
+          <form
+            className="coach-question-form"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void askCoach("ask", coachQuestion);
+            }}
+          >
+            <label htmlFor={`coach-question-${exercise.id}`}>Ask the Coach</label>
+            <div className="coach-question-row">
+              <textarea
+                id={`coach-question-${exercise.id}`}
+                value={coachQuestion}
+                maxLength={400}
+                rows={2}
+                placeholder="e.g. Why does this need a colon?"
+                onChange={(event) => setCoachQuestion(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    if (coachQuestion.trim().length >= 2 && !coachLoading) {
+                      void askCoach("ask", coachQuestion);
+                    }
+                  }
+                }}
+                disabled={Boolean(coachLoading)}
+              />
+              <button
+                type="submit"
+                className="coach-question-submit"
+                disabled={Boolean(coachLoading) || coachQuestion.trim().length < 2}
+              >
+                {coachLoading === "ask" ? "Asking…" : "Ask"}
+              </button>
+            </div>
+            <small>{coachQuestion.length}/400 · Enter sends · Shift+Enter adds a new line</small>
+          </form>
 
           {(coachReply || coachError) && (
             <div className={`coach-response ${coachError ? "is-error" : ""}`} aria-live="polite">
