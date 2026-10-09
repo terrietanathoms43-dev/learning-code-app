@@ -85,6 +85,12 @@ jobs:
             http://127.0.0.1:3000/api/coach)
           test "$COACH_STATUS" = "503"
 
+          COACH_ASK_STATUS=$(curl --silent --output /tmp/coach-ask.json --write-out "%{http_code}" \
+            -H 'content-type: application/json' \
+            -d '{"lessonSlug":"conditions","exerciseId":"condition-code","mode":"ask","question":"Why does an if statement need a colon?"}' \
+            http://127.0.0.1:3000/api/coach)
+          test "$COACH_ASK_STATUS" = "503"
+
           PROGRESS_STATUS=$(curl --silent --output /tmp/progress.json --write-out "%{http_code}" \
             -H 'content-type: application/json' \
             -d '{"lessonSlug":"hello-world","sessionId":"550e8400-e29b-41d4-a716-446655440000"}' \
