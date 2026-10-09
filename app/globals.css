@@ -3265,3 +3265,81 @@ button { color: inherit; }
     margin: 0 11px;
   }
 }
+
+
+/* Free-form AI Coach questions */
+.coach-question-form {
+  margin-top: 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.coach-question-form > label {
+  color: var(--ink);
+  font-size: .72rem;
+  font-weight: 850;
+}
+
+.coach-question-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.coach-question-row textarea {
+  width: 100%;
+  min-height: 54px;
+  resize: vertical;
+  border: 1px solid #dfe3ef;
+  border-radius: 13px;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: white;
+  font: inherit;
+  font-size: .78rem;
+  line-height: 1.45;
+}
+
+.coach-question-row textarea:focus {
+  outline: 2px solid rgba(91,82,232,.16);
+  border-color: #aaa4ff;
+}
+
+.coach-question-row textarea:disabled {
+  opacity: .66;
+  background: #f7f8fb;
+}
+
+.coach-question-submit {
+  min-width: 72px;
+  border: 0;
+  border-radius: 13px;
+  padding: 0 16px;
+  color: white;
+  background: var(--indigo);
+  font-size: .76rem;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.coach-question-submit:disabled {
+  cursor: default;
+  opacity: .5;
+}
+
+.coach-question-form > small {
+  color: var(--muted);
+  font-size: .63rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 560px) {
+  .coach-question-row {
+    grid-template-columns: 1fr;
+  }
+
+  .coach-question-submit {
+    min-height: 42px;
+  }
+}
