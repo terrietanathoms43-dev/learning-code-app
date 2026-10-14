@@ -20,17 +20,14 @@ export default function Home() {
               for Python, web development and JavaScript that grow with every skill you master.
             </p>
             <div className="hero-actions">
-              <Link className="primary-button primary-button--large" href="/learn">
-                Start Python
+              <Link className="primary-button primary-button--large" href="/login?mode=signup&next=/learn">
+                Create free account
               </Link>
-              <Link className="secondary-button" href="/learn/web">
-                Start Web
-              </Link>
-              <Link className="secondary-button" href="/learn/javascript">
-                Start JavaScript
-              </Link>
-              <Link className="text-link" href="/login">
+              <Link className="secondary-button" href="/login?mode=signin&next=/learn">
                 Sign in
+              </Link>
+              <Link className="text-link" href="/learn">
+                Explore coding paths →
               </Link>
             </div>
             <div className="hero-proof" aria-label="Product highlights">
