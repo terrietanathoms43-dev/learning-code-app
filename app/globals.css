@@ -3419,6 +3419,7 @@ button { color: inherit; }
 }
 
 @media (min-width: 901px) {
+  html { font-size: 17px; }
   /* Previously several desktop captions and path labels rendered around 10-12px. */
   .topnav-links { font-size: 1.05rem; gap: 22px; }
   .brand { font-size: 1.2rem; }
