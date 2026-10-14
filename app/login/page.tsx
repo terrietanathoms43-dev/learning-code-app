@@ -12,7 +12,7 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const initialAuthMessage = getLoginAuthMessage(searchParams.get("auth"));
   const [mode, setMode] = useState<"signin" | "signup">(
-    initialAuthMessage ? "signin" : "signup",
+    initialAuthMessage ? "signin" : searchParams.get("mode") === "signup" ? "signup" : "signin",
   );
   const [message, setMessage] = useState(initialAuthMessage);
   const [busy, setBusy] = useState(false);
@@ -84,6 +84,26 @@ function LoginPageContent() {
         <div className="auth-mascot">
           <Image src="/mascot.svg" alt="" width={88} height={88} aria-hidden="true" />
         </div>
+        <div className="auth-mode-switch" role="group" aria-label="Account access">
+          <button
+            type="button"
+            className={mode === "signup" ? "is-active" : ""}
+            aria-pressed={mode === "signup"}
+            disabled={busy}
+            onClick={() => { setMode("signup"); setMessage(""); }}
+          >
+            Create account
+          </button>
+          <button
+            type="button"
+            className={mode === "signin" ? "is-active" : ""}
+            aria-pressed={mode === "signin"}
+            disabled={busy}
+            onClick={() => { setMode("signin"); setMessage(""); }}
+          >
+            Sign in
+          </button>
+        </div>
         <p className="eyebrow">{mode === "signup" ? "Start your trail" : "Welcome back"}</p>
         <h1>{mode === "signup" ? "Create your learner account" : "Continue learning"}</h1>
         <p className="auth-subcopy">
@@ -119,16 +139,9 @@ function LoginPageContent() {
           )}
         </form>
 
-        <button
-          className="text-button"
-          type="button"
-          onClick={() => {
-            setMode((value) => (value === "signup" ? "signin" : "signup"));
-            setMessage("");
-          }}
-        >
-          {mode === "signup" ? "Already have an account? Sign in" : "New here? Create an account"}
-        </button>
+        <p className="auth-switch-note">
+          {mode === "signup" ? "Already have an account? Use Sign in above." : "New to CodeTrail? Choose Create account above."}
+        </p>
 
         <Link className="auth-privacy-link" href="/privacy">
           Privacy &amp; Data

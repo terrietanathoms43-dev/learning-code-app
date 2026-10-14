@@ -359,7 +359,26 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         <div className="energy-meter" title="Practice energy">⚡ {energy}/5</div>
       </div>
 
-      <section className="lesson-card">
+      <section
+        className="lesson-card"
+        onKeyDown={(event) => {
+          if (event.key !== "Enter" || checking || saving || outOfEnergy) return;
+          const target = event.target as HTMLElement;
+          if (target.closest(".coach-inline")) return;
+
+          const submitText = target.classList.contains("answer-input") &&
+            !event.ctrlKey && !event.metaKey && !event.shiftKey;
+          const submitCode = Boolean(target.closest(".mini-editor")) &&
+            (event.ctrlKey || event.metaKey);
+
+          if (!submitText && !submitCode) return;
+          if (!answer.trim() && !feedback?.correct) return;
+
+          event.preventDefault();
+          if (feedback?.correct) void next();
+          else void check();
+        }}
+      >
         <div className="lesson-card-heading">
           <span className="lesson-mini-icon" aria-hidden="true">{lesson.icon}</span>
           <div>
@@ -606,7 +625,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           ) : (
             <>
               <strong>Challenge {index + 1} of {lesson.exercises.length}</strong>
-              <span>Take your time — coding is learned one small win at a time.</span>
+              <span>Answer below without scrolling. Press Enter for text answers, or Ctrl/⌘ + Enter for code.</span>
             </>
           )}
         </div>

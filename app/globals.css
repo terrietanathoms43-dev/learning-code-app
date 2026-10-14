@@ -3343,3 +3343,131 @@ button { color: inherit; }
     min-height: 42px;
   }
 }
+
+
+/* Readability and always-visible lesson actions (October 2026) */
+/* Show an obvious sign-in choice on the public landing page and on mobile. */
+.profile-chip--signin {
+  border-color: #c4c0ff;
+  background: var(--indigo-soft);
+  color: var(--indigo-dark);
+  font-weight: 900;
+  font-size: 0.95rem;
+  padding-inline: 16px;
+}
+.profile-chip--signin:hover,
+.profile-chip--signin:focus-visible {
+  background: #e1e2ff;
+  outline: 2px solid var(--indigo);
+  outline-offset: 2px;
+}
+
+.auth-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  padding: 5px;
+  margin: 0 0 22px;
+  border-radius: 16px;
+  background: #eef0fb;
+}
+.auth-mode-switch button {
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #47516f;
+  font-weight: 850;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.auth-mode-switch button.is-active {
+  color: #342cba;
+  background: white;
+  box-shadow: 0 3px 12px rgba(30, 41, 89, .12);
+}
+.auth-mode-switch button:focus-visible {
+  outline: 3px solid var(--indigo);
+  outline-offset: 2px;
+}
+.auth-mode-switch button:disabled { opacity: .6; cursor: wait; }
+.auth-switch-note {
+  margin: 18px 0 0;
+  color: #53607a;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.auth-privacy-link { display: inline-block; margin-top: 12px; }
+
+/* The controls remain visible for long lessons and AI Coach conversations. */
+.lesson-shell { padding-bottom: 136px; }
+.lesson-action-bar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 40;
+  min-height: 112px;
+  padding: 16px max(24px, calc((100% - 760px) / 2));
+  box-shadow: 0 -9px 28px rgba(24, 32, 59, .09);
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+.lesson-action-bar .primary-button { flex-shrink: 0; }
+.lesson-action-bar .primary-button:focus-visible,
+.answer-option:focus-visible,
+.answer-input:focus-visible {
+  outline: 3px solid var(--indigo);
+  outline-offset: 3px;
+}
+
+@media (min-width: 901px) {
+  html { font-size: 17px; }
+  /* Previously several desktop captions and path labels rendered around 10-12px. */
+  .topnav-links { font-size: 1.05rem; gap: 22px; }
+  .brand { font-size: 1.2rem; }
+  .stat-chip { font-size: .95rem; }
+  .hero-pill, .hero-proof { font-size: .96rem; }
+  .feature-strip h2 { font-size: 1.16rem; }
+  .feature-strip p { font-size: 1rem; }
+  .world-banner h1 { font-size: 1.9rem; }
+  .world-banner p { font-size: 1.05rem; opacity: .95; }
+  .eyebrow { font-size: .85rem; }
+  .world-progress, .sidebar-card-title { font-size: .96rem; }
+  .trail-intro strong { font-size: 1.08rem; }
+  .trail-intro p { font-size: 1rem; line-height: 1.55; }
+  .path-node-copy { width: 188px; gap: 4px; }
+  .path-node-copy strong { font-size: 1.04rem; }
+  .path-node-copy small { font-size: .9rem; line-height: 1.38; }
+  .path-node-copy em { font-size: .86rem; }
+  .sidebar-card > p, .coach-card p { font-size: 1rem; }
+  .sidebar-card h2, .coach-card h2 { font-size: 1.24rem; }
+  .answer-option code { font-size: 1.06rem; line-height: 1.5; }
+  .feedback-copy span { font-size: .96rem; }
+  .editor-bar { font-size: .9rem; }
+  .auth-subcopy, .auth-card label { font-size: 1rem; }
+  .auth-card h1 { font-size: 2.04rem; }
+  .auth-switch-note { font-size: .95rem; }
+  .world-switcher-link small { font-size: .94rem; }
+  .world-switcher-link strong { font-size: 1rem; }
+}
+
+@media (max-width: 640px) {
+  /* Mobile visitors should see CodeTrail's name and the sign-in button. */
+  .topbar .brand > span:last-child { display: inline; }
+  .lesson-shell { padding-bottom: 202px; }
+  .lesson-action-bar {
+    min-height: 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    gap: 11px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .lesson-action-bar .primary-button { width: 100%; min-height: 48px; }
+  .lesson-action-bar .feedback-copy { gap: 4px; }
+  .feedback-copy span { font-size: .9rem; }
+  .auth-mode-switch button { font-size: .93rem; }
+}
+
+@media (max-width: 370px) {
+  .topbar .brand { gap: 6px; font-size: 1.03rem; }
+  .topbar .brand-mark { width: 34px; height: 34px; }
+  .profile-chip--signin { padding-inline: 12px; }
+}
