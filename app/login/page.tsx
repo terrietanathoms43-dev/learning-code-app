@@ -48,7 +48,7 @@ function LoginPageContent() {
           email,
           password,
           options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+            emailRedirectTo: `${window.location.hostname.endsWith(".vercel.app") ? "https://learning-code-app.vercel.app" : window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
           },
         });
         if (error) throw error;
