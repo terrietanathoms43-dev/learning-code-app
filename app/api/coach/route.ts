@@ -235,7 +235,7 @@ export async function POST(request: Request) {
       .eq("user_id", userId);
   };
 
-  const model = process.env.OPENAI_MODEL || "gpt-6-luna";
+  const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
   const trustedContext = [
     `Lesson: ${lesson.title}`,
     `Exercise type: ${exercise.type}`,
