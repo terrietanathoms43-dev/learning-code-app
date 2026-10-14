@@ -30,15 +30,19 @@ export function TopNav({ stats, signInHref = "/login" }: TopNavProps) {
         <Link href="/practice">Practice</Link>
         {stats?.signedIn && <Link href="/projects">Projects</Link>}
         <Link href="/progress">Progress</Link>
-        {stats?.signedIn ? <Link href="/profile">Profile</Link> : <Link href={signInHref}>Sign in</Link>}
+        {stats?.signedIn ? <Link href="/profile">Profile</Link> : <Link href="/login?mode=signup">Create account</Link>}
       </nav>
 
       <div className="top-stats" aria-label="Learning stats">
-        <Link className="profile-chip" href={stats?.signedIn ? "/profile" : signInHref}>
+        <Link className={`profile-chip ${!stats?.signedIn ? "profile-chip--signin" : ""}`} href={stats?.signedIn ? "/profile" : signInHref}>
           {stats?.signedIn ? (stats.username ? `@${stats.username}` : "👤") : "Sign in"}
         </Link>
-        <span className="stat-chip">🔥 <strong>{stats?.streak ?? 0}</strong></span>
-        <span className="stat-chip">⭐ <strong>{stats?.totalXp ?? 0} XP</strong></span>
+        {stats?.signedIn && (
+          <>
+            <span className="stat-chip">🔥 <strong>{stats.streak}</strong></span>
+            <span className="stat-chip">⭐ <strong>{stats.totalXp} XP</strong></span>
+          </>
+        )}
       </div>
       </header>
     </>
