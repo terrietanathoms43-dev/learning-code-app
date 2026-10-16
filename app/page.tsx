@@ -17,7 +17,7 @@ export default function Home() {
             </h1>
             <p>
               Short lessons, real coding practice, bright rewards, and learning worlds
-              for Python, web development and JavaScript that grow with every skill you master.
+              for programming fundamentals, Python, web development and JavaScript.
             </p>
             <div className="hero-actions">
               <Link className="primary-button primary-button--large" href="/login?mode=signup&next=/learn">
@@ -26,7 +26,7 @@ export default function Home() {
               <Link className="secondary-button" href="/login?mode=signin&next=/learn">
                 Sign in
               </Link>
-              <Link className="text-link" href="/learn">
+              <Link className="text-link" href="/learn/fundamentals">
                 Explore coding paths →
               </Link>
             </div>

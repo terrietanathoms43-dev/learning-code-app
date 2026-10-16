@@ -5,15 +5,18 @@ import { getLearningDashboards } from "@/lib/learning-dashboard";
 
 export default async function PracticePage() {
   const {
+    fundamentals: fundamentalsDashboard,
     python: dashboard,
     web: webDashboard,
     javascript: javascriptDashboard,
   } = await getLearningDashboards();
   const completedCount =
+    fundamentalsDashboard.completedLessons +
     dashboard.completedLessons +
     webDashboard.completedLessons +
     javascriptDashboard.completedLessons;
   const completedLessons = [
+    ...fundamentalsDashboard.completedLessonSlugs,
     ...dashboard.completedLessonSlugs,
     ...webDashboard.completedLessonSlugs,
     ...javascriptDashboard.completedLessonSlugs,
@@ -21,6 +24,7 @@ export default async function PracticePage() {
     .map((slug) => getLesson(slug))
     .filter(Boolean);
   const preferredTrail = [
+    { href: "/learn/fundamentals", completed: fundamentalsDashboard.completedLessons },
     { href: "/learn", completed: dashboard.completedLessons },
     { href: "/learn/web", completed: webDashboard.completedLessons },
     { href: "/learn/javascript", completed: javascriptDashboard.completedLessons },

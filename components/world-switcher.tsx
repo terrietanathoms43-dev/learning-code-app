@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-type LearningWorld = "python" | "web" | "javascript";
+type LearningWorld = "fundamentals" | "python" | "web" | "javascript";
 
 const worlds: Array<{
   id: LearningWorld;
@@ -9,6 +9,7 @@ const worlds: Array<{
   title: string;
   subtitle: string;
 }> = [
+  { id: "fundamentals", href: "/learn/fundamentals", icon: "🧭", title: "Programming Fundamentals", subtitle: "Thinking Trail" },
   {
     id: "python",
     href: "/learn",

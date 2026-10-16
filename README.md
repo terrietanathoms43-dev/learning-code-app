@@ -1,6 +1,6 @@
 # CodeTrail
 
-A gamified coding-learning app built around visual learning worlds. CodeTrail currently includes Python Foundations, Web Foundations and JavaScript Foundations, interactive exercises, saved coding projects, secure code execution, progress tracking, and a Supabase-authenticated architecture.
+A gamified coding-learning app built around visual learning worlds. CodeTrail includes language-neutral Programming Fundamentals, Python Foundations, Web Foundations and JavaScript Foundations, interactive exercises, saved coding projects, secure code execution, progress tracking, and a Supabase-authenticated architecture.
 
 ## What is already built
 
@@ -17,6 +17,7 @@ A gamified coding-learning app built around visual learning worlds. CodeTrail cu
 - Signed-in exercise-attempt persistence through a server-only Supabase secret key
 - Verified completion, one-time XP rewards, streak calculations and automatic path unlocking
 - Cross-world progress dashboard and practice deck
+- Programming Fundamentals Thinking Trail with ten lessons and a language-neutral logic project
 - Full Python Foundations path through Conditions, Loops, Functions and the Mini Project
 - AI Code Coach with hint / explain / similar-example modes
 - Cross-world achievement badges including Python Pioneer, Web Builder and Logic Lab Graduate

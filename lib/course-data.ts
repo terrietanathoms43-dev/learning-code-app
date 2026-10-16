@@ -16,6 +16,9 @@ export type Lesson = {
   xp: number;
   duration: string;
   exercises: Exercise[];
+  overview?: string;
+  example?: string;
+  takeaway?: string;
 };
 
 export type PathNode = {
@@ -56,10 +59,105 @@ export const javascriptPath: PathNode[] = [
   { slug: "js-mini-project", title: "Score Tracker", subtitle: "Build a tiny score calculator", icon: "🚀", kind: "project", status: "locked", xp: 90 },
 ];
 
+export const fundamentalsPath: PathNode[] = [
+  {
+    "slug": "fund-algorithms",
+    "title": "Algorithmic Thinking",
+    "subtitle": "Solve problems with clear steps",
+    "icon": "🧭",
+    "kind": "lesson",
+    "status": "current",
+    "xp": 30
+  },
+  {
+    "slug": "fund-programming",
+    "title": "Introduction to Programming",
+    "subtitle": "Discover input, processing and output",
+    "icon": "💡",
+    "kind": "lesson",
+    "status": "locked",
+    "xp": 30
+  },
+  {
+    "slug": "fund-variables",
+    "title": "Variables",
+    "subtitle": "Store and update named values",
+    "icon": "📦",
+    "kind": "lesson",
+    "status": "locked",
+    "xp": 30
+  },
+  {
+    "slug": "fund-types",
+    "title": "Data Types",
+    "subtitle": "Distinguish text, numbers and booleans",
+    "icon": "🧩",
+    "kind": "lesson",
+    "status": "locked",
+    "xp": 30
+  },
+  {
+    "slug": "fund-operators",
+    "title": "Operators & Expressions",
+    "subtitle": "Calculate and compare",
+    "icon": "➕",
+    "kind": "lesson",
+    "status": "locked",
+    "xp": 30
+  },
+  {
+    "slug": "fund-conditions",
+    "title": "Conditional Decisions",
+    "subtitle": "Choose between IF and ELSE",
+    "icon": "🔀",
+    "kind": "lesson",
+    "status": "locked",
+    "xp": 35
+  },
+  {
+    "slug": "fund-loops",
+    "title": "Loops & Repetition",
+    "subtitle": "Repeat instructions safely",
+    "icon": "🔁",
+    "kind": "lesson",
+    "status": "locked",
+    "xp": 35
+  },
+  {
+    "slug": "fund-functions",
+    "title": "Functions",
+    "subtitle": "Reuse a set of instructions",
+    "icon": "🛠️",
+    "kind": "lesson",
+    "status": "locked",
+    "xp": 40
+  },
+  {
+    "slug": "fund-lists",
+    "title": "Arrays & Lists",
+    "subtitle": "Store and process collections",
+    "icon": "🗂️",
+    "kind": "lesson",
+    "status": "locked",
+    "xp": 40
+  },
+  {
+    "slug": "fund-mini-project",
+    "title": "Final Logic Challenge",
+    "subtitle": "Design a score counter in pseudocode",
+    "icon": "🚀",
+    "kind": "project",
+    "status": "locked",
+    "xp": 90
+  }
+];
+export const fundamentalsLessonSlugs = fundamentalsPath.map((node) => node.slug);
+
 export const pythonLessonSlugs = pythonPath.map((node) => node.slug);
 export const webLessonSlugs = webPath.map((node) => node.slug);
 export const javascriptLessonSlugs = javascriptPath.map((node) => node.slug);
 export const guestAccessibleLessonSlugs = [
+  fundamentalsLessonSlugs[0],
   pythonLessonSlugs[0],
   webLessonSlugs[0],
   javascriptLessonSlugs[0],
@@ -622,6 +720,458 @@ export const lessons: Record<string, Lesson> = {
   },
 };
 
+Object.assign(lessons, {
+  "fund-algorithms": {
+    "slug": "fund-algorithms",
+    "title": "Algorithmic Thinking",
+    "subtitle": "Solve problems with clear steps",
+    "icon": "🧭",
+    "xp": 30,
+    "duration": "6 min",
+    "overview": "An algorithm is a clear, finite sequence of steps for solving a problem. Identify the input, decide which actions are needed, and specify the output. This logic can be translated into any programming language.",
+    "example": "INPUT first number\nINPUT second number\nADD the numbers\nDISPLAY the total",
+    "takeaway": "The concept matters more than the punctuation of any single programming language.",
+    "exercises": [
+      {
+        "id": "fund-algorithms-q1",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "Which example is an algorithm?",
+        "options": [
+          "A recipe with numbered instructions",
+          "A random collection of ideas",
+          "A laptop brand",
+          "A programming language"
+        ]
+      },
+      {
+        "id": "fund-algorithms-q2",
+        "type": "text",
+        "eyebrow": "Complete the concept",
+        "prompt": "What do we call values supplied to an algorithm?",
+        "placeholder": "Type your answer"
+      },
+      {
+        "id": "fund-algorithms-q3",
+        "type": "order",
+        "eyebrow": "Sequence the steps",
+        "prompt": "Put the steps to add numbers in the correct order.",
+        "options": [
+          "DISPLAY the total",
+          "INPUT two numbers",
+          "ADD the numbers"
+        ]
+      }
+    ]
+  },
+  "fund-programming": {
+    "slug": "fund-programming",
+    "title": "Introduction to Programming",
+    "subtitle": "Discover input, processing and output",
+    "icon": "💡",
+    "xp": 30,
+    "duration": "6 min",
+    "overview": "Programming is creating precise instructions for a computer. A program can take input, process the input and produce output. Pseudocode is a readable planning tool, not code that depends on a particular platform.",
+    "example": "INPUT name\nDISPLAY name",
+    "takeaway": "The concept matters more than the punctuation of any single programming language.",
+    "exercises": [
+      {
+        "id": "fund-programming-q1",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "Why do programmers write pseudocode?",
+        "options": [
+          "To plan the steps of a solution",
+          "To run the same file on every computer",
+          "To buy hardware",
+          "To replace testing"
+        ]
+      },
+      {
+        "id": "fund-programming-q2",
+        "type": "text",
+        "eyebrow": "Complete the concept",
+        "prompt": "Complete the sequence: input → processing → ____.",
+        "placeholder": "Type your answer"
+      },
+      {
+        "id": "fund-programming-q3",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "If a program asks for your name and then displays it, what is the output?",
+        "options": [
+          "The name entered",
+          "The keyboard",
+          "The operating system",
+          "Nothing"
+        ]
+      }
+    ]
+  },
+  "fund-variables": {
+    "slug": "fund-variables",
+    "title": "Variables",
+    "subtitle": "Store and update named values",
+    "icon": "📦",
+    "xp": 30,
+    "duration": "6 min",
+    "overview": "A variable gives a value a name so it can be used again. Values can change while an algorithm runs. We use SET name TO value as pseudocode; actual programming languages may use other syntax.",
+    "example": "SET score TO 5\nSET score TO score + 2\nDISPLAY score",
+    "takeaway": "The concept matters more than the punctuation of any single programming language.",
+    "exercises": [
+      {
+        "id": "fund-variables-q1",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "Which word is the variable name in SET score TO 5?",
+        "options": [
+          "score",
+          "SET",
+          "TO",
+          "5"
+        ]
+      },
+      {
+        "id": "fund-variables-q2",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "What does the example display?",
+        "options": [
+          "7",
+          "5",
+          "52",
+          "2"
+        ]
+      },
+      {
+        "id": "fund-variables-q3",
+        "type": "text",
+        "eyebrow": "Complete the concept",
+        "prompt": "Complete the variable name: SET ____ TO 3, where the name holds remaining lives.",
+        "placeholder": "Type your answer"
+      }
+    ]
+  },
+  "fund-types": {
+    "slug": "fund-types",
+    "title": "Data Types",
+    "subtitle": "Distinguish text, numbers and booleans",
+    "icon": "🧩",
+    "xp": 30,
+    "duration": "6 min",
+    "overview": "Data types describe the kind of information in a value. Common types include string (text), integer (whole number), decimal number and Boolean (true or false). Languages can use different names and conventions for these types.",
+    "example": "SET name TO \"Amara\"\nSET age TO 15\nSET ready TO TRUE",
+    "takeaway": "The concept matters more than the punctuation of any single programming language.",
+    "exercises": [
+      {
+        "id": "fund-types-q1",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "What data type is \"Amara\"?",
+        "options": [
+          "String",
+          "Integer",
+          "Boolean",
+          "List"
+        ]
+      },
+      {
+        "id": "fund-types-q2",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "What data type represents TRUE or FALSE?",
+        "options": [
+          "Boolean",
+          "String",
+          "Integer",
+          "Decimal"
+        ]
+      },
+      {
+        "id": "fund-types-q3",
+        "type": "text",
+        "eyebrow": "Complete the concept",
+        "prompt": "What common data type holds a whole number like 15?",
+        "placeholder": "Type your answer"
+      }
+    ]
+  },
+  "fund-operators": {
+    "slug": "fund-operators",
+    "title": "Operators & Expressions",
+    "subtitle": "Calculate and compare",
+    "icon": "➕",
+    "xp": 30,
+    "duration": "6 min",
+    "overview": "Operators perform actions such as addition, multiplication and comparison. Expressions combine operators and values to produce a result. Follow ordinary mathematical order of operations unless grouping changes it.",
+    "example": "SET total TO 8 + 4\nSET enough TO total >= 10\nDISPLAY enough",
+    "takeaway": "The concept matters more than the punctuation of any single programming language.",
+    "exercises": [
+      {
+        "id": "fund-operators-q1",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "What is 8 + 4 × 2?",
+        "options": [
+          "16",
+          "24",
+          "20",
+          "12"
+        ]
+      },
+      {
+        "id": "fund-operators-q2",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "Does 12 >= 10 evaluate to TRUE or FALSE?",
+        "options": [
+          "TRUE",
+          "FALSE",
+          "12",
+          "10"
+        ]
+      },
+      {
+        "id": "fund-operators-q3",
+        "type": "text",
+        "eyebrow": "Complete the concept",
+        "prompt": "Which mathematical symbol means multiplication?",
+        "placeholder": "Type your answer"
+      }
+    ]
+  },
+  "fund-conditions": {
+    "slug": "fund-conditions",
+    "title": "Conditional Decisions",
+    "subtitle": "Choose between IF and ELSE",
+    "icon": "🔀",
+    "xp": 35,
+    "duration": "8 min",
+    "overview": "Conditions test whether a statement is true. IF follows one set of steps when the condition succeeds; ELSE handles the alternative. The exact punctuation differs across languages, but the decision logic stays the same.",
+    "example": "IF temperature > 28 THEN\n  DISPLAY \"Warm\"\nELSE\n  DISPLAY \"Cool\"\nEND IF",
+    "takeaway": "The concept matters more than the punctuation of any single programming language.",
+    "exercises": [
+      {
+        "id": "fund-conditions-q1",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "If temperature is 30, what message is displayed?",
+        "options": [
+          "Warm",
+          "Cool",
+          "30",
+          "Nothing"
+        ]
+      },
+      {
+        "id": "fund-conditions-q2",
+        "type": "text",
+        "eyebrow": "Complete the concept",
+        "prompt": "Which word introduces the alternative branch?",
+        "placeholder": "Type your answer"
+      },
+      {
+        "id": "fund-conditions-q3",
+        "type": "order",
+        "eyebrow": "Sequence the steps",
+        "prompt": "Arrange a simple IF decision.",
+        "options": [
+          "END IF",
+          "IF ready THEN",
+          "DISPLAY \"Start\""
+        ]
+      }
+    ]
+  },
+  "fund-loops": {
+    "slug": "fund-loops",
+    "title": "Loops & Repetition",
+    "subtitle": "Repeat instructions safely",
+    "icon": "🔁",
+    "xp": 35,
+    "duration": "8 min",
+    "overview": "A loop repeats work. Count-controlled loops repeat a known number of times; condition-controlled loops repeat while a test remains true. Every loop should have a sensible way to stop.",
+    "example": "REPEAT 3 TIMES\n  DISPLAY \"Hello\"\nEND REPEAT",
+    "takeaway": "The concept matters more than the punctuation of any single programming language.",
+    "exercises": [
+      {
+        "id": "fund-loops-q1",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "How many times does the example display Hello?",
+        "options": [
+          "3",
+          "2",
+          "4",
+          "Forever"
+        ]
+      },
+      {
+        "id": "fund-loops-q2",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "When is a loop useful?",
+        "options": [
+          "When work must repeat",
+          "To remove all variables",
+          "To avoid decisions",
+          "To change the computer"
+        ]
+      },
+      {
+        "id": "fund-loops-q3",
+        "type": "text",
+        "eyebrow": "Complete the concept",
+        "prompt": "A loop that never reaches a stopping condition is called an ____ loop.",
+        "placeholder": "Type your answer"
+      }
+    ]
+  },
+  "fund-functions": {
+    "slug": "fund-functions",
+    "title": "Functions",
+    "subtitle": "Reuse a set of instructions",
+    "icon": "🛠️",
+    "xp": 40,
+    "duration": "8 min",
+    "overview": "A function is a named, reusable group of steps. Functions can accept parameters as inputs and RETURN a result. The names and symbols vary, but the concept carries across programming languages.",
+    "example": "FUNCTION double(number)\n  RETURN number * 2\nEND FUNCTION\nDISPLAY double(4)",
+    "takeaway": "The concept matters more than the punctuation of any single programming language.",
+    "exercises": [
+      {
+        "id": "fund-functions-q1",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "Why do programmers use functions?",
+        "options": [
+          "To reuse steps",
+          "To avoid input",
+          "To delete variables",
+          "To choose a device"
+        ]
+      },
+      {
+        "id": "fund-functions-q2",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "What value does double(4) produce?",
+        "options": [
+          "8",
+          "4",
+          "2",
+          "16"
+        ]
+      },
+      {
+        "id": "fund-functions-q3",
+        "type": "text",
+        "eyebrow": "Complete the concept",
+        "prompt": "Which word sends the result back from a function?",
+        "placeholder": "Type your answer"
+      }
+    ]
+  },
+  "fund-lists": {
+    "slug": "fund-lists",
+    "title": "Arrays & Lists",
+    "subtitle": "Store and process collections",
+    "icon": "🗂️",
+    "xp": 40,
+    "duration": "8 min",
+    "overview": "An array or list stores a collection of items under one name. A loop can visit each item. Index positions are language-dependent, so this example uses FOR EACH rather than an indexing rule.",
+    "example": "SET colors TO [blue, gold, violet]\nFOR EACH color IN colors\n  DISPLAY color\nEND FOR",
+    "takeaway": "The concept matters more than the punctuation of any single programming language.",
+    "exercises": [
+      {
+        "id": "fund-lists-q1",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "Which expression represents a collection of three colors?",
+        "options": [
+          "[blue, gold, violet]",
+          "blue + gold",
+          "TRUE",
+          "12"
+        ]
+      },
+      {
+        "id": "fund-lists-q2",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "How many colors does the example display?",
+        "options": [
+          "3",
+          "2",
+          "1",
+          "4"
+        ]
+      },
+      {
+        "id": "fund-lists-q3",
+        "type": "text",
+        "eyebrow": "Complete the concept",
+        "prompt": "What is the general term for visiting items in a collection?",
+        "placeholder": "Type your answer"
+      }
+    ]
+  },
+  "fund-mini-project": {
+    "slug": "fund-mini-project",
+    "title": "Final Logic Challenge",
+    "subtitle": "Design a score counter in pseudocode",
+    "icon": "🚀",
+    "xp": 90,
+    "duration": "12 min",
+    "overview": "Combine your new skills without relying on a particular language. Plan a score counter: start at zero, check each answer, add one for every correct answer, and display the final score.",
+    "example": "SET score TO 0\nFOR EACH answer IN answers\n  IF answer IS correct THEN\n    SET score TO score + 1\n  END IF\nEND FOR\nDISPLAY score",
+    "takeaway": "You can translate this algorithm into a language after planning the logic.",
+    "exercises": [
+      {
+        "id": "fund-mini-project-q1",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "What value should score start with?",
+        "options": [
+          "0",
+          "1",
+          "TRUE",
+          "A list"
+        ]
+      },
+      {
+        "id": "fund-mini-project-q2",
+        "type": "order",
+        "eyebrow": "Sequence the steps",
+        "prompt": "Arrange the main stages of the score counter.",
+        "options": [
+          "DISPLAY score",
+          "CHECK answers and add points for correct ones",
+          "SET score TO 0"
+        ]
+      },
+      {
+        "id": "fund-mini-project-q3",
+        "type": "choice",
+        "eyebrow": "Choose the answer",
+        "prompt": "Which concept determines whether a point is earned?",
+        "options": [
+          "A condition",
+          "A file name",
+          "A string",
+          "A comment"
+        ]
+      },
+      {
+        "id": "fund-mini-project-q4",
+        "type": "text",
+        "eyebrow": "Complete the concept",
+        "prompt": "If three answers are correct, what is the final score?",
+        "placeholder": "Type your answer"
+      }
+    ]
+  }
+} satisfies Record<string, Lesson>);
+
 export const implementedLessonSlugs = Object.keys(lessons);
 
 export function getLesson(slug: string) {
@@ -629,13 +1179,15 @@ export function getLesson(slug: string) {
 }
 
 export function getLessonWorldHome(slug: string) {
+  if (slug.startsWith("fund-")) return "/learn/fundamentals";
   if (slug.startsWith("web-")) return "/learn/web";
   if (slug.startsWith("js-")) return "/learn/javascript";
   return "/learn";
 }
 
 export function isCourseFinalProject(slug: string) {
-  return slug === "mini-project" ||
+  return slug === "fund-mini-project" ||
+    slug === "mini-project" ||
     slug === "web-mini-project" ||
     slug === "js-mini-project";
 }

@@ -13,11 +13,13 @@ function formatActivityDate(value: string, timeZone: string) {
 
 export default async function ProgressPage() {
   const {
+    fundamentals: fundamentalsDashboard,
     python: dashboard,
     web: webDashboard,
     javascript: javascriptDashboard,
   } = await getLearningDashboards();
   const lessonsCleared =
+    fundamentalsDashboard.completedLessons +
     dashboard.completedLessons +
     webDashboard.completedLessons +
     javascriptDashboard.completedLessons;
@@ -26,6 +28,7 @@ export default async function ProgressPage() {
     Math.round((dashboard.todayXp / Math.max(dashboard.dailyGoalXp, 1)) * 100),
   );
   const achievements = getAchievements(dashboard, [
+    fundamentalsDashboard,
     webDashboard,
     javascriptDashboard,
   ]);
@@ -65,6 +68,15 @@ export default async function ProgressPage() {
         </section>
 
         <section className="progress-grid">
+          <article className="progress-panel">
+            <div className="progress-panel-heading">
+              <div><p className="eyebrow">Programming Fundamentals</p><h2>Thinking Trail</h2></div>
+              <strong>{fundamentalsDashboard.progressPercent}%</strong>
+            </div>
+            <div className="big-progress-track"><span style={{ width: `${fundamentalsDashboard.progressPercent}%` }} /></div>
+            <p>{fundamentalsDashboard.completedLessons} of {fundamentalsDashboard.totalLessons} available lessons completed.</p>
+            <Link className="secondary-button" href="/learn/fundamentals">Continue Thinking Trail</Link>
+          </article>
           <article className="progress-panel">
             <div className="progress-panel-heading">
               <div><p className="eyebrow">Python Foundations</p><h2>Beginner Meadow</h2></div>

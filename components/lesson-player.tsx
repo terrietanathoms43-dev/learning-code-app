@@ -70,6 +70,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const exercise = lesson.exercises[index];
   const worldHome = getLessonWorldHome(lesson.slug);
   const editorFileName =
+    lesson.slug.startsWith("fund-") ? "pseudocode.txt" :
     exercise?.id.includes("html")
       ? "index.html"
       : exercise?.id.includes("css")
@@ -278,6 +279,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   if (finished) {
     const finalAccuracy = completion?.accuracy ?? localAccuracy;
+    const isFundamentalsFinalProject = lesson.slug === "fund-mini-project";
     const isPythonFinalProject = lesson.slug === "mini-project";
     const isWebFinalProject = lesson.slug === "web-mini-project";
     const isJavaScriptFinalProject = lesson.slug === "js-mini-project";
@@ -287,7 +289,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       <main className={`lesson-shell lesson-finish ${isFinalProject ? "course-finish" : ""}`}>
         <div className="celebration-burst" aria-hidden="true">✦</div>
         <div className="lesson-finish-icon" aria-hidden="true">
-          {isWebFinalProject
+          {isFundamentalsFinalProject
+            ? "🧭"
+            : isWebFinalProject
             ? "🌐"
             : isJavaScriptFinalProject
               ? "⚡"
@@ -296,7 +300,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 : "🏆"}
         </div>
         <p className="eyebrow">
-          {isWebFinalProject
+          {isFundamentalsFinalProject
+            ? "Programming Fundamentals complete"
+            : isWebFinalProject
             ? "Web Foundations complete"
             : isJavaScriptFinalProject
               ? "JavaScript Foundations complete"
@@ -305,7 +311,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 : "Trail cleared"}
         </p>
         <h1>
-          {isWebFinalProject
+          {isFundamentalsFinalProject
+            ? "Thinking Trail complete!"
+            : isWebFinalProject
             ? "Pixel Garden is in bloom!"
             : isJavaScriptFinalProject
               ? "You powered through Logic Lab!"
@@ -314,7 +322,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 : `${lesson.title} complete!`}
         </h1>
         <p>
-          {isWebFinalProject
+          {isFundamentalsFinalProject
+            ? "You planned algorithms with language-neutral pseudocode, decisions, loops and lists."
+            : isWebFinalProject
             ? "You combined HTML, CSS and JavaScript to finish your first web-building trail."
             : isJavaScriptFinalProject
               ? "You combined values, decisions, arrays, loops and functions to finish your JavaScript score tracker."
@@ -379,6 +389,15 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           else void check();
         }}
       >
+        {lesson.overview && (
+          <div aria-label="Lesson explanation" style={{ border: "1px solid #dbe2f2", borderRadius: 18, padding: "clamp(14px, 3vw, 22px)", marginBottom: 24, background: "#f7f9ff" }}>
+            <p className="eyebrow">Learn the concept · language-neutral</p>
+            <h2 style={{ marginBottom: 12 }}>{lesson.title}</h2>
+            <p style={{ lineHeight: 1.65 }}>{lesson.overview}</p>
+            {lesson.example && <pre className="code-panel" style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}><code>{lesson.example}</code></pre>}
+            {lesson.takeaway && <p style={{ lineHeight: 1.6 }}><strong>Remember: </strong>{lesson.takeaway}</p>}
+          </div>
+        )}
         <div className="lesson-card-heading">
           <span className="lesson-mini-icon" aria-hidden="true">{lesson.icon}</span>
           <div>
