@@ -6,11 +6,13 @@ import { getLearningDashboards } from "@/lib/learning-dashboard";
 
 export default async function LearnPage() {
   const {
+    fundamentals: fundamentalsDashboard,
     python: dashboard,
     web: webDashboard,
     javascript: javascriptDashboard,
   } = await getLearningDashboards();
   const completedAcrossWorlds =
+    fundamentalsDashboard.completedLessons +
     dashboard.completedLessons +
     webDashboard.completedLessons +
     javascriptDashboard.completedLessons;

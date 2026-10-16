@@ -1,4 +1,6 @@
 import {
+  fundamentalsLessonSlugs,
+  fundamentalsPath,
   javascriptLessonSlugs,
   javascriptPath,
   pythonLessonSlugs,
@@ -82,6 +84,11 @@ type ServerSupabaseClient = Awaited<ReturnType<typeof createClient>>;
 type DashboardLoadOptions = {
   supabase?: ServerSupabaseClient;
   userId?: string | null;
+};
+
+const fundamentalsWorld: WorldDefinition = {
+  path: fundamentalsPath,
+  lessonSlugs: fundamentalsLessonSlugs,
 };
 
 const pythonWorld: WorldDefinition = {
@@ -266,6 +273,13 @@ function buildWorldDashboard(
   };
 }
 
+export async function getFundamentalsLearningDashboard(
+  options: DashboardLoadOptions = {},
+) {
+  const context = await loadDashboardContext(options);
+  return buildWorldDashboard(fundamentalsWorld, context);
+}
+
 export async function getLearningDashboard(
   options: DashboardLoadOptions = {},
 ) {
@@ -293,6 +307,7 @@ export async function getLearningDashboards(
   const context = await loadDashboardContext(options);
 
   return {
+    fundamentals: buildWorldDashboard(fundamentalsWorld, context),
     python: buildWorldDashboard(pythonWorld, context),
     web: buildWorldDashboard(webWorld, context),
     javascript: buildWorldDashboard(javascriptWorld, context),

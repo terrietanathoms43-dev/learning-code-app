@@ -331,6 +331,226 @@ const rules: Record<string, AnswerRule> = {
   },
 };
 
+Object.assign(rules, {
+  "fund-algorithms-q1": {
+    "accepted": [
+      "A recipe with numbered instructions"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-algorithms-q2": {
+    "accepted": [
+      "input"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-algorithms-q3": {
+    "accepted": [
+      "INPUT two numbers\nADD the numbers\nDISPLAY the total"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-programming-q1": {
+    "accepted": [
+      "To plan the steps of a solution"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-programming-q2": {
+    "accepted": [
+      "output"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-programming-q3": {
+    "accepted": [
+      "The name entered"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-variables-q1": {
+    "accepted": [
+      "score"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-variables-q2": {
+    "accepted": [
+      "7"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-variables-q3": {
+    "accepted": [
+      "lives"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-types-q1": {
+    "accepted": [
+      "String"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-types-q2": {
+    "accepted": [
+      "Boolean"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-types-q3": {
+    "accepted": [
+      "integer"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-operators-q1": {
+    "accepted": [
+      "16"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-operators-q2": {
+    "accepted": [
+      "TRUE"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-operators-q3": {
+    "accepted": [
+      "*"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-conditions-q1": {
+    "accepted": [
+      "Warm"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-conditions-q2": {
+    "accepted": [
+      "else"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-conditions-q3": {
+    "accepted": [
+      "IF ready THEN\nDISPLAY \"Start\"\nEND IF"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-loops-q1": {
+    "accepted": [
+      "3"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-loops-q2": {
+    "accepted": [
+      "When work must repeat"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-loops-q3": {
+    "accepted": [
+      "infinite"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-functions-q1": {
+    "accepted": [
+      "To reuse steps"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-functions-q2": {
+    "accepted": [
+      "8"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-functions-q3": {
+    "accepted": [
+      "return"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-lists-q1": {
+    "accepted": [
+      "[blue, gold, violet]"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-lists-q2": {
+    "accepted": [
+      "3"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-lists-q3": {
+    "accepted": [
+      "iteration"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-mini-project-q1": {
+    "accepted": [
+      "0"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-mini-project-q2": {
+    "accepted": [
+      "SET score TO 0\nCHECK answers and add points for correct ones\nDISPLAY score"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-mini-project-q3": {
+    "accepted": [
+      "A condition"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  },
+  "fund-mini-project-q4": {
+    "accepted": [
+      "3"
+    ],
+    "correctFeedback": "Correct — you applied the programming concept.",
+    "incorrectFeedback": "Review the lesson explanation and example, then try again."
+  }
+} satisfies Record<string, AnswerRule>);
+
 const punctuation = new Set(["(", ")", "[", "]", "{", "}", ":", ",", "=", ">", "<", "+", "-", "*", "/", "%"]);
 
 function normalizeCodeLine(line: string) {
